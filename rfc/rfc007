@@ -1,0 +1,12 @@
+ABI (Application Binary Interface)
+======
+
+API defines how to serials objects to binary.
+
+ABI for Tensors
+------
+We adopt the idx format for tensor.
+Other ABI format will be encapulation format on top of the idx format.
+
+ABI for model
+ABI for layer

@@ -1,0 +1,14 @@
+RFCs are design proposals
+======
+
+rfc001 : Overview
+rfc002 : Resource management
+rfc003 : Higher order functions
+rfc004 : Operators
+rfc005 : Dynamic batch size
+rfc006 : C API
+rfc007 : ABI
+rfc008 : Symbol
+rfc009 : Tracing
+rfc010 : Linear Algebra
+

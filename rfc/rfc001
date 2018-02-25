@@ -1,0 +1,52 @@
+Overview
+======
+
+data types:
+------
+* f32 (default)
+* f64
+* i8 / u8
+* i16 / u16
+* i32 / u32
+* i64 / u64
+
+key features
+------
+
+* minimalist
+  - pure ansi c++17 (c++20)
+  - self contained (openblas and cudnn should be optional)
+
+* highly expressive as well as low level control
+  - declarative syntax (symbolic)
+
+A view from users' perspective
+------
+
+a C program
+
+```c
+#include <misaka.h>
+
+int main() {
+    int width = 28;
+    int height = 28;
+    int depth = 1;
+
+    tensor image = make_placeholder(f32, width, height, depth); // allocates a 3-tensor of (width, height, depth)
+    return 0;
+}
+```
+
+
+a C++20 program
+
+```cpp
+#include <misaka>
+
+int main() {
+    auto x = make_placeholder(shape(n,n,n));
+    auto l1 = layer<fc>(800)(x)
+    return 0;
+}
+```

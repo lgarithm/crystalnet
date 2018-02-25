@@ -1,0 +1,23 @@
+Tracing
+======
+
+Builtin debug/profiling mechanisms.
+
+For a function
+
+```
+void f() {
+    ...
+}
+```
+
+it should be traced like
+
+```
+#include "misaka/trace/trace.hpp"
+
+void f() {
+    TRACE;
+}
+
+```

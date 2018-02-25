@@ -1,0 +1,14 @@
+Dynamic Batch Size
+======
+
+For an operation
+
+F : (P, Q) -> S
+
+We can derive a batch operation:
+
+\tilde F : (\tilde P, Q) -> \tilde S
+
+where \tilde P = [m] \otimes P, \tilde S = [m] \otimes S,
+
+m is the batch size and can be dynamic determined.

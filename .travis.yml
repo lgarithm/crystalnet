@@ -1,0 +1,15 @@
+# https://docs.travis-ci.com/user/languages/cpp/
+language: cpp
+
+# https://docs.travis-ci.com/user/docker/
+services:
+- docker
+
+before_install:
+- docker info
+- docker build -t misaka .
+
+script:
+# The default is
+# - ./configure && make && make test
+- docker run -it misaka make test

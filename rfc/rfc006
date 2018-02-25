@@ -1,0 +1,7 @@
+C API
+======
+
+C API will only provide pointers of struct.
+
+This is to allow struct be actually implemented using c++, with c++ features
+being fully utilised.

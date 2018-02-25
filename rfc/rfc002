@@ -1,0 +1,18 @@
+Resource Management
+======
+
+(Currently core/gc.hpp)
+
+Resource Allocation
+------
+for each struct T, new_t and free_t must be defined.
+new_t must return *T and free_t must accept *T.
+
+Resource Manager
+------
+
+a resource manager manages resources including
+
+* tensor
+
+it will release resource automatically after program exits

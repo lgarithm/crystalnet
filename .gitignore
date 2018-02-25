@@ -1,0 +1,7 @@
+*.swp
+*~
+/.gopath
+/build
+/compile_commands.json
+/xtleak.kcg.*
+__pycache__

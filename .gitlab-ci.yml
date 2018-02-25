@@ -1,0 +1,18 @@
+# https://docs.gitlab.com/ce/ci/yaml/README.html
+image: docker:latest
+
+variables:
+  DOCKER_DRIVER: overlay2
+
+# https://docs.gitlab.com/ce/ci/docker/using_docker_build.html
+services:
+- docker:dind
+
+before_script:
+- docker info
+
+build_image:
+  script:
+    - docker info
+    - docker build -t misaka .
+    # - docker run misaka

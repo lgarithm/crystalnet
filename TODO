@@ -1,0 +1,24 @@
+* build so (done)
+* add Python3 binding (done)
+* add Golang binding (done)
+* add Dockerfile (done)
+* don't add '-std=c++1z' for C (done)
+* load mnist (done)
+* varlangth args (done)
+* implement one hot (done)
+* mini batch
+* wrap node
+* add configure
+* add C++ binding
+* add Haskell binding
+* reverse test binary name
+* load cifar
+* run clang-tidy
+* run iwyu
+* add namespace
+* run find in Makefile
+* fix python binding crash on mac
+* remove teavana dependency
+* open source on github
+* integrate with travis-ci
+* tests for operators

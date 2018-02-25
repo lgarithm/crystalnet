@@ -1,0 +1,28 @@
+Operators
+======
+
+Operators should be implemented as plugins.
+
+bulitin operators:
+add
+mul
+softmax
+xentropy
+
+Bulitin operators candidate
+incr
+conv
+pool
+relu
+rbf
+mean
+batch_combinator
+sum
+
+Operator should have a forward tensor function, 
+
+F : (T_1, \dots, T_r) -> S (where r is the arity of F)
+
+and an optional backward tensor function:
+
+G|_{(T_1, \dots, T_r), S} : dS -> (dT_1, \dots, T_r)

@@ -1,0 +1,12 @@
+Linear Algebra
+======
+
+Provide an abstraction layer simpler than blas,
+for some common computations patterns.
+
+mm : matrix * matrix
+mmt : matrix * matrix transposed
+mtm : matrix transposed * matrix
+mv : matrix * vector
+vm : vector * matrix
+vv : vector + vector

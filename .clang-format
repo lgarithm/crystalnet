@@ -1,3 +1,16 @@
+# https://clang.llvm.org/docs/ClangFormatStyleOptions.html
+
+# TODO: make it work
+# AllowShortBlocksOnASingleLine: true
+# AllowShortIfStatementsOnASingleLine: true
+# AllowShortLoopsOnASingleLine: true
+
 IndentWidth: 4
 BreakBeforeBraces: Linux
 SortIncludes: true
+# IncludeBlocks: true
+
+ColumnLimit: 80
+# SpacesBeforeTrailingComments: 2
+
+# TODO: require one blank line between blocks

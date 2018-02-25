@@ -1,0 +1,39 @@
+Higher order functions
+======
+
+A train operator has the following signature
+
+```
+train : Image -> Model -> Label -> Loss -> Model
+```
+
+i.e. give an image, a label and a loss function, a new model will be returned.
+
+In gradient descent algorithm, the train function can be rewritten as:
+
+```
+train' : Image -> Model -> Label -> Loss -> Grad
+```
+were Grad is the gradient, and new model will be `m - g`.
+
+the last step can be rewritten as
+```
+learn : Grad -> Model -> Model
+```
+
+A predict operator has the following signature
+
+```
+pred : Image -> Model -> Label
+```
+
+i.e. give an image and a model, a label will be returned
+
+Image is a tensor, Label is a distribution vector of finite dimension.
+Loss a real function, i.e.
+
+```
+loss : \mathbb R^n -> \mathbb R^n -> \mathbb R
+```
+
+where n is the number of classes.

@@ -1,0 +1,5 @@
+#pragma once
+
+// TODO: only export c++ API here
+#include <misaka.h>
+#include <misaka/misaka.hpp>
