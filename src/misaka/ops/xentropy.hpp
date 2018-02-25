@@ -8,8 +8,7 @@ struct xentropy {
 
     static shape_t *infer(const shape_list_t *shape_list)
     {
-        auto shape = new shape_t(shape_list->shapes[0]);
-        return shape;
+        return new shape_t(0);
     }
 
     using T = float;
@@ -17,7 +16,6 @@ struct xentropy {
     struct forward : forward_ctx_t {
         void operator()() const
         {
-            DEBUG(__func__);
             assert(inputs.arity() == arity);
             auto a = as_vector_ref<T>(inputs[0]);
             auto b = as_vector_ref<T>(inputs[1]);
