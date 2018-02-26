@@ -5,7 +5,7 @@
 void test_1()
 {
     shape_t *shape = make_shape(4, 2, 3, 4, 5);
-    tensor_t *tensor = new_tensor(shape, DTYPE_FLOAT);
+    tensor_t *tensor = new_tensor(shape, dtypes.f32);
     free_tensor(tensor);
     free_shape(shape);
 }

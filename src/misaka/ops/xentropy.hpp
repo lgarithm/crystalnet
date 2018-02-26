@@ -8,7 +8,7 @@ struct xentropy {
 
     static shape_t *infer(const shape_list_t *shape_list)
     {
-        return new shape_t(0);
+        return new shape_t();
     }
 
     using T = float;

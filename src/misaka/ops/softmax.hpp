@@ -9,8 +9,7 @@ struct softmax {
 
     static shape_t *infer(const shape_list_t *shape_list)
     {
-        auto shape = new shape_t(shape_list->shapes[0]);
-        return shape;
+        return new shape_t(shape_list->shapes[0]);
     }
 
     template <typename T>
@@ -43,8 +42,7 @@ struct softmax {
         void operator()() const
         {
             auto n = output.shape.dim();
-            tensor_t tmp(shape_t(std::vector<uint32_t>({n, n})),
-                         idx_type<T>::type);
+            tensor_t tmp(shape_t(n, n), idx_type<T>::type);
             tea::softmax_grad(n, //
                               cast(as_vector_ref<T>(inputs[0])),
                               cast(as_vector_ref<T>(output)),

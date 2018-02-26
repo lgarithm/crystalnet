@@ -47,20 +47,11 @@ struct trainer_t {
     {
         DEBUG(__func__);
         int step = 0;
-        debug("before train");
-        while (ds.has_next()) {
+        for (auto[image, label_] : range(ds)) {
             ++step;
-            auto[image, label_] = ds.next();
-
-            // printf("%s\n", std::to_string(image).c_str());
-            // printf("%s\n", std::to_string(label_).c_str());
-
             model->input->bind(image);
             label->bind(label_);
-
             loss->forward();
-            // debug("after forward");
-
             {
                 r_tensor_ref_t<float> r(loss->gradient());
                 auto n = r.shape.dim();
@@ -69,7 +60,6 @@ struct trainer_t {
                 }
             }
             loss->backward();
-            // debug("after backward");
 
             for (auto p : model->ctx->params) {
                 p->learn(); // TODO: sync parameter with other agents
@@ -88,13 +78,11 @@ struct trainer_t {
         DEBUG(__func__);
         uint32_t step = 0;
         uint32_t yes = 0;
-        while (ds.has_next()) {
+        for (auto[image, label_] : range(ds)) {
             ++step;
-            auto[image, label_] = ds.next();
             model->input->bind(image);
             label->bind(label_);
             loss->forward();
-
             using T = float;
             auto p = argmax<T>(as_vector_ref<T>(label_));
             auto q = argmax<T>(as_vector_ref<T>(model->output->value()));

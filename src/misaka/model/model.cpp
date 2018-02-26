@@ -8,12 +8,12 @@ model_ctx_t *new_model_ctx() { return gc(new model_ctx_t); }
 
 void free_model_ctx(model_ctx_t *model) { delete model; }
 
-node_t *make_placeholder(model_ctx_t *model, shape_t *shape)
+node_t *make_placeholder(model_ctx_t *model, const shape_t *shape)
 {
     return model->make_placeholder(*shape);
 }
 
-node_t *make_parameter(model_ctx_t *model, shape_t *shape)
+node_t *make_parameter(model_ctx_t *model, const shape_t *shape)
 {
     return model->make_parameter(*shape);
 }

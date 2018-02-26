@@ -5,16 +5,12 @@
 #include <vector>
 
 struct shape_t {
-    shape_t(uint8_t rank) : dims(rank)
+    template <typename... T>
+    explicit shape_t(T... dims) : dims({static_cast<uint32_t>(dims)...})
     {
-        std::fill(dims.begin(), dims.end(), 1);
     }
 
-    shape_t(const shape_t &other) : dims(other.dims) {}
-
     explicit shape_t(const std::vector<uint32_t> &dims) : dims(dims) {}
-
-    // TODO: more constructors
 
     uint8_t rank() const { return dims.size(); }
 
@@ -36,7 +32,7 @@ struct shape_t {
         return 1;
     }
 
-    std::vector<uint32_t> dims; // TODO: make it const
+    const std::vector<uint32_t> dims;
 };
 
 struct shape_list_t {

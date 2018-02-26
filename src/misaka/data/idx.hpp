@@ -46,13 +46,14 @@ tensor_t *load_idx_file(const char *filename)
     fread(&magic, 4, 1, fp);
     reverse_byte_order(magic);
     idx_meta meta(magic);
-    shape_t shape(meta.rank);
+    std::vector<uint32_t> dims(meta.rank);
     for (auto i = 0; i < meta.rank; ++i) {
         uint32_t dim;
         fread(&dim, 4, 1, fp);
         reverse_byte_order(dim);
-        shape.dims[i] = dim;
+        dims[i] = dim;
     }
+    shape_t shape(dims);
     auto tensor = new tensor_t(shape, meta.type);
     fread(tensor->data, shape.dim(), dtype_size(meta.type), fp);
     fclose(fp);

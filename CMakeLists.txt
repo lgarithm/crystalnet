@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.9)
 project(misaka)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -19,7 +19,6 @@ file(GLOB tests src/misaka/**/*_test.*)
 list(REMOVE_ITEM srcs ${tests})
 add_library(misaka SHARED ${srcs})
 
-file(GLOB tests src/misaka/**/*_test.*)
 foreach(main ${tests})
     get_filename_component(bin_name ${main} NAME_WE)
     add_executable(${bin_name} ${main})

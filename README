@@ -9,7 +9,7 @@ A distributive AI platform.
 ```
 $ make
 $ ./utils/download-mnist.sh
-$ /build/bin/mnist_slp_c
+$ ./build/bin/mnist_slp_c
 ```
 
 

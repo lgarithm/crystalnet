@@ -1,8 +1,13 @@
-NPROC = 4
+ifeq ($(shell uname), Darwin)
+	NPROC = $(shell sysctl -n hw.ncpu)
+else
+	NPROC = $(shell nproc)
+endif
 
+# TODO: don't disable assert (remove -DNDEBUG)
 CMAKE_FLAGS = \
+    -DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
     -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_EXPORT_COMPILE_COMMANDS=1
 
 libmisaka:
 	mkdir -p build
@@ -40,6 +45,9 @@ python_example: libmisaka
 image:
 	docker build .
 
+alpine_image:
+	docker build -f Dockerfile.alpine .
+
 lint:
 	cpplint src/misaka/*.h
 
@@ -48,13 +56,14 @@ pylint:
 
 format:
 	clang-format -i src/misaka/**/*
+	clang-format -i src/misaka/*.hpp
 	clang-format -i src/*.h
 	clang-format -i examples/c/*
 	clang-format -i examples/cpp/*
 	yapf -i langs/python/misaka.py
 
 tidy:
-	 ./utils/tidy.sh
+	./utils/tidy.sh
 
 test: libmisaka
 	./utils/test.sh

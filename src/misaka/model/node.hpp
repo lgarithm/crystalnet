@@ -1,5 +1,6 @@
 #pragma once
 #include <cassert>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -14,9 +15,12 @@ struct node_t {
     // int idx; // TODO: support index
     std::string name;
     const shape_t shape;
+    const uint8_t dtype;
+
+    static constexpr const auto default_dtype = idx_type<float>::type;
 
     node_t(const shape_t &shape, const char *pname = nullptr)
-        : name(create_name(pname)), shape(shape)
+        : name(create_name(pname)), shape(shape), dtype(default_dtype)
     {
         LOG_NODE_USAGE(shape, name);
     }
@@ -51,7 +55,8 @@ struct parameter_node_t : node_t {
     tensor_t _gradient;
 
     parameter_node_t(const shape_t &shape, const std::string &name)
-        : node_t(shape), name(name), _value(shape), _gradient(shape)
+        : node_t(shape), name(name), _value(shape, dtype),
+          _gradient(shape, dtype)
     {
     }
 
@@ -89,12 +94,14 @@ struct placeholder_node_t : node_t {
     tensor_t _gradient; // TODO: remove it
 
     placeholder_node_t(const shape_t &shape, const std::string &name)
-        : node_t(shape), name(name), _gradient(shape)
+        : node_t(shape), name(name), _gradient(shape, dtype)
     {
     }
 
     void bind(const tensor_ref_t &r) override
     {
+        DEBUG(__func__);
+        assert(r.dtype == dtype);
         _value.reset(new tensor_ref_t(r));
     }
 
@@ -122,10 +129,7 @@ struct operator_node_t : node_t {
         for (auto i = 0; i < op.arity; ++i) {
             shape_list.shapes.push_back(nodes[i]->shape);
         }
-        shape_t *p_shape = op.infer(&shape_list);
-        shape_t output_shape = *p_shape;
-        free_shape(p_shape);
-        return output_shape;
+        return *std::unique_ptr<shape_t>(op.infer(&shape_list));
     }
 
     using input_list_t = std::vector<node_t *>;

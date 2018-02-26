@@ -3,17 +3,6 @@
 #include <misaka/core/shape.hpp>
 #include <misaka/core/tensor.hpp>
 #include <misaka/linag/plain_impl.hpp>
-#include <vector>
-
-shape_t make_1d_shape(uint32_t n)
-{
-    return shape_t(std::vector<uint32_t>({n}));
-}
-
-shape_t make_2d_shape(uint32_t m, uint32_t n)
-{
-    return shape_t(std::vector<uint32_t>({m, n}));
-}
 
 template <typename T, typename linag> struct test_linag {
     static constexpr auto dtype = idx_type<T>::type;
@@ -30,49 +19,49 @@ template <typename T, typename linag> struct test_linag {
 
     static void test_mm(uint32_t k, uint32_t m, uint32_t n)
     {
-        tensor_t a(make_2d_shape(k, m), dtype);
-        tensor_t b(make_2d_shape(m, n), dtype);
-        tensor_t c(make_2d_shape(k, n), dtype);
+        tensor_t a(shape_t(k, m), dtype);
+        tensor_t b(shape_t(m, n), dtype);
+        tensor_t c(shape_t(k, n), dtype);
         linag::mm(mref(a), mref(b), mref(c));
     }
 
     static void test_mmt(uint32_t k, uint32_t m, uint32_t n)
     {
-        tensor_t a(make_2d_shape(k, m), dtype);
-        tensor_t b(make_2d_shape(n, m), dtype);
-        tensor_t c(make_2d_shape(k, n), dtype);
+        tensor_t a(shape_t(k, m), dtype);
+        tensor_t b(shape_t(n, m), dtype);
+        tensor_t c(shape_t(k, n), dtype);
         linag::mmt(mref(a), mref(b), mref(c));
     }
 
     static void test_mtm(uint32_t k, uint32_t m, uint32_t n)
     {
-        tensor_t a(make_2d_shape(m, k), dtype);
-        tensor_t b(make_2d_shape(m, n), dtype);
-        tensor_t c(make_2d_shape(k, n), dtype);
+        tensor_t a(shape_t(m, k), dtype);
+        tensor_t b(shape_t(m, n), dtype);
+        tensor_t c(shape_t(k, n), dtype);
         linag::mtm(mref(a), mref(b), mref(c));
     }
 
     static void test_mv(uint32_t m, uint32_t n)
     {
-        tensor_t a(make_2d_shape(m, n), dtype);
-        tensor_t b(make_1d_shape(n), dtype);
-        tensor_t c(make_1d_shape(m), dtype);
+        tensor_t a(shape_t(m, n), dtype);
+        tensor_t b(shape_t(n), dtype);
+        tensor_t c(shape_t(m), dtype);
         linag::mv(mref(a), vref(b), vref(c));
     }
 
     static void test_vm(uint32_t m, uint32_t n)
     {
-        tensor_t a(make_1d_shape(m), dtype);
-        tensor_t b(make_2d_shape(m, n), dtype);
-        tensor_t c(make_1d_shape(n), dtype);
+        tensor_t a(shape_t(m), dtype);
+        tensor_t b(shape_t(m, n), dtype);
+        tensor_t c(shape_t(n), dtype);
         linag::vm(vref(a), mref(b), vref(c));
     }
 
     static void test_vv(uint32_t n)
     {
-        tensor_t a(make_1d_shape(n), dtype);
-        tensor_t b(make_1d_shape(n), dtype);
-        tensor_t c(make_1d_shape(n), dtype);
+        tensor_t a(shape_t(n), dtype);
+        tensor_t b(shape_t(n), dtype);
+        tensor_t c(shape_t(n), dtype);
         linag::vv(vref(a), vref(b), vref(c));
     }
 

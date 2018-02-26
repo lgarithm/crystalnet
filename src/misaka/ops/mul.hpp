@@ -14,7 +14,7 @@ struct mul_vm {
         assert(s1.rank() == 1);
         assert(s2.rank() == 2);
         assert(s1.dims[0] == s2.dims[0]);
-        return make_shape(1, s2.dims[1]);
+        return new shape_t(s2.dims[1]);
     }
 
     using T = float;

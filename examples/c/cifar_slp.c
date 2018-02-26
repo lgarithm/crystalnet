@@ -1,5 +1,3 @@
-#include <stdio.h>
-
 #include <misaka.h>
 
 // y = softmax(xw + b)
@@ -29,33 +27,17 @@ model_t *slp_model(shape_t *image_shape, int arity)
     return new_model(m, x_, op3);
 }
 
-model_ctx_t *slp_model_2(shape_t *image_shape, int arity)
-{
-    // layer_t* fc1 = make_layer(m, Layer_FC, x);
-    // placeholder_t *y_ = make_placeholder(m, lable_shape);
-    //
-    // auto l1 =
-    //     make_layer(layer_fc_with_bias(k), wrap(shape(m, height * width), x));
-    // output = make_operator(batch<op_softmax>(), l1);
-    // auto ce = make_operator(xybatch<op_cross_entropy>(), y_, output);
-    model_ctx_t *m = new_model_ctx();
-    return m;
-}
-
-void show_version() { printf("misaka: %s\n", version()); }
-
 int main()
 {
-    show_version();
-    int width = 28;
-    int height = 28;
-    int depth = 1;
+    int width = 32;
+    int height = 32;
+    int depth = 3;
     int n = 10;
-    shape_t *image_shape = make_shape(3, width, height, depth);
+    shape_t *image_shape = make_shape(3, depth, width, height);
     model_t *model = slp_model(image_shape, n);
     trainer_t *trainer = new_trainer(model, op_xentropy, opt_sgd);
-    dataset_t *ds1 = load_mnist("train");
-    dataset_t *ds2 = load_mnist("t10k");
+    dataset_t *ds1 = load_cifar();
+    dataset_t *ds2 = load_cifar();
     run_trainer(trainer, ds1);
     test_trainer(trainer, ds2);
     free_shape(image_shape);

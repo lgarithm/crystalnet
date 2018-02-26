@@ -1,4 +1,5 @@
 #pragma once
+#include <cassert>
 #include <cstdint>
 
 inline uint8_t dtype_size(uint8_t dtype)
