@@ -15,12 +15,16 @@ model_t *mlp_model(shape_t *image_shape, uint32_t arity)
     auto x_wrap_shape = shape(n0);
     auto x = wrap(m, &x_wrap_shape, x_);
 
-    auto w1 = var(m, shape(n0, n1));
-    auto b1 = var(m, shape(n1));
-    auto w2 = var(m, shape(n1, n2));
-    auto b2 = var(m, shape(n2));
-    auto w3 = var(m, shape(n2, n3));
-    auto b3 = var(m, shape(n3));
+    using T = float;
+    const truncated_normal_initializer<T> weight_init(0.1);
+    const constant_initializer<T> bias_init(0.1);
+
+    auto w1 = var(m, shape(n0, n1), weight_init);
+    auto b1 = var(m, shape(n1), bias_init);
+    auto w2 = var(m, shape(n1, n2), weight_init);
+    auto b2 = var(m, shape(n2), bias_init);
+    auto w3 = var(m, shape(n2, n3), weight_init);
+    auto b3 = var(m, shape(n3), bias_init);
 
     // layer 1
     auto op1_1 = apply(m, op_mul, x, w1);
@@ -46,12 +50,12 @@ int main()
     int n = 10;
     auto image_shape = shape(width, height, depth);
     model_t *model = mlp_model(&image_shape, n);
-    // TODO: implement adam optimizer
-    trainer_t *trainer = new_trainer(model, op_xentropy, opt_sgd);
+    trainer_t *trainer = new_trainer(model, op_xentropy, opt_adam);
     dataset_t *ds1 = load_mnist("train");
     dataset_t *ds2 = load_mnist("t10k");
-    run_trainer(trainer, ds1);
-    test_trainer(trainer, ds2);
+    // run_trainer(trainer, ds1);
+    // test_trainer(trainer, ds2);
+    experiment(trainer, ds1, ds2);
     free_model(model);
     free_trainer(trainer);
     free_dataset(ds1);

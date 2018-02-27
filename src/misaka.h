@@ -24,14 +24,15 @@ const char *version();
 typedef struct shape_t shape_t;
 typedef struct shape_list_t shape_list_t;
 typedef struct tensor_t tensor_t;
+typedef struct node_t node_t;
 typedef struct model_t model_t;
 typedef struct model_ctx_t model_ctx_t;
-typedef struct node_t node_t;
 
 // TODO: make it possible to add user defined operators
 typedef struct forward_ctx_t forward_ctx_t;
 typedef struct backward_ctx_t backward_ctx_t;
 typedef struct operator_t operator_t;
+typedef struct layer_t layer_t;
 
 typedef shape_t *(shape_func_t)(const shape_list_t *);
 typedef void(forward_func_t)(forward_ctx_t *);
@@ -68,6 +69,10 @@ extern operator_t *op_relu;
 extern operator_t *op_softmax;
 extern operator_t *op_xentropy;
 
+// TODO: provide C bindings for layer API.
+// extern layer_t *layer_fc;
+// extern layer_t *layer_covn;
+
 // training
 typedef struct dataset_t dataset_t;
 typedef struct trainer_t trainer_t;
@@ -78,6 +83,9 @@ extern optimizer_t *opt_adam;
 
 // dataset_t *new_dataset();
 void free_dataset(dataset_t *);
+const shape_t *ds_image_shape(dataset_t *);
+const shape_t *ds_label_shape(dataset_t *);
+
 trainer_t *new_trainer(model_t *, operator_t *, optimizer_t *);
 void free_trainer(trainer_t *);
 void run_trainer(trainer_t *, dataset_t *);
@@ -87,7 +95,9 @@ void test_trainer(trainer_t *, dataset_t *);
 dataset_t *load_mnist(const char *const); // train | t10k
 dataset_t *load_cifar();
 
+// unstable APIs
 tensor_t *_load_idx_file(const char *filename);
+void experiment(trainer_t *, dataset_t *, dataset_t *);
 
 #ifdef __cplusplus
 }

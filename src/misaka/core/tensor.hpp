@@ -89,6 +89,7 @@ template <typename R> struct r_tensor_ref_t {
         }
         return s / n;
     }
+    void fill(R x) const { std::fill(data, data + shape.dim(), x); }
 };
 
 template <typename R, typename T>

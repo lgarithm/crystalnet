@@ -3,12 +3,13 @@
 #include <misaka/data/dataset.hpp>
 #include <misaka/linag/base.hpp>
 #include <misaka/model/model.hpp>
+#include <misaka/train/optimizer.hpp>
 
 struct trainer_t {
     model_t *model;
     node_t *label;
     node_t *loss;
-    optimizer_t *optimizer;
+    optimizer_ctx_t *optimize;
 
     static node_t *make_label(model_t *model)
     {
@@ -25,7 +26,8 @@ struct trainer_t {
 
     trainer_t(model_t *model, operator_t *loss_func, optimizer_t *optimizer)
         : model(model), label(make_label(model)),
-          loss(make_loss(model, label, loss_func)), optimizer(optimizer)
+          loss(make_loss(model, label, loss_func)),
+          optimize(optimizer->optimize(model))
     {
         DEBUG(__func__);
         printf("%lu parameters\n", model->ctx->params.size());
@@ -43,7 +45,7 @@ struct trainer_t {
         }
     }
 
-    void run(dataset_t &ds)
+    void run(dataset_t &ds, dataset_t *test_ds = nullptr)
     {
         DEBUG(__func__);
         int step = 0;
@@ -52,23 +54,16 @@ struct trainer_t {
             model->input->bind(image);
             label->bind(label_);
             loss->forward();
-            {
-                r_tensor_ref_t<float> r(loss->gradient());
-                auto n = r.shape.dim();
-                for (auto i = 0; i < n; ++i) {
-                    r.data[i] = 1;
-                }
-            }
+            r_tensor_ref_t<float>(loss->gradient()).fill(1);
             loss->backward();
-
-            for (auto p : model->ctx->params) {
-                p->learn(); // TODO: sync parameter with other agents
-            }
-
+            (*optimize)();
             constexpr auto freq = 1000;
             if (step % freq == 0) {
-                printf("step: %d\n", step);
-                debug("steps ...");
+                printf("train step: %d\n", step);
+                debug("train step");
+                if (test_ds) {
+                    test(*test_ds);
+                }
             }
         }
     }
@@ -87,8 +82,9 @@ struct trainer_t {
             auto p = argmax<T>(as_vector_ref<T>(label_));
             auto q = argmax<T>(as_vector_ref<T>(model->output->value()));
             yes += p == q;
-            if (step % 10000 == 0) {
-                printf("step: %d\n", step);
+            const auto freq = 10000;
+            if (step % freq == 0) {
+                printf("test step: %d\n", step);
             }
         }
         printf("step : %u, acc : %f\n", step, (float)yes / step);

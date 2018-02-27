@@ -1,6 +1,8 @@
 #pragma once
 #include <misaka/core/shape.hpp>
+#include <misaka/model/layer.hpp>
 #include <misaka/model/model.hpp>
+#include <misaka/train/initializers.hpp>
 
 template <typename... T> shape_t shape(T... dims)
 {
@@ -12,9 +14,13 @@ auto place(model_ctx_t *ctx, const shape_t &shape)
     return make_placeholder(ctx, &shape);
 }
 
-auto var(model_ctx_t *ctx, const shape_t &shape)
+template <typename T>
+auto var(model_ctx_t *ctx, const shape_t &shape, const T &init)
 {
-    return make_parameter(ctx, &shape);
+    using R = float;
+    auto p = make_parameter(ctx, &shape);
+    init(r_tensor_ref_t<R>(p->value()));
+    return p;
 }
 
 template <typename... T> auto apply(model_ctx_t *ctx, operator_t *op, T... a)
