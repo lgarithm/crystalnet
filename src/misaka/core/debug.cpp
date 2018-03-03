@@ -14,6 +14,6 @@ void log_tensor_usage(const shape_t *shape, uint8_t dtype_size)
 
 void log_node_usage(const shape_t *shape, const std::string &name)
 {
-    printf("new node: %s, rank %d, dim: %d\n", name.c_str(), shape->rank(),
-           shape->dim());
+    printf("new node: %s, rank %d, dim: %d, shape: %s\n", name.c_str(),
+           shape->rank(), shape->dim(), std::to_string(*shape).c_str());
 }

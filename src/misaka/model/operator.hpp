@@ -1,8 +1,9 @@
 #pragma once
 #include <cstdint>
+#include <string>
+
 #include <misaka.h>
 #include <misaka/core/tensor.hpp>
-#include <string>
 
 struct forward_ctx_t {
     tensor_ref_list_t inputs;

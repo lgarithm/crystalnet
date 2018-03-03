@@ -1,5 +1,4 @@
-Gitlab
-* https://gitlab.com/lgarithm/misaka/pipelines
+We use modern C++ (C++17 and beyond) features exclusively.
 
-Bitbucket
-* https://bitbucket.org/lgarithm/misaka/commits
+The following reference is strongly recommended:
+<http://en.cppreference.com/>

@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"gitee.com/kuroicrow/misaka/langs/go/misaka"
+	"github.com/lgarithm/misaka/langs/go/misaka"
 )
 
 // TODO: implement

@@ -58,7 +58,7 @@ node_t *make_parameter(model_ctx_t *, const shape_t *);
 
 typedef node_t *pnode_list_t[];
 node_t *make_operator(model_ctx_t *, operator_t *, pnode_list_t);
-node_t *wrap(model_ctx_t *, shape_t *, node_t *);
+node_t *wrap_node(model_ctx_t *, shape_t *, node_t *);
 
 // operators
 operator_t *register_op(const char *const, uint8_t, shape_func_t,
@@ -68,6 +68,9 @@ extern operator_t *op_mul;
 extern operator_t *op_relu;
 extern operator_t *op_softmax;
 extern operator_t *op_xentropy;
+// unstable operators:
+extern operator_t *op_conv_nhwc;
+extern operator_t *op_pool2d_c_max;
 
 // TODO: provide C bindings for layer API.
 // extern layer_t *layer_fc;

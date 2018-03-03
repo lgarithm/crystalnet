@@ -1,6 +1,7 @@
-
 // http://www.netlib.org/blas/
 #pragma once
+#include <cstring>
+
 #include <cblas.h>
 #include <misaka/linag/base.hpp>
 
@@ -33,23 +34,23 @@ template <typename T> struct cblas_impl {
         blas::gemm(CblasRowMajor,
                    trans_a ? CblasTrans : CblasNoTrans, //
                    trans_b ? CblasTrans : CblasNoTrans, //
-                   c.m, c.n, trans_b ? b.m : b.n,       //
+                   c.m, c.n, trans_b ? b.n : b.m,       //
                    alpha, a.data, a.n, b.data, b.n, beta, c.data, c.n);
     }
 
-    // a \times b -> C
+    // a \times b -> c
     static void mm(const m_ref_t &a, const m_ref_t &b, const m_ref_t &c)
     {
         _gemm(a, false, b, false, c);
     }
 
-    // a \times b^T -> C
+    // a \times b^T -> c
     static void mmt(const m_ref_t &a, const m_ref_t &b, const m_ref_t &c)
     {
         _gemm(a, false, b, true, c);
     }
 
-    // a^T \times b -> C
+    // a^T \times b -> c
     static void mtm(const m_ref_t &a, const m_ref_t &b, const m_ref_t &c)
     {
         _gemm(a, true, b, false, c);
@@ -67,9 +68,10 @@ template <typename T> struct cblas_impl {
                    a.data, inc, beta, c.data, inc);
     }
 
-    // A + B -> C
+    // a + b -> c
     static void vv(const v_ref_t &a, const v_ref_t &b, const v_ref_t &c)
     {
-        // blas::axpy();
+        std::memcpy(c.data, b.data, sizeof(T) * c.n);
+        blas::axpy(a.n, alpha, a.data, inc, c.data, inc);
     }
 };

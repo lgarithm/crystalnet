@@ -17,7 +17,14 @@ it should be traced like
 #include "misaka/trace/trace.hpp"
 
 void f() {
-    TRACE;
+    TRACE(__func__);
 }
 
+ideally, we should add the __func__ macro automatically,
+so it would be even simpler:
+
+```
+void f() {
+    TRACE;
+}
 ```

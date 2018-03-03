@@ -4,41 +4,76 @@
 #include <misaka/core/shape.hpp>
 #include <misaka/linag/linag.hpp>
 #include <misaka/model/operator.hpp>
+#include <misaka/ops/batch.hpp>
 
-struct add {
+// [n], [n] -> [n]
+struct add_vv {
     constexpr static uint8_t arity = 2;
 
-    static shape_t *infer(const shape_list_t *shape_list)
+    static shape_t *infer(const shape_list_t *shapes)
     {
-        assert(shape_list->shapes.size() == arity);
-        auto shape = new shape_t(shape_list->shapes[0]);
-        return shape;
+        assert(shapes->size() == arity);
+        return new shape_t((*shapes)[0]);
     }
 
-    using T = float;
+    using T = float; // TODO: cast based on dtype
 
     struct forward : forward_ctx_t {
         void operator()() const
         {
-            assert(inputs.arity() == arity);
             linag<T>::vv(as_vector_ref<T>(inputs[0]),
                          as_vector_ref<T>(inputs[1]), as_vector_ref<T>(output));
         }
     };
 
-    template <typename T>
-    static void assign(const vector_ref_t<T> &a, const vector_ref_t<T> &b)
+    struct backward : backward_ctx_t {
+        void operator()() const
+        {
+            auto g = r_tensor_ref_t<T>(output_gradient);
+            r_tensor_ref_t<T>(input_gradients[0]).copy(g);
+            r_tensor_ref_t<T>(input_gradients[1]).copy(g);
+        }
+    };
+};
+
+struct add {
+    constexpr static uint8_t arity = 2;
+    using add_mv = batch<add_vv, 0>;
+
+    static shape_t *infer(const shape_list_t *shape_list)
     {
-        auto n = equally(a.n, b.n);
-        memcpy(a.data, b.data, n * sizeof(T));
+        assert(shape_list->shapes.size() == arity);
+        const auto[p, q] = cast<2>(shape_list->shapes);
+        if (p.rank() > q.rank()) {
+            return add_mv::infer(shape_list);
+        }
+        assert(p.rank() == q.rank());
+        return add_vv::infer(shape_list);
     }
+
+    struct forward : forward_ctx_t {
+        void operator()() const
+        {
+            const auto[x, y] = cast<2>(inputs._args);
+            if (x.shape.rank() > y.shape.rank()) {
+                (*(add_mv::forward *)this)();
+            } else {
+                assert(x.shape.rank() == y.shape.rank());
+                (*(add_vv::forward *)this)();
+            }
+        }
+    };
 
     struct backward : backward_ctx_t {
         void operator()() const
         {
-            auto g = as_vector_ref<T>(output_gradient);
-            assign(as_vector_ref<T>(input_gradients[0]), g);
-            assign(as_vector_ref<T>(input_gradients[1]), g);
+            const auto[x, y] = cast<2>(inputs._args);
+            if (x.shape.rank() > y.shape.rank()) {
+                (*(add_mv::backward *)this)();
+            } else {
+                assert(x.shape.rank() == y.shape.rank());
+                (*(add_vv::backward *)this)();
+            }
         }
     };
 };

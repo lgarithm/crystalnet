@@ -1,4 +1,5 @@
 #pragma once
+#include <algorithm>
 #include <cassert>
 #include <memory>
 #include <utility>
@@ -26,7 +27,7 @@ struct range_t {
     struct iter_t {
         dataset_t *ds;
         std::unique_ptr<item_t> next;
-        iter_t(dataset_t *ds) : ds(ds) { this->operator++(); }
+        explicit iter_t(dataset_t *ds) : ds(ds) { this->operator++(); }
         bool operator!=(const iter_t &it) const { return ds != it.ds; }
         void operator++()
         {
@@ -61,26 +62,16 @@ struct simple_dataset_t : dataset_t {
     using owner_t = std::unique_ptr<tensor_t>;
 
     int idx; // TODO: move idx to iterator
-    uint32_t n;
-
-    shape_t _image_shape;
-    shape_t _label_shape;
+    const uint32_t n;
+    const shape_t _image_shape;
+    const shape_t _label_shape;
     owner_t images;
     owner_t labels;
 
-    static shape_t sub_shape(const shape_t &shape)
-    {
-        auto dims = shape.dims;
-        if (dims.size() > 0) {
-            dims = std::vector<uint32_t>(dims.begin() + 1, dims.end());
-        } // TODO: else run time error
-        return shape_t(dims);
-    }
-
     simple_dataset_t(tensor_t *images, tensor_t *labels)
-        : _image_shape(sub_shape(images->shape)),
-          _label_shape(sub_shape(labels->shape)), images(owner_t(images)),
-          labels(owner_t(labels)), idx(0), n(images->shape.len())
+        : _image_shape(images->shape.sub()), _label_shape(labels->shape.sub()),
+          images(owner_t(images)), labels(owner_t(labels)), idx(0),
+          n(images->shape.len())
     {
     }
 
@@ -90,7 +81,7 @@ struct simple_dataset_t : dataset_t {
     {
         assert(has_next());
         auto i = idx++;
-        return item_t((*images)[i], (*labels)[i]);
+        return item_t(ref(*images)[i], ref(*labels)[i]);
     }
     const shape_t *image_shape() const override { return &_image_shape; }
     const shape_t *label_shape() const override { return &_label_shape; }
@@ -123,8 +114,6 @@ template <typename T> tensor_t *make_onehot(const tensor_t &tensor, uint32_t k)
 
 template <typename T> void normalize(const r_tensor_ref_t<T> &r, T b)
 {
-    auto n = r.shape.dim();
-    for (auto i = 0; i < n; ++i) {
-        r.data[i] /= b;
-    }
+    std::transform(r.data, r.data + r.shape.dim(), r.data,
+                   [&](T x) { return x / b; });
 }

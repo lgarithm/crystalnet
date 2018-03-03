@@ -50,12 +50,11 @@ struct node_t {
 };
 
 struct parameter_node_t : node_t {
-    const std::string name;
     tensor_t _value;
     tensor_t _gradient;
 
     parameter_node_t(const shape_t &shape, const std::string &name)
-        : node_t(shape), name(name), _value(shape, dtype),
+        : node_t(shape, name.c_str()), _value(shape, dtype),
           _gradient(shape, dtype)
     {
     }
@@ -63,38 +62,17 @@ struct parameter_node_t : node_t {
     tensor_ref_t value() const override { return ref(_value); }
     tensor_ref_t gradient() const override { return ref(_gradient); }
 
-    void forward() const override
-    {
-        const auto name = std::string(__func__) + "@" + this->name;
-        DEBUG(name.c_str());
-    }
+    void forward() const override { /* noop */}
 
-    void backward() const override
-    {
-        const auto name = std::string(__func__) + "@" + this->name;
-        DEBUG(name.c_str());
-    }
-
-    void learn() const
-    {
-        using T = float;
-        T eta = 1e-3; // TODO: make it configrable
-        r_tensor_ref_t<T> x(_value);
-        r_tensor_ref_t<T> g(_gradient);
-        auto n = equally(_value.shape.dim(), _gradient.shape.dim());
-        for (auto i = 0; i < n; ++i) {
-            x.data[i] -= g.data[i] * eta;
-        }
-    }
+    void backward() const override { /* noop */}
 };
 
 struct placeholder_node_t : node_t {
-    const std::string name;
     std::unique_ptr<tensor_ref_t> _value;
     tensor_t _gradient; // TODO: remove it
 
     placeholder_node_t(const shape_t &shape, const std::string &name)
-        : node_t(shape), name(name), _gradient(shape, dtype)
+        : node_t(shape, name.c_str()), _gradient(shape, dtype)
     {
     }
 
@@ -125,11 +103,22 @@ struct placeholder_node_t : node_t {
 struct operator_node_t : node_t {
     static shape_t infer_shape(const operator_t &op, node_t *nodes[])
     {
-        shape_list_t shape_list;
+        const auto name = std::string(__func__) + "@" + op.name;
+        DEBUG(name.c_str());
+        std::vector<shape_t> shapes;
+        std::string sig;
         for (auto i = 0; i < op.arity; ++i) {
-            shape_list.shapes.push_back(nodes[i]->shape);
+            shapes.push_back(nodes[i]->shape);
+            if (sig.size() > 0) {
+                sig += ", ";
+            }
+            sig += std::to_string(nodes[i]->shape);
         }
-        return *std::unique_ptr<shape_t>(op.infer(&shape_list));
+        printf("[D] infer shape of %s from inputs shapes: %s\n",
+               op.name.c_str(), sig.c_str());
+        auto out_shape = op.infer(std::make_unique<shape_list_t>(shapes).get());
+        printf("[D] -> %s\n", std::to_string(*out_shape).c_str());
+        return *std::unique_ptr<shape_t>(out_shape);
     }
 
     using input_list_t = std::vector<node_t *>;

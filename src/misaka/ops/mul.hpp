@@ -9,15 +9,16 @@ struct mul_vm {
 
     static shape_t *infer(const shape_list_t *shape_list)
     {
-        auto s1 = shape_list->shapes[0];
-        auto s2 = shape_list->shapes[1];
-        assert(s1.rank() == 1);
-        assert(s2.rank() == 2);
-        assert(s1.dims[0] == s2.dims[0]);
-        return new shape_t(s2.dims[1]);
+        assert(shape_list->shapes.size() == arity);
+        auto p = (*shape_list)[0];
+        auto q = (*shape_list)[1];
+        assert(p.rank() == 1);
+        assert(q.rank() == 2);
+        assert(p.dims[0] == q.dims[0]);
+        return new shape_t(q.dims[1]);
     }
 
-    using T = float;
+    using T = float; // TODO: cast based on dtype
 
     struct forward : forward_ctx_t {
         void operator()() const

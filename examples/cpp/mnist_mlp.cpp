@@ -13,7 +13,7 @@ model_t *mlp_model(shape_t *image_shape, uint32_t arity)
     model_ctx_t *m = new_model_ctx();
     auto x_ = place(m, *image_shape);
     auto x_wrap_shape = shape(n0);
-    auto x = wrap(m, &x_wrap_shape, x_);
+    auto x = wrap(m, x_wrap_shape, x_);
 
     using T = float;
     const truncated_normal_initializer<T> weight_init(0.1);

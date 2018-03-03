@@ -1,4 +1,6 @@
 #pragma once
+#include <utility>
+
 #include <misaka.h>
 #include <misaka/data/dataset.hpp>
 #include <misaka/linag/base.hpp>
@@ -29,8 +31,7 @@ struct trainer_t {
           loss(make_loss(model, label, loss_func)),
           optimize(optimizer->optimize(model))
     {
-        DEBUG(__func__);
-        printf("%lu parameters\n", model->ctx->params.size());
+        printf("[D] %lu hyper parameters\n", model->ctx->params.size());
     }
 
     void debug(const char *name)
@@ -68,7 +69,7 @@ struct trainer_t {
         }
     }
 
-    void test(dataset_t &ds)
+    std::pair<uint32_t, uint32_t> test(dataset_t &ds)
     {
         DEBUG(__func__);
         uint32_t step = 0;
@@ -88,6 +89,7 @@ struct trainer_t {
             }
         }
         printf("step : %u, acc : %f\n", step, (float)yes / step);
+        return std::make_pair(yes, step);
     }
 
     static constexpr uint32_t default_batch_size = 500;

@@ -8,6 +8,7 @@ struct xentropy {
 
     static shape_t *infer(const shape_list_t *shape_list)
     {
+        assert(shape_list->shapes.size() == arity);
         return new shape_t();
     }
 

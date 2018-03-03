@@ -9,7 +9,7 @@ model_t *slp_model(shape_t *image_shape, int arity)
 
     model_ctx_t *m = new_model_ctx();
     node_t *x_ = make_placeholder(m, image_shape);
-    node_t *x = wrap(m, x_wrap_shape, x_);
+    node_t *x = wrap_node(m, x_wrap_shape, x_);
     node_t *w = make_parameter(m, weight_shape);
     node_t *b = make_parameter(m, lable_shape);
 

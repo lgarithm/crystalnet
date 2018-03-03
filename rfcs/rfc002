@@ -1,6 +1,8 @@
 Resource Management
 ======
 
+We shall use std::unique_ptr to manage memory resource.
+
 (Currently core/gc.hpp)
 
 Resource Allocation

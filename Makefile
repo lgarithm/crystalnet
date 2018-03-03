@@ -66,9 +66,11 @@ tidy:
 	./utils/tidy.sh
 
 test: libmisaka
+	make -C tests
 	./utils/test.sh
 
 check: libmisaka
+	make -C tests
 	./utils/check-leak.sh
 
 clean:

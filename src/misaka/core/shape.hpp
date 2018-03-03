@@ -1,10 +1,17 @@
 #pragma once
+#include <cassert>
 #include <cstdint>
 
+#include <array>
+#include <functional>
+#include <numeric>
 #include <string>
+#include <utility>
 #include <vector>
 
 struct shape_t {
+    const std::vector<uint32_t> dims;
+
     template <typename... T>
     explicit shape_t(T... dims) : dims({static_cast<uint32_t>(dims)...})
     {
@@ -16,12 +23,8 @@ struct shape_t {
 
     uint32_t dim() const
     {
-        // TODO: use std::reduce when it's available
-        uint32_t d = 1;
-        for (auto i : dims) {
-            d *= i;
-        }
-        return d;
+        return std::accumulate(dims.begin(), dims.end(), 1,
+                               std::multiplies<uint32_t>());
     }
 
     uint32_t len() const
@@ -32,12 +35,35 @@ struct shape_t {
         return 1;
     }
 
-    const std::vector<uint32_t> dims;
+    shape_t sub() const
+    {
+        if (dims.size() > 0) {
+            return shape_t(std::vector<uint32_t>(dims.begin() + 1, dims.end()));
+        }
+        return *this;
+    }
 };
 
 struct shape_list_t {
-    std::vector<shape_t> shapes;
+    const std::vector<shape_t> shapes;
+    explicit shape_list_t(const std::vector<shape_t> &shapes) : shapes(shapes)
+    {
+    }
+    shape_t operator[](int i) const { return shapes[i]; }
+    uint8_t size() const { return shapes.size(); }
 };
+
+template <typename T, size_t... i>
+auto _index(const std::vector<T> &v, std::index_sequence<i...>)
+{
+    return std::array<T, sizeof...(i)>({v[i]...});
+}
+
+template <uint8_t rank, typename T> auto cast(const std::vector<T> &v)
+{
+    assert(v.size() == rank);
+    return _index(v, std::make_index_sequence<rank>());
+}
 
 namespace std
 {

@@ -24,11 +24,23 @@ dataset_t *load_cifar10_data(const std::string &filename)
     auto labels = std::unique_ptr<tensor_t>(
         new tensor_t(shape_t(n), idx_type<uint8_t>::type));
     auto images = std::unique_ptr<tensor_t>(
-        new tensor_t(shape_t(n, 3, 32, 32), idx_type<uint8_t>::type));
+        new tensor_t(shape_t(n, 32, 32, 3), idx_type<uint8_t>::type));
+    uint8_t buffer[32 * 32 * 3];
     FILE *fp = fopen(filename.c_str(), "r");
-    for (auto i = 0; i < n; ++i) {
-        fread((char *)labels->data + i, 1, 1, fp);
-        fread((char *)images->data + i * 32 * 32 * 3, 3, 32 * 32, fp);
+    uint8_t *p = (uint8_t *)images->data;
+    for (auto l = 0; l < n; ++l) {
+        fread((char *)labels->data + l, 1, 1, fp);
+        fread((char *)buffer, 3, 32 * 32, fp);
+        // [c, n, n] -> [n, n, c]
+        // fread((char *)images->data + i * 32 * 32 * 3, 3, 32 * 32, fp);
+        for (auto i = 0; i < 32; ++i) {
+            for (auto j = 0; j < 32; ++j) {
+                for (auto k = 0; k < 3; ++k) {
+                    // buffer[k, i, j]
+                    *p++ = buffer[(k * 32 + i) * 32 + j];
+                }
+            }
+        }
     }
     fclose(fp);
     tensor_t *images_ = cast_to<float>(r_tensor_ref_t<uint8_t>(*images));

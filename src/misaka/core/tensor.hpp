@@ -4,21 +4,20 @@
 #include <cstdint>
 #include <cstring>
 #include <memory>
+#include <numeric>
 #include <string>
+#include <vector>
 
 #include <misaka.h>
 #include <misaka/core/debug.hpp> // for LOG_TENSOR_USAGE
-#include <misaka/core/idx.hpp>   // for shape_t
+#include <misaka/core/idx.hpp>
 #include <misaka/core/shape.hpp> // for shape_t
-
-struct tensor_t;
-struct tensor_ref_t;
 
 struct tensor_t {
     const shape_t shape;
     const uint8_t dtype;
     const std::unique_ptr<uint8_t[]> _data;
-    void *data;
+    void *const data;
 
     explicit tensor_t(const shape_t &shape,
                       uint8_t dtype = idx_type<float>::type)
@@ -30,14 +29,12 @@ struct tensor_t {
     }
 
     // TODO: support initializers
-
-    tensor_ref_t operator[](uint32_t idx) const;
 };
 
 struct tensor_ref_t {
     const shape_t shape;
     const uint8_t dtype;
-    void *data;
+    void *const data;
 
     tensor_ref_t(const shape_t &shape, uint8_t dtype, void *data)
         : shape(shape), dtype(dtype), data(data)
@@ -47,6 +44,18 @@ struct tensor_ref_t {
     explicit tensor_ref_t(const tensor_t &tensor)
         : shape(tensor.shape), dtype(tensor.dtype), data(tensor.data)
     {
+    }
+
+    tensor_ref_t operator[](uint32_t idx) const
+    {
+        assert(idx < shape.len());
+        if (shape.rank() == 0) {
+            return *this;
+        }
+        shape_t new_shape(
+            std::vector<uint32_t>(shape.dims.begin() + 1, shape.dims.end()));
+        uint32_t offset = idx * new_shape.dim() * dtype_size(dtype);
+        return tensor_ref_t(new_shape, dtype, (uint8_t *)(data) + offset);
     }
 };
 
@@ -64,7 +73,7 @@ inline tensor_ref_t ref(const tensor_t &tensor) { return tensor_ref_t(tensor); }
 
 template <typename R> struct r_tensor_ref_t {
     const shape_t shape;
-    R *data;
+    R *const data;
 
     explicit r_tensor_ref_t(const tensor_t &t)
         : shape(t.shape), data((R *)t.data)
@@ -82,27 +91,24 @@ template <typename R> struct r_tensor_ref_t {
     R min() const { return *std::min_element(data, data + shape.dim()); }
     R mean() const
     {
-        R s = 0;
-        auto n = shape.dim();
-        for (auto i = 0; i < n; ++i) {
-            s += data[i];
-        }
-        return s / n;
+        const auto n = shape.dim();
+        return std::accumulate(data, data + n, (R)0) / n;
     }
     void fill(R x) const { std::fill(data, data + shape.dim(), x); }
+    void copy(const r_tensor_ref_t<R> &r)
+    {
+        const auto n = shape.dim();
+        assert(n == r.shape.dim());
+        std::memcpy(data, r.data, n * sizeof(R));
+    }
 };
 
-template <typename R, typename T>
-tensor_t *cast_to(const r_tensor_ref_t<T> &tensor)
+template <typename R, typename T> tensor_t *cast_to(const r_tensor_ref_t<T> &t)
 {
-    auto t = new tensor_t(tensor.shape, idx_type<R>::type);
-    auto r = r_tensor_ref_t<R>(*t);
-    uint32_t n = t->shape.dim();
-    for (auto i = 0; i < n; ++i) {
-        // TODO: use static_cast
-        r.data[i] = R(tensor.data[i]);
-    }
-    return t;
+    auto r = new tensor_t(t.shape, idx_type<R>::type);
+    std::transform(t.data, t.data + t.shape.dim(), r_tensor_ref_t<R>(*r).data,
+                   [](T x) { return (R)x; });
+    return r;
 }
 
 namespace std

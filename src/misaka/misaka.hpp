@@ -14,6 +14,11 @@ auto place(model_ctx_t *ctx, const shape_t &shape)
     return make_placeholder(ctx, &shape);
 }
 
+auto wrap(model_ctx_t *ctx, const shape_t &shape, node_t *node)
+{
+    return ctx->wrap(shape, *node);
+}
+
 template <typename T>
 auto var(model_ctx_t *ctx, const shape_t &shape, const T &init)
 {

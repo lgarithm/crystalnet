@@ -1,10 +1,14 @@
 misaka network
 ======
 
+(This project is under active development)
+
 A distributive AI platform.
 
 
 ## Getting Started
+
+Cmake and a modern C++ compiler (fully support C++17) are requird.
 
 ```
 $ make
