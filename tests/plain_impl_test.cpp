@@ -1,8 +1,8 @@
 #include <algorithm>
 #include <cassert>
-#include <misaka/core/shape.hpp>
-#include <misaka/core/tensor.hpp>
-#include <misaka/linag/plain_impl.hpp>
+#include <crystalnet/core/shape.hpp>
+#include <crystalnet/core/tensor.hpp>
+#include <crystalnet/linag/plain_impl.hpp>
 
 template <typename T, typename linag> struct test_linag {
     static constexpr auto dtype = idx_type<T>::type;

@@ -6,10 +6,10 @@ import os
 import sys
 path = os.path.join(os.path.dirname(__file__), '../..', 'langs/python')
 sys.path.append(path)
-import misaka
+import crystalnet
 
-for x in dir(misaka):
+for x in dir(crystalnet):
     print(x)
-print(misaka.version())
-shape = misaka.Shape(3)
+print(crystalnet.version())
+shape = crystalnet.Shape(3)
 print(shape)

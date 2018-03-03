@@ -7,9 +7,9 @@ services:
 
 before_install:
 - docker info
-- docker build -t misaka .
+- docker build -t crystalnet .
 
 script:
 # The default is
 # - ./configure && make && make test
-- docker run -it misaka make test
+- docker run -it crystalnet make test

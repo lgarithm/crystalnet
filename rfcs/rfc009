@@ -14,7 +14,7 @@ void f() {
 it should be traced like
 
 ```
-#include "misaka/trace/trace.hpp"
+#include "crystalnet/trace/trace.hpp"
 
 void f() {
     TRACE(__func__);

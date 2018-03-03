@@ -26,7 +26,7 @@ A view from users' perspective
 a C program
 
 ```c
-#include <misaka.h>
+#include <crystalnet.h>
 
 int main() {
     int width = 28;
@@ -42,7 +42,7 @@ int main() {
 a C++20 program
 
 ```cpp
-#include <misaka>
+#include <crystalnet>
 
 int main() {
     auto x = make_placeholder(shape(n,n,n));

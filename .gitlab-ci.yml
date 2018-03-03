@@ -14,5 +14,5 @@ before_script:
 build_image:
   script:
     - docker info
-    - docker build -t misaka .
-    # - docker run misaka
+    - docker build -t crystalnet .
+    # - docker run crystalnet

@@ -1,4 +1,4 @@
-#include <misaka/misaka>
+#include <crystalnet/crystalnet>
 
 // l1 = pool \circ relu \circ conv1
 // l2 = pool \circ relu \circ conv2

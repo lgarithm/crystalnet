@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <misaka.h>
+#include <crystalnet.h>
 
 tensor_t *_load_mnist(const char *const name)
 {

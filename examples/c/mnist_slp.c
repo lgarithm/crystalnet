@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include <misaka.h>
+#include <crystalnet.h>
 
 // y = softmax(xw + b)
 model_t *slp_model(shape_t *image_shape, int arity)
@@ -42,7 +42,7 @@ model_ctx_t *slp_model_2(shape_t *image_shape, int arity)
     return m;
 }
 
-void show_version() { printf("misaka: %s\n", version()); }
+void show_version() { printf("crystalnet: %s\n", version()); }
 
 int main()
 {

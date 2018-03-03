@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 
 setup(
-    name="misaka",
+    name="crystalnet",
     version="0.0.0",
     include_package_data=True,
     author='lg',

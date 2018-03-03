@@ -1,4 +1,4 @@
-#include <misaka.h>
+#include <crystalnet.h>
 
 // y = softmax(xw + b)
 model_t *slp_model(shape_t *image_shape, int arity)
