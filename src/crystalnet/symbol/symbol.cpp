@@ -1,2 +1,55 @@
 #include <crystalnet.h>
+#include <crystalnet/core/gc.hpp>
+#include <crystalnet/model/model.hpp>
+#include <crystalnet/symbol/model.hpp>
 #include <crystalnet/symbol/node.hpp>
+
+static GC<s_model_ctx_t> gc;
+
+s_model_ctx_t *new_s_model_ctx() { return gc(new s_model_ctx_t); }
+
+s_node_t *var(s_model_ctx_t *ctx, const shape_t *shape)
+{
+    return ctx->make_placeholder(*shape);
+}
+
+s_node_t *covar(s_model_ctx_t *ctx, const shape_t *shape)
+{
+    return ctx->make_parameter(*shape);
+}
+
+s_node_t *apply(s_model_ctx_t *ctx, const operator_t *op, s_node_t *args[])
+{
+    std::vector<s_node_t *> nodes;
+    for (auto i = 0; i < op->arity; ++i) {
+        nodes.push_back(args[i]);
+    }
+    return ctx->make_operator(*op, nodes);
+}
+
+s_node_t *reshape(s_model_ctx_t *ctx, const shape_t *shape,
+                  const s_node_t *node)
+{
+    return ctx->wrap_node(*shape, node);
+}
+
+s_model_t *new_s_model(s_model_ctx_t *ctx, s_node_t *input, s_node_t *output)
+{
+    return new s_model_t(ctx, input, output);
+}
+
+void free_s_model(s_model_t *model) { delete model; }
+
+model_t *realize(const s_model_t *m)
+{
+    model_ctx_t *ctx = new_model_ctx();
+    auto output = m->output->realize(*ctx);
+    auto places = ctx->places.items;
+    if (places.size() != 1) {
+        // TODO: support any number of placeholders
+        printf("exact one placeholder must be specified!\n");
+        assert(false);
+    }
+    auto inputs = places[0];
+    return new_model(ctx, inputs, output);
+}

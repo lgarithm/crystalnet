@@ -13,7 +13,7 @@
 
 struct node_t {
     // int idx; // TODO: support index
-    std::string name;
+    const std::string name;
     const shape_t shape;
     const uint8_t dtype;
 

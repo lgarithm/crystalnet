@@ -9,6 +9,8 @@
 #include <utility>
 #include <vector>
 
+#include <crystalnet/core/gc.hpp>
+
 struct shape_t {
     const std::vector<uint32_t> dims;
 
@@ -41,6 +43,14 @@ struct shape_t {
             return shape_t(std::vector<uint32_t>(dims.begin() + 1, dims.end()));
         }
         return *this;
+    }
+};
+
+struct shape_ctx_t {
+    GC<shape_t> gc;
+    const shape_t *make_shape(const std::vector<uint32_t> &dims)
+    {
+        return gc(new shape_t(dims));
     }
 };
 

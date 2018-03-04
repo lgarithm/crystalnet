@@ -8,60 +8,29 @@
 
 struct dataset_t {
     using item_t = std::pair<tensor_ref_t, tensor_ref_t>;
-
-    virtual item_t next() = 0;
-    // virtual item_t next_barch() {} // TODO: next_batch
-    virtual void reset() = 0;
-    virtual bool has_next() const = 0;
     virtual const shape_t *image_shape() const = 0;
     virtual const shape_t *label_shape() const = 0;
+    virtual const uint32_t len() const = 0;
+    virtual item_t slice(uint32_t) const = 0;
     virtual ~dataset_t() {}
-};
-
-struct range_t {
-    using item_t = dataset_t::item_t;
-    dataset_t &ds;
-
-    explicit range_t(dataset_t &ds) : ds(ds) {}
 
     struct iter_t {
-        dataset_t *ds;
-        std::unique_ptr<item_t> next;
-        explicit iter_t(dataset_t *ds) : ds(ds) { this->operator++(); }
-        bool operator!=(const iter_t &it) const { return ds != it.ds; }
-        void operator++()
-        {
-            if (ds && ds->has_next()) {
-                auto item = new item_t(ds->next());
-                next.reset(item);
-            } else {
-                ds = nullptr;
-            }
-        }
-        item_t operator*() { return item_t(*next); }
+        const dataset_t &ds;
+        uint32_t pos;
+        explicit iter_t(const dataset_t &ds, uint32_t pos) : ds(ds), pos(pos) {}
+        bool operator!=(const iter_t &it) const { return pos != it.pos; }
+        void operator++() { ++pos; }
+        item_t operator*() const { return ds.slice(pos); }
     };
 
-    iter_t begin()
-    {
-        if (ds.has_next()) {
-            return iter_t(&ds);
-        }
-        return end();
-    }
+    iter_t begin() const { return iter_t(*this, 0); }
 
-    iter_t end() { return iter_t(nullptr); }
+    iter_t end() const { return iter_t(*this, len()); }
 };
-
-inline range_t range(dataset_t &ds)
-{
-    ds.reset();
-    return range_t(ds);
-}
 
 struct simple_dataset_t : dataset_t {
     using owner_t = std::unique_ptr<tensor_t>;
 
-    int idx; // TODO: move idx to iterator
     const uint32_t n;
     const shape_t _image_shape;
     const shape_t _label_shape;
@@ -70,21 +39,17 @@ struct simple_dataset_t : dataset_t {
 
     simple_dataset_t(tensor_t *images, tensor_t *labels)
         : _image_shape(images->shape.sub()), _label_shape(labels->shape.sub()),
-          images(owner_t(images)), labels(owner_t(labels)), idx(0),
+          images(owner_t(images)), labels(owner_t(labels)),
           n(images->shape.len())
     {
     }
-
-    bool has_next() const override { return idx < n; }
-    void reset() override { idx = 0; }
-    item_t next() override
-    {
-        assert(has_next());
-        auto i = idx++;
-        return item_t(ref(*images)[i], ref(*labels)[i]);
-    }
     const shape_t *image_shape() const override { return &_image_shape; }
     const shape_t *label_shape() const override { return &_label_shape; }
+    const uint32_t len() const override { return n; }
+    item_t slice(uint32_t i) const override
+    {
+        return item_t(ref(*images)[i], ref(*labels)[i]);
+    }
 };
 
 inline std::string data_dir()

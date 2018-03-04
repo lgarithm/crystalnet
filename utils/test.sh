@@ -1,4 +1,4 @@
 #!/bin/sh
 
 set -e
-find tests/build/bin/*_test -print -exec {} \;
+find tests/build/bin -print -exec {} \;

@@ -1,8 +1,8 @@
 #pragma once
 #include <cstdint>
-#include <crystalnet.h>
 #include <string>
 
+#include <crystalnet.h>
 #include <teavana/timer.hpp>
 
 #ifdef CRYSTALNET_DEBUG

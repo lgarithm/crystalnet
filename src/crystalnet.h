@@ -23,6 +23,7 @@ const char *version();
 
 typedef struct shape_t shape_t;
 typedef struct shape_list_t shape_list_t;
+typedef struct shape_ctx_t shape_ctx_t;
 typedef struct tensor_t tensor_t;
 typedef struct node_t node_t;
 typedef struct model_t model_t;
@@ -42,6 +43,9 @@ shape_t *make_shape(int, ...);
 void free_shape(shape_t *);
 uint32_t shape_dim(const shape_t *);
 uint32_t shape_rank(const shape_t *);
+shape_ctx_t *make_shape_ctx();
+void free_shape_ctx(shape_ctx_t *);
+const shape_t *mk_shape(shape_ctx_t *, int, ...);
 
 tensor_t *new_tensor(shape_t *, uint8_t);
 void free_tensor(tensor_t *);
@@ -75,6 +79,20 @@ extern operator_t *op_pool2d_c_max;
 // TODO: provide C bindings for layer API.
 // extern layer_t *layer_fc;
 // extern layer_t *layer_covn;
+
+// symbolic APIs
+typedef struct s_node_t s_node_t;
+typedef s_node_t *symbol;
+typedef struct s_model_t s_model_t;
+typedef struct s_model_ctx_t s_model_ctx_t;
+s_model_ctx_t *new_s_model_ctx();
+s_model_t *new_s_model(s_model_ctx_t *, s_node_t *, s_node_t *);
+void free_s_model(s_model_t *);
+s_node_t *var(s_model_ctx_t *, const shape_t *);
+s_node_t *covar(s_model_ctx_t *, const shape_t *);
+s_node_t *reshape(s_model_ctx_t *, const shape_t *, const s_node_t *);
+s_node_t *apply(s_model_ctx_t *, const operator_t *, s_node_t *args[]);
+model_t *realize(const s_model_t *);
 
 // training
 typedef struct dataset_t dataset_t;

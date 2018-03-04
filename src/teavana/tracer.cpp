@@ -5,10 +5,10 @@
 #include <string>   // for string
 #include <typeinfo> // for type_info
 
-#include "teavana/range.hpp" // for range
 #include "teavana/show.hpp"  // for size2str
 #include "teavana/timer.hpp" // for timer
 #include "teavana/tracer.hpp"
+#include <crystalnet/utility/range.hpp>
 
 namespace tea
 {
@@ -22,13 +22,11 @@ bool tensor_tracer::log_on = true;
 #define TRACE_TENSOR_USAGE(R, s)
 #endif
 
-
 #ifdef ENABLE_PROFILE
 
 emit_header_once emit_header;
 
 #endif
-
 
 #ifdef ENABLE_PROFILE
 

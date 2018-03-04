@@ -7,10 +7,10 @@
 #include <string>   // for string
 #include <typeinfo> // for type_info
 
-#include "teavana/range.hpp" // for range
+#include "teavana/core/shape.hpp"
 #include "teavana/show.hpp"  // for size2str
 #include "teavana/timer.hpp" // for timer
-#include "teavana/core/shape.hpp"
+#include <crystalnet/utility/range.hpp>
 
 namespace tea
 {

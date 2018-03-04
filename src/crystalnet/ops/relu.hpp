@@ -1,9 +1,7 @@
 #pragma once
 #include <crystalnet.h>
 #include <crystalnet/model/operator.hpp>
-#include <teavana/range.hpp>
-
-using tea::range;
+#include <crystalnet/utility/range.hpp>
 
 template <typename T> vector_ref_t<T> cast_to_v(const tensor_ref_t &tensor)
 {

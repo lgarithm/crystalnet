@@ -70,15 +70,13 @@ struct adam_optimizer_t : optimizer_t {
 
         ctx(model_t *model)
         {
-            // printf("%s\n", __func__);
-            for (auto node : model->ctx->params) {
+            for (auto node : model->ctx->params.items) {
                 p_ctxs.push_back(std::make_unique<p_ctx>(node));
             }
         }
 
         void operator()() override
         {
-            // printf("%s\n", __func__);
             for (auto &p : p_ctxs) {
                 (*p)();
             }

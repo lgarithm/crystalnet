@@ -6,6 +6,7 @@
 #include <crystalnet/linag/base.hpp>
 #include <crystalnet/model/model.hpp>
 #include <crystalnet/train/optimizer.hpp>
+#include <crystalnet/utility/enumerate.hpp>
 
 struct trainer_t {
     model_t *model;
@@ -31,7 +32,7 @@ struct trainer_t {
           loss(make_loss(model, label, loss_func)),
           optimize(optimizer->optimize(model))
     {
-        printf("[D] %lu hyper parameters\n", model->ctx->params.size());
+        printf("[D] %lu hyper parameters\n", model->ctx->params.items.size());
     }
 
     void debug(const char *name)
@@ -49,9 +50,8 @@ struct trainer_t {
     void run(dataset_t &ds, dataset_t *test_ds = nullptr)
     {
         DEBUG(__func__);
-        int step = 0;
-        for (auto[image, label_] : range(ds)) {
-            ++step;
+        for (auto[step, data] : enumerate(ds)) {
+            auto[image, label_] = data;
             model->input->bind(image);
             label->bind(label_);
             loss->forward();
@@ -72,24 +72,24 @@ struct trainer_t {
     std::pair<uint32_t, uint32_t> test(dataset_t &ds)
     {
         DEBUG(__func__);
-        uint32_t step = 0;
+        uint32_t no = 0;
         uint32_t yes = 0;
-        for (auto[image, label_] : range(ds)) {
-            ++step;
+        for (auto[step, data] : enumerate(ds)) {
+            auto[image, label_] = data;
             model->input->bind(image);
             label->bind(label_);
             loss->forward();
             using T = float;
             auto p = argmax<T>(as_vector_ref<T>(label_));
             auto q = argmax<T>(as_vector_ref<T>(model->output->value()));
-            yes += p == q;
+            p == q ? ++yes : ++no;
             const auto freq = 10000;
             if (step % freq == 0) {
                 printf("test step: %d\n", step);
             }
         }
-        printf("step : %u, acc : %f\n", step, (float)yes / step);
-        return std::make_pair(yes, step);
+        printf("step : %u, acc : %f\n", yes + no, (float)yes / (yes + no));
+        return std::make_pair(yes, yes + no);
     }
 
     static constexpr uint32_t default_batch_size = 500;

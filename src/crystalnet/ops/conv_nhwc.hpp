@@ -6,7 +6,7 @@
 #include <crystalnet/core/shape.hpp>
 #include <crystalnet/linag/base.hpp>
 #include <crystalnet/linag/linag.hpp>
-#include <teavana/range.hpp>
+#include <crystalnet/utility/range.hpp>
 
 template <typename T>
 matrix_ref_t<T> cast_to_m(uint32_t m, uint32_t n,
@@ -15,8 +15,6 @@ matrix_ref_t<T> cast_to_m(uint32_t m, uint32_t n,
     assert(m * n == tensor.shape.dim());
     return matrix_ref_t<T>(m, n, tensor.data);
 }
-
-using tea::range;
 
 struct conv_nhwc {
     constexpr static uint8_t arity = 2;

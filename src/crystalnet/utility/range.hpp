@@ -1,7 +1,5 @@
 #pragma once
 
-namespace tea
-{
 template <typename T> struct range_t {
     const T from;
     const T to;
@@ -30,4 +28,3 @@ template <typename T> struct range_t {
 template <typename T> range_t<T> range(T n) { return range_t<T>(n); }
 
 template <typename T> range_t<T> range(T m, T n) { return range_t<T>(m, n); }
-}

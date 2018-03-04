@@ -1,7 +1,6 @@
 #pragma once
 #include <crystalnet/core/tensor.hpp>
-#include <teavana/range.hpp>
-using tea::range;
+#include <crystalnet/utility/range.hpp>
 
 template <typename T>
 auto change_ith(const uint8_t pos, const std::vector<T> &items,

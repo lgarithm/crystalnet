@@ -24,17 +24,16 @@ struct model_ctx_t {
     name_generator_t op_name = name_generator_t("op");
 
     GC<node_t> gc;
-    std::vector<operator_node_t *> ops;
-    std::vector<parameter_node_t *> params;
+    Ref<operator_node_t> ops;
+    Ref<parameter_node_t> params;
+    Ref<placeholder_node_t> places;
 
     node_t *make_parameter(const shape_t &shape, std::string name = "")
     {
         if (name.empty()) {
             name = param_name();
         }
-        auto p = new parameter_node_t(shape, name);
-        params.push_back(p);
-        return gc(p);
+        return gc(params(new parameter_node_t(shape, name)));
     }
 
     node_t *make_placeholder(const shape_t &shape, std::string name = "")
@@ -42,7 +41,7 @@ struct model_ctx_t {
         if (name.empty()) {
             name = place_name();
         }
-        return gc(new placeholder_node_t(shape, name));
+        return gc(places(new placeholder_node_t(shape, name)));
     }
 
     node_t *make_operator(const operator_t &op, node_t *nodes[],
@@ -51,9 +50,7 @@ struct model_ctx_t {
         if (name.empty()) {
             name = op_name();
         }
-        auto o = new operator_node_t(op, nodes, name);
-        ops.push_back(o);
-        return gc(o);
+        return gc(ops(new operator_node_t(op, nodes, name)));
     }
 
     node_t *wrap(const shape_t &shape, const node_t &node)
@@ -65,7 +62,7 @@ struct model_ctx_t {
     {
         using T = float;
         printf("debug:\n");
-        for (auto p : params) {
+        for (auto p : params.items) {
             r_tensor_ref_t<T> r(p->value());
             r_tensor_ref_t<T> s(p->gradient());
             printf("%-16s: ", p->name.c_str());
@@ -73,7 +70,7 @@ struct model_ctx_t {
             printf("%-16s: ", p->name.c_str());
             print(s);
         }
-        for (auto o : ops) {
+        for (auto o : ops.items) {
             r_tensor_ref_t<T> r(o->value());
             r_tensor_ref_t<T> s(o->gradient());
             printf("%-16s: ", o->name.c_str());

@@ -4,8 +4,7 @@
 #include <crystalnet.h>
 #include <crystalnet/core/debug.hpp>
 #include <crystalnet/model/operator.hpp>
-#include <teavana/range.hpp>
-using tea::range;
+#include <crystalnet/utility/range.hpp>
 
 template <typename T>
 void softmax_eval_safe(const vector_ref_t<T> &input,

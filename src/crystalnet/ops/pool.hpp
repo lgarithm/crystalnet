@@ -1,8 +1,6 @@
 #pragma once
 #include <crystalnet/core/shape.hpp>
-#include <teavana/range.hpp>
-
-using tea::range;
+#include <crystalnet/utility/range.hpp>
 
 struct pool2d_c_max {
     constexpr static uint8_t arity = 1;

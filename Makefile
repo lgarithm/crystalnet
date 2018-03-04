@@ -4,6 +4,8 @@ else
 	NPROC = $(shell nproc)
 endif
 
+default: libcrystalnet _tests
+
 # TODO: don't disable assert (remove -DNDEBUG)
 CMAKE_FLAGS = \
     -DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
@@ -65,12 +67,13 @@ format:
 tidy:
 	./utils/tidy.sh
 
-test: libcrystalnet
+_tests:
 	make -C tests
+
+test: libcrystalnet _tests
 	./utils/test.sh
 
-check: libcrystalnet
-	make -C tests
+check: libcrystalnet _tests
 	./utils/check-leak.sh
 
 clean:

@@ -10,7 +10,7 @@ struct sgd_optimizer_t : optimizer_t {
         ctx(model_t *model) : model(model) {}
         void operator()() override
         {
-            for (auto p : model->ctx->params) {
+            for (auto p : model->ctx->params.items) {
                 r_tensor_ref_t<T> x(p->value());
                 r_tensor_ref_t<T> g(p->gradient());
                 // TODO: sync parameter with other agents
