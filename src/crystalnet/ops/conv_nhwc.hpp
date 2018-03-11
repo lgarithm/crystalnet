@@ -3,10 +3,10 @@
 #include <tuple>
 #include <vector>
 
+#include <crystalnet/core/operator.hpp>
 #include <crystalnet/core/shape.hpp>
 #include <crystalnet/linag/base.hpp>
 #include <crystalnet/linag/linag.hpp>
-#include <crystalnet/model/operator.hpp>
 #include <crystalnet/utility/cast.hpp>
 #include <crystalnet/utility/range.hpp>
 
@@ -228,5 +228,3 @@ struct conv2d {
         }
     };
 };
-
-operator_t *op_conv_nhwc = _register_bi_op<conv2d>("conv2d");

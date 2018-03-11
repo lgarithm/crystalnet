@@ -46,6 +46,11 @@ struct operator_t {
     backward_func_t *backward;
 };
 
+struct initializer_t {
+    virtual void operator()(const tensor_ref_t &) const = 0;
+    virtual ~initializer_t() {}
+};
+
 template <typename T> struct operator_creator_t {
     static void forward(forward_ctx_t *ctx) { (*(typename T::forward *)ctx)(); }
     static void backward(backward_ctx_t *ctx)

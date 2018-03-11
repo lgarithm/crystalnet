@@ -1,7 +1,7 @@
 #pragma once
 #include <crystalnet.h>
+#include <crystalnet/core/operator.hpp>
 #include <crystalnet/linag/linag.hpp>
-#include <crystalnet/model/operator.hpp>
 #include <crystalnet/utility/cast.hpp>
 #include <crystalnet/utility/range.hpp>
 

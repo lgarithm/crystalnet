@@ -1,7 +1,7 @@
 #include <cstdio>
 
 #include <crystalnet/core/gc.hpp>
-#include <crystalnet/model/operator.hpp>
+#include <crystalnet/core/operator.hpp>
 
 static auto gc = GC<operator_t>();
 

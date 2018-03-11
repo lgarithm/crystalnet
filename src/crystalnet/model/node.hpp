@@ -6,10 +6,10 @@
 #include <crystalnet.h>
 #include <crystalnet/core/debug.hpp>
 #include <crystalnet/core/error.hpp>
+#include <crystalnet/core/operator.hpp>
 #include <crystalnet/core/shape.hpp>
 #include <crystalnet/core/tensor.hpp>
 #include <crystalnet/linag/base.hpp>
-#include <crystalnet/model/operator.hpp>
 
 struct node_t {
     // int idx; // TODO: support index

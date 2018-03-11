@@ -3,9 +3,9 @@
 
 #include <crystalnet.h>
 #include <crystalnet/core/debug.hpp>
+#include <crystalnet/core/operator.hpp>
 #include <crystalnet/linag/base.hpp>
 #include <crystalnet/linag/linag.hpp>
-#include <crystalnet/model/operator.hpp>
 #include <crystalnet/ops/batch.hpp>
 #include <crystalnet/utility/cast.hpp>
 #include <crystalnet/utility/range.hpp>

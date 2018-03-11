@@ -1,6 +1,6 @@
 #pragma once
+#include <crystalnet/core/operator.hpp>
 #include <crystalnet/core/shape.hpp>
-#include <crystalnet/model/operator.hpp>
 #include <crystalnet/ops/batch.hpp>
 #include <crystalnet/utility/cast.hpp>
 #include <crystalnet/utility/range.hpp>
