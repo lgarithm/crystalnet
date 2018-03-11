@@ -1,9 +1,9 @@
 #pragma once
 #include <crystalnet.h>
 #include <crystalnet/core/debug.hpp>
+#include <crystalnet/core/operator.hpp>
 #include <crystalnet/core/shape.hpp>
 #include <crystalnet/linag/linag.hpp>
-#include <crystalnet/model/operator.hpp>
 #include <crystalnet/ops/batch.hpp>
 #include <crystalnet/utility/cast.hpp>
 
@@ -119,5 +119,3 @@ struct add {
         }
     };
 };
-
-operator_t *op_add = _register_bi_op<add>("add");

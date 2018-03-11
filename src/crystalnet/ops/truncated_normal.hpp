@@ -3,7 +3,7 @@
 #include <cmath>
 #include <random>
 
-#include <crystalnet/core/initializer.hpp>
+#include <crystalnet/core/operator.hpp>
 
 struct truncated_normal_initializer_t : initializer_t {
     const double stddev;

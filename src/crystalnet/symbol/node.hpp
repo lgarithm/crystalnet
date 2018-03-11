@@ -4,10 +4,9 @@
 #include <memory>
 #include <vector>
 
-#include <crystalnet/core/initializer.hpp>
+#include <crystalnet/core/operator.hpp>
 #include <crystalnet/core/shape.hpp>
 #include <crystalnet/model/model.hpp>
-#include <crystalnet/model/operator.hpp>
 
 inline void log_new_s_node(const shape_t &shape, const char *type)
 {

@@ -1,6 +1,6 @@
 #pragma once
+#include <crystalnet/core/operator.hpp>
 #include <crystalnet/core/tensor.hpp>
-#include <crystalnet/model/operator.hpp>
 #include <crystalnet/utility/range.hpp>
 
 template <typename T>

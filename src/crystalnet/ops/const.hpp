@@ -1,5 +1,5 @@
 #pragma once
-#include <crystalnet/core/initializer.hpp>
+#include <crystalnet/core/operator.hpp>
 
 struct constant_initializer_t : initializer_t {
     const double c;
