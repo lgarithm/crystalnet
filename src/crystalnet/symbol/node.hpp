@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 
+#include <crystalnet/core/initializer.hpp>
 #include <crystalnet/core/shape.hpp>
 #include <crystalnet/model/model.hpp>
 #include <crystalnet/model/operator.hpp>
@@ -56,13 +57,20 @@ struct s_node_list_t {
 };
 
 struct s_parameter_node_t : s_node_t {
-    explicit s_parameter_node_t(const shape_t &shape) : s_node_t(shape)
+    const initializer_t *const init;
+    explicit s_parameter_node_t(const shape_t &shape,
+                                const initializer_t *const init = nullptr)
+        : s_node_t(shape), init(init)
     {
         log_new_s_node(shape, "covar");
     }
     node_t *realize(model_ctx_t &ctx, const model_option_t &opt) const override
     {
-        return ctx.make_parameter(shape, "", this);
+        const auto p = ctx.make_parameter(shape, "", this);
+        if (init) {
+            (*init)(p->value());
+        }
+        return p;
     }
 };
 
@@ -73,6 +81,8 @@ struct s_placeholder_node_t : s_node_t {
     }
     node_t *realize(model_ctx_t &ctx, const model_option_t &opt) const override
     {
+        printf("s_placeholder_node_t::realize %s\n",
+               std::to_string(shape).c_str());
         if (this == opt.input) {
             return ctx.make_placeholder(shape.batch(opt.batch_size));
         }
@@ -93,7 +103,7 @@ struct s_operator_node_t : s_node_t {
     s_operator_node_t(const operator_t &op, const s_node_list_t &inputs)
         : s_node_t(infer(op, inputs)), op(op), inputs(inputs)
     {
-        log_new_s_node(shape, "op");
+        log_new_s_node(shape, ("op::" + op.name).c_str());
     }
     node_t *realize(model_ctx_t &ctx, const model_option_t &opt) const override
     {

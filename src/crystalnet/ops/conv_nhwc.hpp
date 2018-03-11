@@ -7,13 +7,14 @@
 #include <crystalnet/linag/base.hpp>
 #include <crystalnet/linag/linag.hpp>
 #include <crystalnet/model/operator.hpp>
+#include <crystalnet/utility/cast.hpp>
 #include <crystalnet/utility/range.hpp>
 
 template <typename T>
 matrix_ref_t<T> cast_to_m(uint32_t m, uint32_t n,
                           const r_tensor_ref_t<T> &tensor)
 {
-    assert(m * n == tensor.shape.dim());
+    check(m * n == tensor.shape.dim());
     return matrix_ref_t<T>(m, n, tensor.data);
 }
 
@@ -23,10 +24,10 @@ struct conv_nhwc {
     // [n, h, w, c], [r, s, c, d] -> [n, u, v, d]
     static shape_t *infer(const shape_list_t *shape_list)
     {
-        assert(shape_list->shapes.size() == arity);
+        check(shape_list->shapes.size() == arity);
         const auto[n, h, w, c] = cast<4>((*shape_list)[0].dims);
         const auto[r, s, _c, d] = cast<4>((*shape_list)[1].dims);
-        assert(c == _c);
+        check(c == _c);
         return new shape_t(n, h - r + 1, w - s + 1, d);
     }
 
@@ -85,7 +86,6 @@ struct conv_nhwc {
     struct forward : forward_ctx_t {
         void operator()() const
         {
-            DEBUG(__FILE__);
             const auto x = r_tensor_ref_t<T>(inputs[0]);
             const auto y = r_tensor_ref_t<T>(inputs[1]);
             const auto z = r_tensor_ref_t<T>(output);
@@ -137,4 +137,96 @@ struct conv_nhwc {
     };
 };
 
-operator_t *op_conv_nhwc = _register_bi_op<conv_nhwc>("conv_nhwc");
+struct conv_hwc {
+    constexpr static uint8_t arity = 2;
+
+    // [h, w, c], [r, s, c, d] -> [h - r + 1, w - s + 1, d]
+    static shape_t *infer(const shape_list_t *shape_list)
+    {
+        check(shape_list->shapes.size() == arity);
+        const auto[h, w, c] = cast<3>((*shape_list)[0].dims);
+        const auto[r, s, _c, d] = cast<4>((*shape_list)[1].dims);
+        check(c == _c);
+        return new shape_t(h - r + 1, w - s + 1, d);
+    }
+
+    using T = float; // TODO: cast based on dtype
+
+    static tensor_ref_t as_one_batch(const tensor_ref_t &r)
+    {
+        return tensor_ref_t(r.shape.batch(1), r.dtype, r.data);
+    }
+
+    struct forward : forward_ctx_t {
+        void operator()() const
+        {
+            forward_ctx_t ctx(
+                tensor_ref_list_t({as_one_batch(inputs[0]), inputs[1]}),
+                as_one_batch(output));
+            call<conv_nhwc::forward>(ctx);
+        }
+    };
+
+    struct backward : backward_ctx_t {
+        void operator()() const
+        {
+            backward_ctx_t ctx(
+                tensor_ref_list_t({as_one_batch(inputs[0]), inputs[1]}),
+                as_one_batch(output),
+                tensor_ref_list_t(
+                    {as_one_batch(input_gradients[0]), input_gradients[1]}),
+                as_one_batch(output_gradient));
+            call<conv_nhwc::backward>(ctx);
+        }
+    };
+};
+
+struct conv2d {
+    constexpr static uint8_t arity = 2;
+
+    static shape_t *infer(const shape_list_t *shape_list)
+    {
+        check(shape_list->shapes.size() == arity);
+        const auto[p, q] = cast<2>(shape_list->shapes);
+        if (p.rank() == 3) {
+            return conv_hwc::infer(shape_list);
+        } else {
+            check(p.rank() == 4);
+            return conv_nhwc::infer(shape_list);
+        }
+    }
+
+    using T = float; // TODO: cast based on dtype
+
+    struct forward : forward_ctx_t {
+        void operator()() const
+        {
+            const auto[p, q] = cast<2>(inputs.shapes().shapes);
+            if (p.rank() == 3) {
+                forward_ctx_t ctx(*this);
+                call<conv_hwc::forward>(ctx);
+            } else {
+                check(p.rank() == 4);
+                forward_ctx_t ctx(*this);
+                call<conv_nhwc::forward>(ctx);
+            }
+        }
+    };
+
+    struct backward : backward_ctx_t {
+        void operator()() const
+        {
+            const auto[p, q] = cast<2>(inputs.shapes().shapes);
+            if (p.rank() == 3) {
+                backward_ctx_t ctx(*this);
+                call<conv_hwc::backward>(ctx);
+            } else {
+                check(p.rank() == 4);
+                backward_ctx_t ctx(*this);
+                call<conv_nhwc::backward>(ctx);
+            }
+        }
+    };
+};
+
+operator_t *op_conv_nhwc = _register_bi_op<conv2d>("conv2d");

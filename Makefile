@@ -6,7 +6,6 @@ endif
 
 default: libcrystalnet _tests
 
-# TODO: don't disable assert (remove -DNDEBUG)
 CMAKE_FLAGS = \
     -DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
     -DCMAKE_BUILD_TYPE=Release \

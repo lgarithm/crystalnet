@@ -1,6 +1,7 @@
 #pragma once
-#include <cassert>
 #include <cstdint>
+
+#include <crystalnet/core/error.hpp>
 
 template <typename T> struct matrix_ref_t {
     const uint32_t m;
@@ -26,14 +27,14 @@ template <typename T> struct vector_ref_t {
 
 template <typename T> T equally(T m, T n)
 {
-    assert(m == n);
+    check(m == n);
     return m;
 }
 
 template <typename T> T equally(T k, T m, T n)
 {
-    assert(k == m);
-    assert(m == n);
+    check(k == m);
+    check(m == n);
     return k;
 }
 
@@ -41,15 +42,15 @@ template <typename T> T equally(T k, T m, T n)
 
 template <typename T> auto as_vector_ref(const tensor_ref_t &tensor)
 {
-    assert(tensor.dtype == idx_type<T>::type);
-    assert(tensor.shape.rank() == 1);
+    check(tensor.dtype == idx_type<T>::type);
+    check(tensor.shape.rank() == 1);
     return vector_ref_t<T>(tensor.shape.dims[0], (T *)tensor.data);
 }
 
 template <typename T> auto as_matrix_ref(const tensor_ref_t &tensor)
 {
-    assert(tensor.dtype == idx_type<T>::type);
-    assert(tensor.shape.rank() == 2);
+    check(tensor.dtype == idx_type<T>::type);
+    check(tensor.shape.rank() == 2);
     auto m = tensor.shape.dims[0];
     auto n = tensor.shape.dims[1];
     return matrix_ref_t<T>(m, n, (T *)tensor.data);

@@ -1,6 +1,8 @@
 #pragma once
 #include <crystalnet/core/shape.hpp>
 #include <crystalnet/model/operator.hpp>
+#include <crystalnet/ops/batch.hpp>
+#include <crystalnet/utility/cast.hpp>
 #include <crystalnet/utility/range.hpp>
 
 struct pool2d_c_max {
@@ -13,10 +15,10 @@ struct pool2d_c_max {
     // [w, h, c] -> [w', h', c]
     static shape_t *infer(const shape_list_t *shape_list)
     {
-        assert(shape_list->shapes.size() == arity);
+        check(shape_list->shapes.size() == arity);
         const auto[h, w, c] = cast<3>((*shape_list)[0].dims);
-        assert(h % r == 0);
-        assert(w % s == 0);
+        check(h % r == 0);
+        check(w % s == 0);
         return new shape_t(h / r, w / s, c);
     }
 
@@ -31,7 +33,6 @@ struct pool2d_c_max {
     struct forward : forward_ctx_t {
         void operator()() const
         {
-            DEBUG(__FILE__);
             const auto x = r_tensor_ref_t<T>(inputs[0]);
             const auto y = r_tensor_ref_t<T>(output);
             const auto[h, w, c] = cast<3>(x.shape.dims);
@@ -73,4 +74,49 @@ struct pool2d_c_max {
     };
 };
 
-operator_t *op_pool2d_c_max = _register_bi_op<pool2d_c_max>("pool2d_c_max");
+struct pool2d_n_c_max {
+    constexpr static uint8_t arity = 1;
+    using pool2d_c_max_batched = batch<pool2d_c_max, 0>;
+
+    static shape_t *infer(const shape_list_t *shape_list)
+    {
+        const auto[p] = cast<arity>(shape_list->shapes);
+        if (p.rank() == 3) {
+            return pool2d_c_max::infer(shape_list);
+        } else {
+            return pool2d_c_max_batched::infer(shape_list);
+        }
+    }
+
+    using T = float; // TODO: cast based on dtype
+
+    struct forward : forward_ctx_t {
+        void operator()() const
+        {
+            const auto[p] = cast<arity>(inputs.shapes().shapes);
+            if (p.rank() == 3) {
+                forward_ctx_t ctx(*this);
+                call<pool2d_c_max::forward>(ctx);
+            } else {
+                check(p.rank() == 4);
+                forward_ctx_t ctx(*this);
+                call<pool2d_c_max_batched::forward>(ctx);
+            }
+        }
+    };
+
+    struct backward : backward_ctx_t {
+        void operator()() const
+        {
+            const auto[p] = cast<arity>(inputs.shapes().shapes);
+            if (p.rank() == 3) {
+                backward_ctx_t ctx(*this);
+                call<pool2d_c_max::backward>(ctx);
+            } else {
+                check(p.rank() == 4);
+                backward_ctx_t ctx(*this);
+                call<pool2d_c_max_batched::backward>(ctx);
+            }
+        }
+    };
+};

@@ -1,10 +1,11 @@
 #pragma once
 
-#include <cassert>
 #include <cstdint>
 #include <map>
 #include <memory>
 #include <queue>
+
+#include <crystalnet/core/error.hpp>
 
 struct MB {
     size_t size;
@@ -17,7 +18,7 @@ struct MP {
     size_t available;
     std::map<size_t, std::queue<MB *>> allocs;
 
-    MP() : allocated(0), available(0) { assert(false); }
+    MP() : allocated(0), available(0) { check(false); }
 
     ~MP()
     {

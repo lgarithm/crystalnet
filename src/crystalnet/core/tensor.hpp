@@ -1,6 +1,5 @@
 #pragma once
 #include <algorithm>
-#include <cassert>
 #include <cstdint>
 #include <cstring>
 #include <memory>
@@ -9,9 +8,10 @@
 #include <vector>
 
 #include <crystalnet.h>
-#include <crystalnet/core/debug.hpp> // for LOG_TENSOR_USAGE
+#include <crystalnet/core/debug.hpp>
+#include <crystalnet/core/error.hpp>
 #include <crystalnet/core/idx.hpp>
-#include <crystalnet/core/shape.hpp> // for shape_t
+#include <crystalnet/core/shape.hpp>
 
 struct tensor_t {
     const shape_t shape;
@@ -48,7 +48,7 @@ struct tensor_ref_t {
 
     tensor_ref_t operator[](uint32_t idx) const
     {
-        assert(idx < shape.len());
+        check(idx < shape.len());
         if (shape.rank() == 0) {
             return *this;
         }
@@ -93,13 +93,13 @@ template <typename R> struct r_tensor_ref_t {
     explicit r_tensor_ref_t(const tensor_t &t)
         : shape(t.shape), data((R *)t.data)
     {
-        assert(idx_type<R>::type == t.dtype);
+        check(idx_type<R>::type == t.dtype);
     }
 
     explicit r_tensor_ref_t(const tensor_ref_t &t)
         : shape(t.shape), data((R *)t.data)
     {
-        assert(idx_type<R>::type == t.dtype);
+        check(idx_type<R>::type == t.dtype);
     }
 
     R max() const { return *std::max_element(data, data + shape.dim()); }
@@ -114,7 +114,7 @@ template <typename R> struct r_tensor_ref_t {
     void copy(const r_tensor_ref_t<R> &r)
     {
         const auto n = shape.dim();
-        assert(n == r.shape.dim());
+        check(n == r.shape.dim());
         std::memcpy(data, r.data, n * sizeof(R));
     }
 };

@@ -31,7 +31,7 @@ int main()
     s_trainer_t *trainer = new_s_trainer(model, op_xentropy, opt_sgd);
     dataset_t *ds1 = load_mnist("train");
     dataset_t *ds2 = load_mnist("t10k");
-    s_experiment(trainer, ds1, ds2);
+    s_experiment(trainer, ds1, ds2, 10000);
     free_dataset(ds1);
     free_dataset(ds2);
     free_s_trainer(trainer);

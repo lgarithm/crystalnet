@@ -1,14 +1,13 @@
 #pragma once
-#include <cassert>
-#include <cstdint>
-
 #include <array>
+#include <cstdint>
 #include <functional>
 #include <numeric>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include <crystalnet/core/error.hpp>
 #include <crystalnet/core/gc.hpp>
 
 struct shape_t {
@@ -53,14 +52,6 @@ struct shape_t {
     }
 };
 
-struct shape_ctx_t {
-    GC<shape_t> gc;
-    const shape_t *make_shape(const std::vector<uint32_t> &dims)
-    {
-        return gc(new shape_t(dims));
-    }
-};
-
 struct shape_list_t {
     const std::vector<shape_t> shapes;
     explicit shape_list_t(const std::vector<shape_t> &shapes) : shapes(shapes)
@@ -70,17 +61,18 @@ struct shape_list_t {
     uint8_t size() const { return shapes.size(); }
 };
 
-template <typename T, size_t... i>
-auto _index(const std::vector<T> &v, std::index_sequence<i...>)
-{
-    return std::array<T, sizeof...(i)>({v[i]...});
-}
-
-template <uint8_t rank, typename T> auto cast(const std::vector<T> &v)
-{
-    assert(v.size() == rank);
-    return _index(v, std::make_index_sequence<rank>());
-}
+struct shape_ctx_t {
+    GC<shape_t> gc0;
+    GC<shape_list_t> gc1;
+    const shape_t *make_shape(const std::vector<uint32_t> &dims)
+    {
+        return gc0(new shape_t(dims));
+    }
+    const shape_list_t *make_shape_list(const std::vector<shape_t> &shapes)
+    {
+        return gc1(new shape_list_t(shapes));
+    }
+};
 
 namespace std
 {

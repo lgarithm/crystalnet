@@ -1,9 +1,9 @@
 #pragma once
 #include <algorithm>
-#include <cassert>
 #include <memory>
 #include <utility>
 
+#include <crystalnet/core/error.hpp>
 #include <crystalnet/core/tensor.hpp>
 
 struct dataset_t {
@@ -115,7 +115,7 @@ template <typename T> tensor_t *make_onehot(const tensor_t &tensor, uint32_t k)
             distro.data[i * k + off] = 1;
         } else {
             // TODO: print a warning msg
-            assert(false);
+            check(false);
         }
     }
     return distro_;

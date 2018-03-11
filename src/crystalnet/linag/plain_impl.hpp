@@ -1,6 +1,5 @@
 #pragma once
-#include <cassert>
-
+#include <crystalnet/core/error.hpp>
 #include <crystalnet/linag/base.hpp>
 
 template <typename T> struct plain_impl {

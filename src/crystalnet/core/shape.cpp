@@ -39,3 +39,13 @@ const shape_t *mk_shape(shape_ctx_t *ctx, int n, ...)
     va_end(list);
     return ctx->make_shape(dims);
 }
+
+const shape_list_t *mk_shape_list(shape_ctx_t *ctx,
+                                  const shape_t *const p_shapes[])
+{
+    std::vector<shape_t> shapes;
+    for (auto p = p_shapes; *p; ++p) {
+        shapes.push_back(**p);
+    }
+    return ctx->make_shape_list(shapes);
+}

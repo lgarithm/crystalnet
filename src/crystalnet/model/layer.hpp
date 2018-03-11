@@ -3,6 +3,7 @@
 #include <crystalnet/crystalnet>
 #include <crystalnet/model/model.hpp>
 #include <crystalnet/train/initializers.hpp>
+#include <crystalnet/utility/cast.hpp>
 
 // TODO: layer APIs for C
 struct layer_t {
@@ -51,7 +52,7 @@ struct conv_layer_t : layer_t {
                 const auto[h, w, c] = cast<3>(x->shape.dims);
                 x = ctx.wrap(shape_t(1, h, w, c), *x);
             }
-            assert(x->shape.rank() == 4);
+            check(x->shape.rank() == 4);
             const auto[n, h, w, c] = cast<4>(x->shape.dims);
             return c;
         }();

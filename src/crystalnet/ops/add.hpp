@@ -5,15 +5,17 @@
 #include <crystalnet/linag/linag.hpp>
 #include <crystalnet/model/operator.hpp>
 #include <crystalnet/ops/batch.hpp>
+#include <crystalnet/utility/cast.hpp>
 
 // [n], [n] -> [n]
 struct add_vv {
     constexpr static uint8_t arity = 2;
 
-    static shape_t *infer(const shape_list_t *shapes)
+    static shape_t *infer(const shape_list_t *shape_list)
     {
-        assert(shapes->size() == arity);
-        return new shape_t((*shapes)[0]);
+        const auto[p, q] = cast<arity>(shape_list->shapes);
+        check(p.dim() == q.dim());
+        return new shape_t(p);
     }
 
     using T = float; // TODO: cast based on dtype
@@ -40,26 +42,52 @@ struct add {
     constexpr static uint8_t arity = 2;
     using add_mv = batch<add_vv, 0>;
 
+    static bool is_sub(const shape_t &p, const shape_t &q)
+    {
+        if (p.rank() > q.rank()) {
+            return false;
+        }
+        return p.dims ==
+               std::vector<uint32_t>(q.dims.begin() + (q.rank() - p.rank()),
+                                     q.dims.end());
+    }
+
     static shape_t *infer(const shape_list_t *shape_list)
     {
-        assert(shape_list->shapes.size() == arity);
-        const auto[p, q] = cast<2>(shape_list->shapes);
+        const auto[p, q] = cast<arity>(shape_list->shapes);
         if (p.rank() > q.rank()) {
-            return add_mv::infer(shape_list);
+            check(is_sub(q, p));
+            return new shape_t(p);
         }
-        assert(p.rank() == q.rank());
+        check(p.rank() == q.rank());
         return add_vv::infer(shape_list);
+    }
+
+    static tensor_ref_t ref_as(const shape_t &shape, const tensor_ref_t &r)
+    {
+        check(shape.dim() == r.shape.dim());
+        return tensor_ref_t(shape, r.dtype, r.data);
     }
 
     struct forward : forward_ctx_t {
         void operator()() const
         {
-            const auto[p, q] = cast<2>(inputs.shapes().shapes);
+            const auto[p, q] = cast<arity>(inputs.shapes().shapes);
             if (p.rank() > q.rank()) {
-                (*(add_mv::forward *)this)();
+                check(is_sub(q, p));
+                const shape_t r(std::vector<uint32_t>(
+                    p.dims.begin(), p.dims.begin() + (p.rank() - q.rank())));
+                const auto m = r.dim();
+                const auto n = q.dim();
+                const auto[x, y] = cast<arity>(inputs._args);
+                forward_ctx_t ctx(tensor_ref_list_t({ref_as(shape_t(m, n), x),
+                                                     ref_as(shape_t(n), y)}),
+                                  ref_as(shape_t(m, n), output));
+                call<add_mv::forward>(ctx);
             } else {
-                assert(p.rank() == q.rank());
-                (*(add_vv::forward *)this)();
+                check(p.rank() == q.rank());
+                forward_ctx_t ctx(*this);
+                call<add_vv::forward>(ctx);
             }
         }
     };
@@ -67,12 +95,26 @@ struct add {
     struct backward : backward_ctx_t {
         void operator()() const
         {
-            const auto[p, q] = cast<2>(inputs.shapes().shapes);
+            const auto[p, q] = cast<arity>(inputs.shapes().shapes);
             if (p.rank() > q.rank()) {
-                (*(add_mv::backward *)this)();
+                check(is_sub(q, p));
+                const shape_t r(std::vector<uint32_t>(
+                    p.dims.begin(), p.dims.begin() + (p.rank() - q.rank())));
+                const auto m = r.dim();
+                const auto n = q.dim();
+                const auto[x, y] = cast<arity>(inputs._args);
+                const auto[gx, gy] = cast<arity>(input_gradients._args);
+                backward_ctx_t ctx(tensor_ref_list_t({ref_as(shape_t(m, n), x),
+                                                      ref_as(shape_t(n), y)}),
+                                   ref_as(shape_t(m, n), output),
+                                   tensor_ref_list_t({ref_as(shape_t(m, n), gx),
+                                                      ref_as(shape_t(n), gy)}),
+                                   ref_as(shape_t(m, n), output_gradient));
+                call<add_mv::backward>(ctx);
             } else {
-                assert(p.rank() == q.rank());
-                (*(add_vv::backward *)this)();
+                check(p.rank() == q.rank());
+                backward_ctx_t ctx(*this);
+                call<add_vv::backward>(ctx);
             }
         }
     };

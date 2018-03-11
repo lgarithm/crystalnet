@@ -18,9 +18,10 @@ void experiment(trainer_t *trainer, dataset_t *train_ds, dataset_t *test_ds)
     trainer->run(*train_ds, test_ds);
 }
 
-void s_experiment(s_trainer_t *trainer, dataset_t *train_ds, dataset_t *test_ds)
+void s_experiment(s_trainer_t *trainer, dataset_t *train_ds, dataset_t *test_ds,
+                  uint32_t batch_size)
 {
-    trainer->run(*train_ds, test_ds);
+    trainer->run(*train_ds, test_ds, batch_size);
 }
 
 s_trainer_t *new_s_trainer(s_model_t *model, operator_t *loss,

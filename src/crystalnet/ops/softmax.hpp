@@ -7,6 +7,7 @@
 #include <crystalnet/linag/linag.hpp>
 #include <crystalnet/model/operator.hpp>
 #include <crystalnet/ops/batch.hpp>
+#include <crystalnet/utility/cast.hpp>
 #include <crystalnet/utility/range.hpp>
 
 template <typename T>
@@ -43,7 +44,7 @@ struct softmax_1d {
 
     static shape_t *infer(const shape_list_t *shape_list)
     {
-        assert(shape_list->shapes.size() == arity);
+        check(shape_list->shapes.size() == arity);
         return new shape_t((*shape_list)[0]);
     }
 
@@ -52,7 +53,7 @@ struct softmax_1d {
     struct forward : forward_ctx_t {
         void operator()() const
         {
-            assert(inputs.arity() == arity);
+            check(inputs.arity() == arity);
             softmax_eval_safe(as_vector_ref<T>(inputs[0]),
                               as_vector_ref<T>(output));
         }
@@ -77,7 +78,7 @@ struct softmax {
 
     static shape_t *infer(const shape_list_t *shape_list)
     {
-        assert(shape_list->shapes.size() == arity);
+        check(shape_list->shapes.size() == arity);
         return new shape_t((*shape_list)[0]);
     }
 
@@ -90,7 +91,7 @@ struct softmax {
             if (p.rank() == 1) {
                 (*(softmax_1d::forward *)this)();
             } else {
-                assert(p.rank() == 2);
+                check(p.rank() == 2);
                 (*(softmax_2d::forward *)this)();
             }
         }
@@ -103,11 +104,9 @@ struct softmax {
             if (p.rank() == 1) {
                 (*(softmax_1d::backward *)this)();
             } else {
-                assert(p.rank() == 2);
+                check(p.rank() == 2);
                 (*(softmax_2d::backward *)this)();
             }
         }
     };
 };
-
-operator_t *op_softmax = _register_bi_op<softmax>("softmax");

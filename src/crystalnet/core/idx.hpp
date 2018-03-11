@@ -1,6 +1,7 @@
 #pragma once
-#include <cassert>
 #include <cstdint>
+
+#include <crystalnet/core/error.hpp>
 
 inline uint8_t dtype_size(uint8_t dtype)
 {
@@ -18,7 +19,7 @@ inline uint8_t dtype_size(uint8_t dtype)
     case 0x0E:
         return 8;
     default:
-        assert(false);
+        check(false);
         return 0;
     }
 }

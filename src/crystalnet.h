@@ -46,6 +46,8 @@ uint32_t shape_rank(const shape_t *);
 shape_ctx_t *make_shape_ctx();
 void free_shape_ctx(shape_ctx_t *);
 const shape_t *mk_shape(shape_ctx_t *, int, ...);
+const shape_list_t *mk_shape_list(shape_ctx_t *,
+                                  const shape_t *const p_shapes[]);
 
 tensor_t *new_tensor(shape_t *, uint8_t);
 void free_tensor(tensor_t *);
@@ -76,10 +78,6 @@ extern operator_t *op_xentropy;
 extern operator_t *op_conv_nhwc;
 extern operator_t *op_pool2d_c_max;
 
-// TODO: provide C bindings for layer API.
-// extern layer_t *layer_fc;
-// extern layer_t *layer_covn;
-
 // symbolic APIs
 typedef struct s_node_t s_node_t;
 typedef s_node_t *symbol;
@@ -92,6 +90,17 @@ s_node_t *var(s_model_ctx_t *, const shape_t *);
 s_node_t *covar(s_model_ctx_t *, const shape_t *);
 s_node_t *reshape(s_model_ctx_t *, const shape_t *, const s_node_t *);
 s_node_t *apply(s_model_ctx_t *, const operator_t *, s_node_t *args[]);
+
+// layer APIs
+typedef struct s_layer_t s_layer_t;
+typedef s_layer_t *(layer_func_t)(const shape_list_t *);
+extern layer_func_t *const new_layer_dense;
+extern layer_func_t *const new_layer_conv_nhwc;
+extern layer_func_t *const new_layer_pool_max;
+extern layer_func_t *const new_layer_relu;
+extern layer_func_t *const new_layer_softmax;
+s_node_t *transform(s_model_ctx_t *, const s_layer_t *, s_node_t *);
+void free_s_layer(s_layer_t *);
 
 // training
 typedef struct dataset_t dataset_t;
@@ -124,7 +133,7 @@ dataset_t *load_cifar();
 // unstable APIs
 tensor_t *_load_idx_file(const char *filename);
 void experiment(trainer_t *, dataset_t *, dataset_t *);
-void s_experiment(s_trainer_t *, dataset_t *, dataset_t *);
+void s_experiment(s_trainer_t *, dataset_t *, dataset_t *, uint32_t);
 
 #ifdef __cplusplus
 }

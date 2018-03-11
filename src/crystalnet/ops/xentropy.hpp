@@ -5,6 +5,7 @@
 #include <crystalnet/core/debug.hpp>
 #include <crystalnet/linag/base.hpp>
 #include <crystalnet/model/operator.hpp>
+#include <crystalnet/utility/cast.hpp>
 #include <crystalnet/utility/range.hpp>
 
 struct xentropy_1d {
@@ -12,7 +13,7 @@ struct xentropy_1d {
 
     static shape_t *infer(const shape_list_t *shape_list)
     {
-        assert(shape_list->shapes.size() == arity);
+        check(shape_list->shapes.size() == arity);
         return new shape_t();
     }
 
@@ -21,7 +22,7 @@ struct xentropy_1d {
     struct forward : forward_ctx_t {
         void operator()() const
         {
-            assert(inputs.arity() == arity);
+            check(inputs.arity() == arity);
             auto a = as_vector_ref<T>(inputs[0]);
             auto b = as_vector_ref<T>(inputs[1]);
             auto c = r_tensor_ref_t<T>(output);
@@ -89,9 +90,9 @@ struct xentropy {
 
     static shape_t *infer(const shape_list_t *shape_list)
     {
-        assert(shape_list->shapes.size() == arity);
+        check(shape_list->shapes.size() == arity);
         const auto[p, q] = cast<2>(shape_list->shapes);
-        // assert(p == q); // TODO: assert shape equal
+        // check(p == q); // TODO: check shape equal
         return new shape_t(
             std::vector<uint32_t>(p.dims.begin(), p.dims.end() - 1));
     }
@@ -105,7 +106,7 @@ struct xentropy {
             if (p.rank() == 1) {
                 (*(xentropy_1d::forward *)this)();
             } else {
-                assert(p.rank() == 2);
+                check(p.rank() == 2);
                 (*(xentropy_2d::forward *)this)();
             }
         }
@@ -118,7 +119,7 @@ struct xentropy {
             if (p.rank() == 1) {
                 (*(xentropy_1d::backward *)this)();
             } else {
-                assert(p.rank() == 2);
+                check(p.rank() == 2);
                 (*(xentropy_2d::backward *)this)();
             }
         }

@@ -5,9 +5,10 @@
 struct s_model_ctx_t {
     GC<s_node_t> gc;
 
-    s_node_t *make_parameter(const shape_t &shape)
+    s_node_t *make_parameter(const shape_t &shape,
+                             const initializer_t *init = nullptr)
     {
-        return gc(new s_parameter_node_t(shape));
+        return gc(new s_parameter_node_t(shape, init));
     }
 
     s_node_t *make_placeholder(const shape_t &shape)

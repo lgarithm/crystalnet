@@ -36,9 +36,9 @@ struct s_trainer_t {
     {
     }
 
-    void run(dataset_t &ds, dataset_t *test_ds = nullptr)
+    void run(dataset_t &ds, dataset_t *test_ds = nullptr,
+             uint32_t batch_size = default_batch_size)
     {
-        const auto batch_size = default_batch_size;
         auto m = realize(&p_ctx, model, batch_size);
         std::unique_ptr<model_t> __m(m);
         auto label = make_label(m);

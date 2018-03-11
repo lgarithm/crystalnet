@@ -14,13 +14,15 @@ auto change_ith(const uint8_t pos, const std::vector<T> &items,
     return new_items;
 }
 
-forward_ctx_t unbatch(uint8_t pos, uint32_t idx, const forward_ctx_t &ctx)
+inline forward_ctx_t unbatch(uint8_t pos, uint32_t idx,
+                             const forward_ctx_t &ctx)
 {
     const auto inputs = change_ith(pos, ctx.inputs._args, ctx.inputs[pos][idx]);
     return forward_ctx_t(tensor_ref_list_t(inputs), ctx.output[idx]);
 }
 
-backward_ctx_t unbatch(uint8_t pos, uint32_t idx, const backward_ctx_t &ctx)
+inline backward_ctx_t unbatch(uint8_t pos, uint32_t idx,
+                              const backward_ctx_t &ctx)
 {
     const auto inputs = change_ith(pos, ctx.inputs._args, ctx.inputs[pos][idx]);
     const auto input_gradients = change_ith(pos, ctx.input_gradients._args,
@@ -36,9 +38,9 @@ template <typename O, uint8_t pos> struct batch {
     static shape_t *infer(const shape_list_t *shapes)
     {
         static_assert(pos < arity);
-        assert(shapes->size() == arity);
+        check(shapes->size() == arity);
         const auto batched_shape = (*shapes)[pos];
-        assert(batched_shape.rank() > 1);
+        check(batched_shape.rank() > 1);
         const auto new_shapes =
             change_ith(pos, shapes->shapes, batched_shape.sub());
         const auto out_shape = std::unique_ptr<shape_t>(

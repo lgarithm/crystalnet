@@ -1,6 +1,5 @@
 // The IDX file format: http://yann.lecun.com/exdb/mnist/
 #pragma once
-#include <cassert>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>

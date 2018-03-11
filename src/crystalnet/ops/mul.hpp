@@ -3,16 +3,17 @@
 #include <crystalnet/core/debug.hpp>
 #include <crystalnet/linag/linag.hpp>
 #include <crystalnet/model/operator.hpp>
+#include <crystalnet/utility/cast.hpp>
 
 struct mul_vm {
     constexpr static uint8_t arity = 2;
 
     static shape_t *infer(const shape_list_t *shape_list)
     {
-        assert(shape_list->shapes.size() == arity);
-        const auto[m] = cast<1>((*shape_list)[0].dims);
-        const auto[_m, n] = cast<2>((*shape_list)[1].dims);
-        assert(m == _m);
+        const auto[p, q] = cast<arity>(shape_list->shapes);
+        const auto[m] = cast<1>(p.dims);
+        const auto[_m, n] = cast<2>(q.dims);
+        check(m == _m);
         return new shape_t(n);
     }
 
@@ -44,10 +45,10 @@ struct mul_mm {
 
     static shape_t *infer(const shape_list_t *shape_list)
     {
-        assert(shape_list->shapes.size() == arity);
-        const auto[k, m] = cast<2>((*shape_list)[0].dims);
-        const auto[_m, n] = cast<2>((*shape_list)[1].dims);
-        assert(m == _m);
+        const auto[p, q] = cast<arity>(shape_list->shapes);
+        const auto[k, m] = cast<2>(p.dims);
+        const auto[_m, n] = cast<2>(q.dims);
+        check(m == _m);
         return new shape_t(k, n);
     }
 
@@ -79,23 +80,22 @@ struct mul {
 
     static shape_t *infer(const shape_list_t *shape_list)
     {
-        assert(shape_list->shapes.size() == arity);
-        const auto[p, q] = cast<2>(shape_list->shapes);
+        const auto[p, q] = cast<arity>(shape_list->shapes);
         if (p.rank() == 1 && q.rank() == 2) {
             return mul_vm::infer(shape_list);
         }
-        assert(p.rank() == 2 && q.rank() == 2);
+        check(p.rank() == 2 && q.rank() == 2);
         return mul_mm::infer(shape_list);
     }
 
     struct forward : forward_ctx_t {
         void operator()() const
         {
-            const auto[p, q] = cast<2>(inputs.shapes().shapes);
+            const auto[p, q] = cast<arity>(inputs.shapes().shapes);
             if (p.rank() == 1 && q.rank() == 2) {
                 (*(mul_vm::forward *)this)();
             } else {
-                assert(p.rank() == 2 && q.rank() == 2);
+                check(p.rank() == 2 && q.rank() == 2);
                 (*(mul_mm::forward *)this)();
             }
         }
@@ -104,11 +104,11 @@ struct mul {
     struct backward : backward_ctx_t {
         void operator()() const
         {
-            const auto[p, q] = cast<2>(inputs.shapes().shapes);
+            const auto[p, q] = cast<arity>(inputs.shapes().shapes);
             if (p.rank() == 1 && q.rank() == 2) {
                 (*(mul_vm::backward *)this)();
             } else {
-                assert(p.rank() == 2 && q.rank() == 2);
+                check(p.rank() == 2 && q.rank() == 2);
                 (*(mul_mm::backward *)this)();
             }
         }
