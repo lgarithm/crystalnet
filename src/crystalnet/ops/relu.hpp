@@ -1,5 +1,6 @@
 #pragma once
 #include <crystalnet.h>
+#include <crystalnet/linag/linag.hpp>
 #include <crystalnet/model/operator.hpp>
 #include <crystalnet/utility/range.hpp>
 

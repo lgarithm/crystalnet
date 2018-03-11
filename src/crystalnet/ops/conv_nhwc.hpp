@@ -6,6 +6,7 @@
 #include <crystalnet/core/shape.hpp>
 #include <crystalnet/linag/base.hpp>
 #include <crystalnet/linag/linag.hpp>
+#include <crystalnet/model/operator.hpp>
 #include <crystalnet/utility/range.hpp>
 
 template <typename T>

@@ -1,5 +1,6 @@
 #pragma once
 #include <crystalnet/core/shape.hpp>
+#include <crystalnet/model/operator.hpp>
 #include <crystalnet/utility/range.hpp>
 
 struct pool2d_c_max {

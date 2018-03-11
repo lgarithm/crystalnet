@@ -71,6 +71,7 @@ _tests:
 	make -C tests
 
 test: libcrystalnet _tests
+	./tests/test-includes.sh
 	./utils/test.sh
 
 check: libcrystalnet _tests

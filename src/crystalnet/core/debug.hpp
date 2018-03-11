@@ -3,12 +3,11 @@
 #include <string>
 
 #include <crystalnet.h>
-#include <teavana/timer.hpp>
 
 #ifdef CRYSTALNET_DEBUG
 #define DEBUG(func)                                                            \
     log_func_call(func);                                                       \
-    DEBUG_TIMER(_, func)
+    // DEBUG_TIMER(_, func)
 #define LOG_TENSOR_USAGE(shape, size) log_tensor_usage(&shape, size)
 #define LOG_NODE_USAGE(shape, name) log_node_usage(&shape, name)
 #else

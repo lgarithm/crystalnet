@@ -31,10 +31,8 @@ void test_1()
 {
     uint8_t arity = 10;
     shape_t *image_shape = make_shape(2, 28, 28);
-    s_model_t *sm = slp(image_shape, arity);
-    model_t *pm = realize(sm);
-    free_model(pm);
-    free_s_model(sm);
+    s_model_t *model = slp(image_shape, arity);
+    free_s_model(model);
     free_shape(image_shape);
 }
 

@@ -13,12 +13,9 @@ s_model_t *slp(shape_t *image_shape, uint8_t arity)
     symbol w = covar(ctx, mk_shape(sc, 2, shape_dim(image_shape), arity));
     symbol b = covar(ctx, mk_shape(sc, 1, arity));
 
-    symbol args1[] = {x_, w};
-    symbol op1 = apply(ctx, op_mul, args1);
-    symbol args2[] = {op1, b};
-    symbol op2 = apply(ctx, op_add, args2);
-    symbol args3[] = {op2};
-    symbol op3 = apply(ctx, op_softmax, args3);
+    symbol op1 = apply(ctx, op_mul, (symbol[]){x_, w});
+    symbol op2 = apply(ctx, op_add, (symbol[]){op1, b});
+    symbol op3 = apply(ctx, op_softmax, (symbol[]){op2});
 
     free_shape_ctx(sc);
     return new_s_model(ctx, x, op3);
@@ -30,16 +27,15 @@ int main()
     int height = 28;
     uint8_t n = 10;
     shape_t *image_shape = make_shape(2, width, height);
-    s_model_t *sm = slp(image_shape, n);
-    model_t *pm = realize(sm);
-    trainer_t *trainer = new_trainer(pm, op_xentropy, opt_sgd);
+    s_model_t *model = slp(image_shape, n);
+    s_trainer_t *trainer = new_s_trainer(model, op_xentropy, opt_sgd);
     dataset_t *ds1 = load_mnist("train");
     dataset_t *ds2 = load_mnist("t10k");
-    experiment(trainer, ds1, ds2);
+    s_experiment(trainer, ds1, ds2);
     free_dataset(ds1);
     free_dataset(ds2);
-    free_model(pm);
-    free_s_model(sm);
+    free_s_trainer(trainer);
+    free_s_model(model);
     free_shape(image_shape);
     return 0;
 }

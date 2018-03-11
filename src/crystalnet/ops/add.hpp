@@ -54,11 +54,11 @@ struct add {
     struct forward : forward_ctx_t {
         void operator()() const
         {
-            const auto[x, y] = cast<2>(inputs._args);
-            if (x.shape.rank() > y.shape.rank()) {
+            const auto[p, q] = cast<2>(inputs.shapes().shapes);
+            if (p.rank() > q.rank()) {
                 (*(add_mv::forward *)this)();
             } else {
-                assert(x.shape.rank() == y.shape.rank());
+                assert(p.rank() == q.rank());
                 (*(add_vv::forward *)this)();
             }
         }
@@ -67,11 +67,11 @@ struct add {
     struct backward : backward_ctx_t {
         void operator()() const
         {
-            const auto[x, y] = cast<2>(inputs._args);
-            if (x.shape.rank() > y.shape.rank()) {
+            const auto[p, q] = cast<2>(inputs.shapes().shapes);
+            if (p.rank() > q.rank()) {
                 (*(add_mv::backward *)this)();
             } else {
-                assert(x.shape.rank() == y.shape.rank());
+                assert(p.rank() == q.rank());
                 (*(add_vv::backward *)this)();
             }
         }

@@ -1,8 +1,10 @@
+*.gch
+*.o
 *.swp
 *~
+.DS_store
 /.gopath
 /build
 /compile_commands.json
 /xtleak.kcg.*
 __pycache__
-.DS_store

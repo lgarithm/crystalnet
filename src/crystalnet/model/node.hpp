@@ -22,7 +22,7 @@ struct node_t {
     node_t(const shape_t &shape, const char *pname = nullptr)
         : name(create_name(pname)), shape(shape), dtype(default_dtype)
     {
-        LOG_NODE_USAGE(shape, name);
+        // LOG_NODE_USAGE(shape, name);
     }
 
     virtual ~node_t() {}
@@ -50,20 +50,17 @@ struct node_t {
 };
 
 struct parameter_node_t : node_t {
-    tensor_t _value;
+    tensor_ref_t _value;
     tensor_t _gradient;
 
-    parameter_node_t(const shape_t &shape, const std::string &name)
-        : node_t(shape, name.c_str()), _value(shape, dtype),
-          _gradient(shape, dtype)
+    parameter_node_t(const tensor_ref_t &p, const std::string &name)
+        : node_t(p.shape, name.c_str()), _value(p), _gradient(shape, dtype)
     {
     }
 
-    tensor_ref_t value() const override { return ref(_value); }
+    tensor_ref_t value() const override { return _value; }
     tensor_ref_t gradient() const override { return ref(_gradient); }
-
     void forward() const override { /* noop */}
-
     void backward() const override { /* noop */}
 };
 
@@ -78,26 +75,14 @@ struct placeholder_node_t : node_t {
 
     void bind(const tensor_ref_t &r) override
     {
-        DEBUG(__func__);
         assert(r.dtype == dtype);
         _value.reset(new tensor_ref_t(r));
     }
 
     tensor_ref_t value() const override { return *_value; }
-
     tensor_ref_t gradient() const override { return ref(_gradient); }
-
-    void forward() const override
-    {
-        const auto name = std::string(__func__) + "@" + this->name;
-        DEBUG(name.c_str());
-    }
-
-    void backward() const override
-    {
-        const auto name = std::string(__func__) + "@" + this->name;
-        DEBUG(name.c_str());
-    }
+    void forward() const override { /* noop */}
+    void backward() const override { /* noop */}
 };
 
 struct operator_node_t : node_t {
@@ -159,8 +144,6 @@ struct operator_node_t : node_t {
 
     void forward() const override
     {
-        const auto name = std::string(__func__) + "@" + this->name;
-        DEBUG(name.c_str());
         for (auto i : inputs) {
             i->forward();
         }
@@ -173,8 +156,6 @@ struct operator_node_t : node_t {
 
     void backward() const override
     {
-        const auto name = std::string(__func__) + "@" + this->name;
-        DEBUG(name.c_str());
         // TODO: op.backward should be present
         if (op.backward) {
             tensor_ref_list_t input = _input_refs();
@@ -202,26 +183,15 @@ struct wrap_node_t : node_t {
 
     tensor_ref_t value() const override
     {
-        DEBUG("wrap::value");
         auto v = wrapped.value();
         return tensor_ref_t(this->shape, v.dtype, v.data);
     }
     tensor_ref_t gradient() const override
     {
-        DEBUG("wrap::gradient");
         auto v = wrapped.gradient();
         return tensor_ref_t(this->shape, v.dtype, v.data);
     }
 
-    virtual void forward() const override
-    {
-        DEBUG("wrap::forward");
-        wrapped.forward();
-    }
-
-    virtual void backward() const override
-    {
-        DEBUG("wrap::backward");
-        wrapped.backward();
-    }
+    void forward() const override { wrapped.forward(); }
+    void backward() const override { wrapped.backward(); }
 };

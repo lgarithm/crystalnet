@@ -44,6 +44,13 @@ struct shape_t {
         }
         return *this;
     }
+
+    shape_t batch(uint32_t n) const
+    {
+        std::vector<uint32_t> dims({n});
+        dims.insert(dims.end(), this->dims.begin(), this->dims.end());
+        return shape_t(dims);
+    }
 };
 
 struct shape_ctx_t {

@@ -3,7 +3,10 @@
 
 #include <crystalnet.h>
 #include <crystalnet/core/debug.hpp>
+#include <crystalnet/linag/base.hpp>
+#include <crystalnet/linag/linag.hpp>
 #include <crystalnet/model/operator.hpp>
+#include <crystalnet/ops/batch.hpp>
 #include <crystalnet/utility/range.hpp>
 
 template <typename T>
@@ -35,7 +38,7 @@ void softmax_grad(const vector_ref_t<T> &output, const matrix_ref_t<T> &grad)
     }
 }
 
-struct softmax {
+struct softmax_1d {
     constexpr static uint8_t arity = 1;
 
     static shape_t *infer(const shape_list_t *shape_list)
@@ -64,6 +67,45 @@ struct softmax {
             linag<T>::vm(as_vector_ref<T>(output_gradient),
                          as_matrix_ref<T>(ref(tmp)),
                          as_vector_ref<T>(input_gradients[0]));
+        }
+    };
+};
+
+struct softmax {
+    constexpr static uint8_t arity = 1;
+    using softmax_2d = batch<softmax_1d, 0>;
+
+    static shape_t *infer(const shape_list_t *shape_list)
+    {
+        assert(shape_list->shapes.size() == arity);
+        return new shape_t((*shape_list)[0]);
+    }
+
+    using T = float;
+
+    struct forward : forward_ctx_t {
+        void operator()() const
+        {
+            const auto[p] = cast<1>(inputs.shapes().shapes);
+            if (p.rank() == 1) {
+                (*(softmax_1d::forward *)this)();
+            } else {
+                assert(p.rank() == 2);
+                (*(softmax_2d::forward *)this)();
+            }
+        }
+    };
+
+    struct backward : backward_ctx_t {
+        void operator()() const
+        {
+            const auto[p] = cast<1>(inputs.shapes().shapes);
+            if (p.rank() == 1) {
+                (*(softmax_1d::backward *)this)();
+            } else {
+                assert(p.rank() == 2);
+                (*(softmax_2d::backward *)this)();
+            }
         }
     };
 };

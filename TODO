@@ -10,7 +10,8 @@
 * integrate with travis-ci (done)
 * wrap node (done)
 * load cifar (done)
-* implement adam optimizer
+* implement adam optimizer (done)
+* remove teavana dependency (done)
 * mini batch
 * add configure
 * add C++ binding
@@ -21,5 +22,4 @@
 * add namespace
 * run find in Makefile
 * fix python binding crash on mac
-* remove teavana dependency
 * tests for operators

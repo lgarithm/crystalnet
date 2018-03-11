@@ -11,7 +11,7 @@ add_definitions(-DENABLE_DEBUG_TIMER)
 include_directories(${CMAKE_SOURCE_DIR}/../src)
 link_directories(${CMAKE_SOURCE_DIR}/../build/lib)
 
-file(GLOB tests *.c *.cpp)
+file(GLOB tests src/crystalnet/**/*)
 foreach(main ${tests})
     get_filename_component(base_name ${main} NAME)
     string(REPLACE "." "_" bin_name ${base_name})

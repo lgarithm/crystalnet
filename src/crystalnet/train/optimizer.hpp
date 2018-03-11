@@ -5,8 +5,10 @@
 
 struct optimizer_ctx_t {
     virtual void operator()() = 0;
+    virtual ~optimizer_ctx_t() {}
 };
 
 struct optimizer_t {
     virtual optimizer_ctx_t *optimize(model_t *) = 0;
+    virtual ~optimizer_t() {}
 };

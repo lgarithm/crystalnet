@@ -5,14 +5,17 @@
 #include <crystalnet/data/dataset.hpp>
 #include <crystalnet/linag/base.hpp>
 #include <crystalnet/model/model.hpp>
+#include <crystalnet/symbol/model.hpp>
 #include <crystalnet/train/optimizer.hpp>
-#include <crystalnet/utility/enumerate.hpp>
+#include <crystalnet/utility/range.hpp>
 
-struct trainer_t {
-    model_t *model;
-    node_t *label;
-    node_t *loss;
-    optimizer_ctx_t *optimize;
+struct s_trainer_t {
+    static constexpr uint32_t default_batch_size = 9999;
+
+    parameter_ctx_t p_ctx;
+    const s_model_t *const model;
+    operator_t *const loss_func;
+    optimizer_t *const optimizer;
 
     static node_t *make_label(model_t *model)
     {
@@ -27,76 +30,64 @@ struct trainer_t {
                                          loss_func->name.c_str());
     }
 
-    trainer_t(model_t *model, operator_t *loss_func, optimizer_t *optimizer)
-        : model(model), label(make_label(model)),
-          loss(make_loss(model, label, loss_func)),
-          optimize(optimizer->optimize(model))
+    s_trainer_t(const s_model_t *model, operator_t *loss_func,
+                optimizer_t *optimizer)
+        : model(model), loss_func(loss_func), optimizer(optimizer)
     {
-        printf("[D] %lu hyper parameters\n", model->ctx->params.items.size());
-    }
-
-    void debug(const char *name)
-    {
-        printf("%s\n", name);
-        model->ctx->debug();
-        {
-            auto l = loss->value();
-            r_tensor_ref_t<float> r(l);
-            printf("loss: ");
-            print(r);
-        }
     }
 
     void run(dataset_t &ds, dataset_t *test_ds = nullptr)
     {
-        DEBUG(__func__);
-        for (auto[step, data] : enumerate(ds)) {
-            auto[image, label_] = data;
-            model->input->bind(image);
-            label->bind(label_);
+        const auto batch_size = default_batch_size;
+        auto m = realize(&p_ctx, model, batch_size);
+        std::unique_ptr<model_t> __m(m);
+        auto label = make_label(m);
+        auto loss = make_loss(m, label, loss_func);
+        auto optimize = optimizer->optimize(m);
+        std::unique_ptr<optimizer_ctx_t> __o(optimize);
+
+        printf("[D] training, batch size: %u\n", batch_size);
+        uint32_t step = 0;
+        for (auto[images, label_s] : batch(ds, batch_size)) {
+            ++step;
+            printf("[D] begin step %u\n", step);
+            m->input->bind(images);
+            label->bind(label_s);
             loss->forward();
-            r_tensor_ref_t<float>(loss->gradient()).fill(1);
+            r_tensor_ref_t<float>(loss->gradient()).fill_uni();
             loss->backward();
             (*optimize)();
-            constexpr auto freq = 1000;
-            if (step % freq == 0) {
-                printf("train step: %d\n", step);
-                debug("train step");
-                if (test_ds) {
-                    test(*test_ds);
-                }
+            m->ctx->debug();
+            printf("train step: %u\n", step);
+            if (test_ds) {
+                const auto[yes, tot] = test(*test_ds);
+                printf("test acc: %g\n", yes / (float)tot);
             }
         }
     }
 
     std::pair<uint32_t, uint32_t> test(dataset_t &ds)
     {
-        DEBUG(__func__);
+        const auto batch_size = 1000;
         uint32_t no = 0;
         uint32_t yes = 0;
-        for (auto[step, data] : enumerate(ds)) {
-            auto[image, label_] = data;
-            model->input->bind(image);
-            label->bind(label_);
-            loss->forward();
+        auto m = realize(&p_ctx, model, batch_size);
+        std::unique_ptr<model_t> __m(m);
+        uint32_t step = 0;
+        for (auto[images, label_s] : batch(ds, batch_size)) {
+            ++step;
+            m->input->bind(images);
+            m->output->forward();
             using T = float;
-            auto p = argmax<T>(as_vector_ref<T>(label_));
-            auto q = argmax<T>(as_vector_ref<T>(model->output->value()));
-            p == q ? ++yes : ++no;
-            const auto freq = 10000;
-            if (step % freq == 0) {
-                printf("test step: %d\n", step);
+            for (auto i : range(batch_size)) {
+                auto p = argmax<T>(as_vector_ref<T>(label_s[i]));
+                auto q = argmax<T>(as_vector_ref<T>(m->output->value()[i]));
+                p == q ? ++yes : ++no;
             }
+            printf("test step: %u, %u/%u\n", step, yes, yes + no);
         }
-        printf("step : %u, acc : %f\n", yes + no, (float)yes / (yes + no));
         return std::make_pair(yes, yes + no);
     }
-
-    static constexpr uint32_t default_batch_size = 500;
-
-    void run_batch(dataset_t &ds)
-    {
-        DEBUG(__func__);
-        // TODO
-    }
 };
+
+#include <crystalnet/train/trainer_old.hpp>

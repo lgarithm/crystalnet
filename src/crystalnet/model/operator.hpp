@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <string>
+#include <type_traits>
 
 #include <crystalnet.h>
 #include <crystalnet/core/tensor.hpp>
@@ -57,4 +58,10 @@ template <typename T> operator_t *_register_bi_op(const char *const name)
 {
     return register_op(name, T::arity, T::infer, operator_creator_t<T>::forward,
                        operator_creator_t<T>::backward);
+}
+
+template <typename T, typename S> void call(S &op)
+{
+    static_assert(std::is_base_of<S, T>::value);
+    (*(T *)&op)();
 }

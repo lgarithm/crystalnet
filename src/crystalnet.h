@@ -92,11 +92,11 @@ s_node_t *var(s_model_ctx_t *, const shape_t *);
 s_node_t *covar(s_model_ctx_t *, const shape_t *);
 s_node_t *reshape(s_model_ctx_t *, const shape_t *, const s_node_t *);
 s_node_t *apply(s_model_ctx_t *, const operator_t *, s_node_t *args[]);
-model_t *realize(const s_model_t *);
 
 // training
 typedef struct dataset_t dataset_t;
 typedef struct trainer_t trainer_t;
+typedef struct s_trainer_t s_trainer_t;
 
 typedef struct optimizer_t optimizer_t;
 extern optimizer_t *opt_sgd;
@@ -112,6 +112,11 @@ void free_trainer(trainer_t *);
 void run_trainer(trainer_t *, dataset_t *);
 void test_trainer(trainer_t *, dataset_t *);
 
+s_trainer_t *new_s_trainer(s_model_t *, operator_t *, optimizer_t *);
+void free_s_trainer(s_trainer_t *);
+void s_trainer_run(s_trainer_t *, dataset_t *);
+void s_rtainer_test(s_trainer_t *, dataset_t *);
+
 // dataset
 dataset_t *load_mnist(const char *const); // train | t10k
 dataset_t *load_cifar();
@@ -119,6 +124,7 @@ dataset_t *load_cifar();
 // unstable APIs
 tensor_t *_load_idx_file(const char *filename);
 void experiment(trainer_t *, dataset_t *, dataset_t *);
+void s_experiment(s_trainer_t *, dataset_t *, dataset_t *);
 
 #ifdef __cplusplus
 }
