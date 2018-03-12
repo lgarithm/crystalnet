@@ -35,9 +35,9 @@ typedef struct backward_ctx_t backward_ctx_t;
 typedef struct operator_t operator_t;
 typedef struct layer_t layer_t;
 
-typedef shape_t *(shape_func_t)(const shape_list_t *);
-typedef void(forward_func_t)(forward_ctx_t *);
-typedef void(backward_func_t)(backward_ctx_t *);
+typedef struct shape_func_t shape_func_t;
+typedef struct forward_func_t forward_func_t;
+typedef struct backward_func_t backward_func_t;
 
 shape_t *make_shape(int, ...);
 void free_shape(shape_t *);
@@ -67,8 +67,8 @@ node_t *make_operator(model_ctx_t *, operator_t *, pnode_list_t);
 node_t *wrap_node(model_ctx_t *, shape_t *, node_t *);
 
 // operators
-operator_t *register_op(const char *const, uint8_t, shape_func_t,
-                        forward_func_t, backward_func_t);
+operator_t *register_op(const char *const, uint8_t, shape_func_t *,
+                        forward_func_t *, backward_func_t *);
 extern operator_t *op_add;
 extern operator_t *op_mul;
 extern operator_t *op_relu;

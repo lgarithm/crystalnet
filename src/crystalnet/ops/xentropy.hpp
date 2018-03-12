@@ -11,10 +11,13 @@
 struct xentropy_1d {
     constexpr static uint8_t arity = 2;
 
-    static shape_t *infer(const shape_list_t *shape_list)
+    static shape_t infer(const shape_list_t &shape_list)
     {
-        check(shape_list->shapes.size() == arity);
-        return new shape_t();
+        const auto[p, q] = cast<arity>(shape_list.shapes);
+        check(p.rank() == 1);
+        check(q.rank() == 1);
+        check(p.dim() == q.dim());
+        return shape_t();
     }
 
     using T = float;
@@ -88,13 +91,11 @@ struct xentropy_2d {
 struct xentropy {
     constexpr static uint8_t arity = 2;
 
-    static shape_t *infer(const shape_list_t *shape_list)
+    static shape_t infer(const shape_list_t &shape_list)
     {
-        check(shape_list->shapes.size() == arity);
-        const auto[p, q] = cast<2>(shape_list->shapes);
-        // check(p == q); // TODO: check shape equal
-        return new shape_t(
-            std::vector<uint32_t>(p.dims.begin(), p.dims.end() - 1));
+        const auto[p, q] = cast<arity>(shape_list.shapes);
+        check(p.dims == q.dims);
+        return shape_t(std::vector<uint32_t>(p.dims.begin(), p.dims.end() - 1));
     }
 
     using T = float;
@@ -102,7 +103,7 @@ struct xentropy {
     struct forward : forward_ctx_t {
         void operator()() const
         {
-            const auto[p, q] = cast<2>(inputs.shapes().shapes);
+            const auto[p, q] = cast<arity>(inputs.shapes().shapes);
             if (p.rank() == 1) {
                 (*(xentropy_1d::forward *)this)();
             } else {
@@ -115,7 +116,7 @@ struct xentropy {
     struct backward : backward_ctx_t {
         void operator()() const
         {
-            const auto[p, q] = cast<2>(inputs.shapes().shapes);
+            const auto[p, q] = cast<arity>(inputs.shapes().shapes);
             if (p.rank() == 1) {
                 (*(xentropy_1d::backward *)this)();
             } else {

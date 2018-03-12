@@ -22,13 +22,13 @@ struct conv_nhwc {
     constexpr static uint8_t arity = 2;
 
     // [n, h, w, c], [r, s, c, d] -> [n, u, v, d]
-    static shape_t *infer(const shape_list_t *shape_list)
+    static shape_t infer(const shape_list_t &shape_list)
     {
-        check(shape_list->shapes.size() == arity);
-        const auto[n, h, w, c] = cast<4>((*shape_list)[0].dims);
-        const auto[r, s, _c, d] = cast<4>((*shape_list)[1].dims);
+        const auto[p, q] = cast<arity>(shape_list.shapes);
+        const auto[n, h, w, c] = cast<4>(p.dims);
+        const auto[r, s, _c, d] = cast<4>(q.dims);
         check(c == _c);
-        return new shape_t(n, h - r + 1, w - s + 1, d);
+        return shape_t(n, h - r + 1, w - s + 1, d);
     }
 
     using T = float; // TODO: cast based on dtype
@@ -141,13 +141,13 @@ struct conv_hwc {
     constexpr static uint8_t arity = 2;
 
     // [h, w, c], [r, s, c, d] -> [h - r + 1, w - s + 1, d]
-    static shape_t *infer(const shape_list_t *shape_list)
+    static shape_t infer(const shape_list_t &shape_list)
     {
-        check(shape_list->shapes.size() == arity);
-        const auto[h, w, c] = cast<3>((*shape_list)[0].dims);
-        const auto[r, s, _c, d] = cast<4>((*shape_list)[1].dims);
+        const auto[p, q] = cast<arity>(shape_list.shapes);
+        const auto[h, w, c] = cast<3>(p.dims);
+        const auto[r, s, _c, d] = cast<4>(q.dims);
         check(c == _c);
-        return new shape_t(h - r + 1, w - s + 1, d);
+        return shape_t(h - r + 1, w - s + 1, d);
     }
 
     using T = float; // TODO: cast based on dtype
@@ -184,10 +184,9 @@ struct conv_hwc {
 struct conv2d {
     constexpr static uint8_t arity = 2;
 
-    static shape_t *infer(const shape_list_t *shape_list)
+    static shape_t infer(const shape_list_t &shape_list)
     {
-        check(shape_list->shapes.size() == arity);
-        const auto[p, q] = cast<2>(shape_list->shapes);
+        const auto[p, q] = cast<arity>(shape_list.shapes);
         if (p.rank() == 3) {
             return conv_hwc::infer(shape_list);
         } else {

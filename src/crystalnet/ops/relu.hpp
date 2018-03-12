@@ -14,10 +14,10 @@ template <typename T> vector_ref_t<T> cast_to_v(const tensor_ref_t &tensor)
 struct relu {
     constexpr static uint8_t arity = 1;
 
-    static shape_t *infer(const shape_list_t *shape_list)
+    static shape_t infer(const shape_list_t &shape_list)
     {
-        const auto[p] = cast<arity>(shape_list->shapes);
-        return new shape_t(p);
+        const auto[p] = cast<arity>(shape_list.shapes);
+        return p;
     }
 
     using T = float; // TODO: cast based on dtype

@@ -13,13 +13,13 @@ struct pool2d_c_max {
     constexpr static uint32_t s = 2;
 
     // [w, h, c] -> [w', h', c]
-    static shape_t *infer(const shape_list_t *shape_list)
+    static shape_t infer(const shape_list_t &shape_list)
     {
-        check(shape_list->shapes.size() == arity);
-        const auto[h, w, c] = cast<3>((*shape_list)[0].dims);
+        const auto[p] = cast<arity>(shape_list.shapes);
+        const auto[h, w, c] = cast<3>(p.dims);
         check(h % r == 0);
         check(w % s == 0);
-        return new shape_t(h / r, w / s, c);
+        return shape_t(h / r, w / s, c);
     }
 
     static uint32_t idx3(uint32_t i, uint32_t j, uint32_t k, //
@@ -78,9 +78,9 @@ struct pool2d_n_c_max {
     constexpr static uint8_t arity = 1;
     using pool2d_c_max_batched = batch<pool2d_c_max, 0>;
 
-    static shape_t *infer(const shape_list_t *shape_list)
+    static shape_t infer(const shape_list_t &shape_list)
     {
-        const auto[p] = cast<arity>(shape_list->shapes);
+        const auto[p] = cast<arity>(shape_list.shapes);
         if (p.rank() == 3) {
             return pool2d_c_max::infer(shape_list);
         } else {

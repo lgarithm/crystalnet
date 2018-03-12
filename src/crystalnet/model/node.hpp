@@ -101,9 +101,9 @@ struct operator_node_t : node_t {
         }
         printf("[D] infer shape of %s from inputs shapes: %s\n",
                op.name.c_str(), sig.c_str());
-        auto out_shape = op.infer(std::make_unique<shape_list_t>(shapes).get());
-        printf("[D] -> %s\n", std::to_string(*out_shape).c_str());
-        return *std::unique_ptr<shape_t>(out_shape);
+        auto out_shape = (*op.infer)(shape_list_t(shapes));
+        printf("[D] -> %s\n", std::to_string(out_shape).c_str());
+        return out_shape;
     }
 
     using input_list_t = std::vector<node_t *>;
@@ -150,7 +150,7 @@ struct operator_node_t : node_t {
         // TODO: op.forward must be present
         if (op.forward) {
             forward_ctx_t ctx(_input_refs(), ref(_value));
-            op.forward(&ctx);
+            (*op.forward)(ctx);
         }
     }
 
@@ -164,7 +164,7 @@ struct operator_node_t : node_t {
 
             backward_ctx_t ctx(_input_refs(), ref(_value), _input_grad_refs(),
                                ref(_gradient));
-            op.backward(&ctx);
+            (*op.backward)(ctx);
         }
         for (auto i : inputs) {
             i->backward();

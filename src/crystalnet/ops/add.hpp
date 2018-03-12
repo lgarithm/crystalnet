@@ -11,11 +11,11 @@
 struct add_vv {
     constexpr static uint8_t arity = 2;
 
-    static shape_t *infer(const shape_list_t *shape_list)
+    static shape_t infer(const shape_list_t &shape_list)
     {
-        const auto[p, q] = cast<arity>(shape_list->shapes);
+        const auto[p, q] = cast<arity>(shape_list.shapes);
         check(p.dim() == q.dim());
-        return new shape_t(p);
+        return shape_t(p);
     }
 
     using T = float; // TODO: cast based on dtype
@@ -52,12 +52,12 @@ struct add {
                                      q.dims.end());
     }
 
-    static shape_t *infer(const shape_list_t *shape_list)
+    static shape_t infer(const shape_list_t &shape_list)
     {
-        const auto[p, q] = cast<arity>(shape_list->shapes);
+        const auto[p, q] = cast<arity>(shape_list.shapes);
         if (p.rank() > q.rank()) {
             check(is_sub(q, p));
-            return new shape_t(p);
+            return shape_t(p);
         }
         check(p.rank() == q.rank());
         return add_vv::infer(shape_list);

@@ -95,8 +95,7 @@ struct s_operator_node_t : s_node_t {
 
     static shape_t infer(const operator_t &op, const s_node_list_t &inputs)
     {
-        const shape_list_t shape_list(inputs.shapes());
-        return *std::unique_ptr<shape_t>(op.infer(&shape_list));
+        return (*op.infer)(shape_list_t(inputs.shapes()));
     }
 
     s_operator_node_t(const operator_t &op, const s_node_list_t &inputs)

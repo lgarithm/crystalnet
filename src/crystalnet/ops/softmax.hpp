@@ -42,10 +42,10 @@ void softmax_grad(const vector_ref_t<T> &output, const matrix_ref_t<T> &grad)
 struct softmax_1d {
     constexpr static uint8_t arity = 1;
 
-    static shape_t *infer(const shape_list_t *shape_list)
+    static shape_t infer(const shape_list_t &shape_list)
     {
-        check(shape_list->shapes.size() == arity);
-        return new shape_t((*shape_list)[0]);
+        const auto[p] = cast<arity>(shape_list.shapes);
+        return p;
     }
 
     using T = float;
@@ -76,10 +76,10 @@ struct softmax {
     constexpr static uint8_t arity = 1;
     using softmax_2d = batch<softmax_1d, 0>;
 
-    static shape_t *infer(const shape_list_t *shape_list)
+    static shape_t infer(const shape_list_t &shape_list)
     {
-        check(shape_list->shapes.size() == arity);
-        return new shape_t((*shape_list)[0]);
+        const auto[p] = cast<arity>(shape_list.shapes);
+        return p;
     }
 
     using T = float;

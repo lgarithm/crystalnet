@@ -8,13 +8,13 @@
 struct mul_vm {
     constexpr static uint8_t arity = 2;
 
-    static shape_t *infer(const shape_list_t *shape_list)
+    static shape_t infer(const shape_list_t &shape_list)
     {
-        const auto[p, q] = cast<arity>(shape_list->shapes);
+        const auto[p, q] = cast<arity>(shape_list.shapes);
         const auto[m] = cast<1>(p.dims);
         const auto[_m, n] = cast<2>(q.dims);
         check(m == _m);
-        return new shape_t(n);
+        return shape_t(n);
     }
 
     using T = float; // TODO: cast based on dtype
@@ -43,13 +43,13 @@ struct mul_vm {
 struct mul_mm {
     constexpr static uint8_t arity = 2;
 
-    static shape_t *infer(const shape_list_t *shape_list)
+    static shape_t infer(const shape_list_t &shape_list)
     {
-        const auto[p, q] = cast<arity>(shape_list->shapes);
+        const auto[p, q] = cast<arity>(shape_list.shapes);
         const auto[k, m] = cast<2>(p.dims);
         const auto[_m, n] = cast<2>(q.dims);
         check(m == _m);
-        return new shape_t(k, n);
+        return shape_t(k, n);
     }
 
     using T = float; // TODO: cast based on dtype
@@ -78,9 +78,9 @@ struct mul_mm {
 struct mul {
     constexpr static uint8_t arity = 2;
 
-    static shape_t *infer(const shape_list_t *shape_list)
+    static shape_t infer(const shape_list_t &shape_list)
     {
-        const auto[p, q] = cast<arity>(shape_list->shapes);
+        const auto[p, q] = cast<arity>(shape_list.shapes);
         if (p.rank() == 1 && q.rank() == 2) {
             return mul_vm::infer(shape_list);
         }
