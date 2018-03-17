@@ -12,14 +12,14 @@
 * load cifar (done)
 * implement adam optimizer (done)
 * remove teavana dependency (done)
-* mini batch
+* mini batch (done)
+* fix python binding crash on mac (done)
 * add configure
 * add C++ binding
 * add Haskell binding
-* reverse test binary name
 * run clang-tidy
 * run iwyu
 * add namespace
 * run find in Makefile
-* fix python binding crash on mac
 * tests for operators
+* fix auto batch when batch_size = 1

@@ -127,6 +127,27 @@ template <typename R, typename T> tensor_t *cast_to(const r_tensor_ref_t<T> &t)
     return r;
 }
 
+template <typename R, uint8_t r> struct ranked_tensor_ref_t {
+    ranked_shape_t<r> shape;
+    R *const data;
+    ranked_tensor_ref_t(const ranked_shape_t<r> &shape, R *data)
+        : shape(shape), data(data)
+    {
+    }
+    void fill(R x) const { std::fill(data, data + shape.dim(), x); }
+    template <typename... I> R &at(I... i) const
+    {
+        return data[shape.idx(i...)];
+    }
+};
+
+template <uint8_t r, typename T>
+ranked_tensor_ref_t<T, r> ranked(const tensor_ref_t &t)
+{
+    check(t.dtype == idx_type<T>::type);
+    return ranked_tensor_ref_t<T, r>(ranked<r>(t.shape), (T *)t.data);
+}
+
 namespace std
 {
 inline string to_string(const tensor_t &t)

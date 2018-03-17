@@ -9,6 +9,7 @@
 
 #include <crystalnet/core/error.hpp>
 #include <crystalnet/core/gc.hpp>
+#include <crystalnet/utility/cast.hpp>
 
 struct shape_t {
     const std::vector<uint32_t> dims;
@@ -73,6 +74,41 @@ struct shape_ctx_t {
         return gc1(new shape_list_t(shapes));
     }
 };
+
+template <uint8_t r> struct ranked_shape_t {
+    const std::array<uint32_t, r> dims;
+
+    explicit ranked_shape_t(const std::array<uint32_t, r> &dims) : dims(dims) {}
+    uint32_t dim() const
+    {
+        return std::accumulate(dims.begin(), dims.end(), 1,
+                               std::multiplies<uint32_t>());
+    }
+    template <typename... I> uint32_t idx(I... i) const
+    {
+        static_assert(sizeof...(i) == r);
+        const std::array<uint32_t, r> offs{static_cast<uint32_t>(i)...};
+        uint32_t off = 0;
+        for (uint8_t i = 0; i < r; ++i) {
+            off = off * dims[i] + offs[i];
+        }
+        return off;
+    }
+};
+
+template <typename... Dim> ranked_shape_t<sizeof...(Dim)> r_shape(Dim... dim)
+{
+    constexpr uint8_t r = sizeof...(Dim);
+    const std::array<uint32_t, r> dims({static_cast<uint32_t>(dim)...});
+    return ranked_shape_t<r>(dims);
+}
+
+template <uint8_t r> ranked_shape_t<r> ranked(const shape_t &shape)
+{
+    check(shape.rank() == r);
+    const auto dims = cast<r>(shape.dims);
+    return ranked_shape_t<r>(dims);
+}
 
 namespace std
 {

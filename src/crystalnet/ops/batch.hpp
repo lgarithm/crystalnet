@@ -14,6 +14,7 @@ auto change_ith(const uint8_t pos, const std::vector<T> &items,
     return new_items;
 }
 
+// TODO: rename unbatch to proj
 inline forward_ctx_t unbatch(uint8_t pos, uint32_t idx,
                              const forward_ctx_t &ctx)
 {
@@ -68,3 +69,26 @@ template <typename O, uint8_t pos> struct batch {
         }
     };
 };
+
+inline tensor_ref_t embed(const tensor_ref_t &t)
+{
+    return tensor_ref_t(t.shape.batch(1), t.dtype, t.data);
+}
+
+inline forward_ctx_t embed(uint8_t pos, const forward_ctx_t &ctx)
+{
+    const auto inputs =
+        change_ith(pos, ctx.inputs._args, embed(ctx.inputs[pos]));
+    return forward_ctx_t(tensor_ref_list_t(inputs), embed(ctx.output));
+}
+
+inline backward_ctx_t embed(uint8_t pos, const backward_ctx_t &ctx)
+{
+    const auto inputs =
+        change_ith(pos, ctx.inputs._args, embed(ctx.inputs[pos]));
+    const auto input_gradients = change_ith(pos, ctx.input_gradients._args,
+                                            embed(ctx.input_gradients[pos]));
+    return backward_ctx_t(tensor_ref_list_t(inputs), embed(ctx.output),
+                          tensor_ref_list_t(input_gradients),
+                          embed(ctx.output_gradient));
+}

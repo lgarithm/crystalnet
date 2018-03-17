@@ -1,0 +1,6 @@
+DSL
+======
+
+A DSL will be provided for defining a NN model.
+
+The DSL should be compiled to the API of symbolic model.

@@ -14,7 +14,7 @@ void runtime_check(bool cond, const char *const e, const char *const file,
                    int line)
 {
     if (!cond) {
-        printf("%s:%d %s\n", get_src_name(file), line, e);
+        printf("contract not meet: %s:%d %s\n", get_src_name(file), line, e);
         exit(1);
     }
 }

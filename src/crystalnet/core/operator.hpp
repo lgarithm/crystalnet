@@ -77,10 +77,17 @@ struct simple_shape_func_t : shape_func_t {
     }
 };
 
-template <typename T, typename S> void call(S &ctx)
+template <typename T, typename S> void call(const S &ctx)
 {
     static_assert(std::is_base_of<S, T>::value);
     (*(T *)&ctx)();
+}
+
+template <typename T, typename S, typename P>
+void call(const S &ctx, const P &p)
+{
+    static_assert(std::is_base_of<S, T>::value);
+    (*(T *)&ctx)(p);
 }
 
 template <typename T> struct simple_forward_func_t : forward_func_t {
@@ -102,4 +109,40 @@ template <typename T> operator_t *_register_bi_op(const char *const name)
     return register_op(name, T::arity, new simple_shape_func_t(T::infer),
                        new simple_forward_func_t<T>,
                        new simple_backward_func_t<T>);
+}
+
+template <typename T> struct generic_shape_func_t : shape_func_t {
+    const T &op;
+
+    explicit generic_shape_func_t(const T &op) : op(op) {}
+
+    shape_t operator()(const shape_list_t &shape_list) override
+    {
+        return op.infer(shape_list);
+    }
+};
+
+template <typename T> struct generic_forward_func_t : forward_func_t {
+    const T &op;
+
+    explicit generic_forward_func_t(const T &op) : op(op) {}
+
+    void operator()(const forward_ctx_t &ctx) override { op.forward(ctx); }
+};
+
+template <typename T> struct generic_backward_func_t : backward_func_t {
+    const T &op;
+
+    explicit generic_backward_func_t(const T &op) : op(op) {}
+
+    void operator()(const backward_ctx_t &ctx) override { op.backward(ctx); }
+};
+
+template <typename T>
+operator_t *_register_generic_bi_op(const char *const name, const T *op)
+{
+    return register_op(name, T::arity, //
+                       new generic_shape_func_t<T>(*op),
+                       new generic_forward_func_t<T>(*op),
+                       new generic_backward_func_t<T>(*op));
 }

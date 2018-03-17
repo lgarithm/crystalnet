@@ -2,17 +2,23 @@
 
 import platform
 from ctypes import cdll
-from ctypes import c_char_p
+from ctypes import c_char_p, c_void_p
 
-lib = './build/lib/libcrystalnet.%s' % (
-    "so" if platform.uname()[0] != "Darwin" else "dylib")
-libcrystalnet = cdll.LoadLibrary(lib)  # pylint: disable=invalid-name
-libcrystalnet.version.restype = c_char_p
+_suffix = 'so' if platform.uname()[0] != 'Darwin' else 'dylib'
+libpath = './build/lib/libcrystalnet.%s' % _suffix
+lib = cdll.LoadLibrary(libpath)  # pylint: disable=invalid-name
+
+lib.version.restype = c_char_p
+
+lib.make_shape.restype = c_void_p
+lib.free_shape.argtypes = [c_void_p]
+lib.shape_rank.argtypes = [c_void_p]
+lib.shape_dim.argtypes = [c_void_p]
 
 
 def version() -> str:
     """version binds version."""
-    return libcrystalnet.version().decode()
+    return lib.version().decode()
 
 
 # pylint: disable=too-few-public-methods
@@ -21,17 +27,21 @@ def version() -> str:
 class Shape(object):
     """Shape is shape_t."""
 
-    def __init__(self, rank: int):
-        dims = [1] * rank
-        self._shape = libcrystalnet.make_shape(rank, *dims)
+    def __init__(self, *dims: int):
+        rank = len(dims)
+        self._shape = lib.make_shape(rank, *dims)
 
     def __del__(self):
-        libcrystalnet.free_shape(self._shape)
+        lib.free_shape(self._shape)
 
     def __str__(self):
-        rank = libcrystalnet.shape_rank(self._shape)
-        dim = libcrystalnet.shape_dim(self._shape)
-        return '<Shape|rank=%d,dim=%d>' % (rank, dim)
+        return '<Shape|rank=%d,dim=%d>' % (self.rank(), self.dim())
+
+    def dim(self) -> int:
+        return lib.shape_dim(self._shape)
+
+    def rank(self) -> int:
+        return lib.shape_rank(self._shape)
 
 
 class Tensor(object):
