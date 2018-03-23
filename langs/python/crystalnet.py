@@ -10,8 +10,8 @@ lib = cdll.LoadLibrary(libpath)  # pylint: disable=invalid-name
 
 lib.version.restype = c_char_p
 
-lib.make_shape.restype = c_void_p
-lib.free_shape.argtypes = [c_void_p]
+lib.new_shape.restype = c_void_p
+lib.del_shape.argtypes = [c_void_p]
 lib.shape_rank.argtypes = [c_void_p]
 lib.shape_dim.argtypes = [c_void_p]
 
@@ -29,10 +29,10 @@ class Shape(object):
 
     def __init__(self, *dims: int):
         rank = len(dims)
-        self._shape = lib.make_shape(rank, *dims)
+        self._shape = lib.new_shape(rank, *dims)
 
     def __del__(self):
-        lib.free_shape(self._shape)
+        lib.del_shape(self._shape)
 
     def __str__(self):
         return '<Shape|rank=%d,dim=%d>' % (self.rank(), self.dim())

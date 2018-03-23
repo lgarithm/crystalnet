@@ -9,7 +9,6 @@
 #include <crystalnet/core/operator.hpp>
 #include <crystalnet/core/shape.hpp>
 #include <crystalnet/core/tensor.hpp>
-#include <crystalnet/linag/base.hpp>
 
 struct node_t {
     // int idx; // TODO: support index
@@ -88,8 +87,6 @@ struct placeholder_node_t : node_t {
 struct operator_node_t : node_t {
     static shape_t infer_shape(const operator_t &op, node_t *nodes[])
     {
-        const auto name = std::string(__func__) + "@" + op.name;
-        DEBUG(name.c_str());
         std::vector<shape_t> shapes;
         std::string sig;
         for (auto i = 0; i < op.arity; ++i) {
@@ -99,10 +96,9 @@ struct operator_node_t : node_t {
             }
             sig += std::to_string(nodes[i]->shape);
         }
-        printf("[D] infer shape of %s from inputs shapes: %s\n",
-               op.name.c_str(), sig.c_str());
         auto out_shape = (*op.infer)(shape_list_t(shapes));
-        printf("[D] -> %s\n", std::to_string(out_shape).c_str());
+        printf("[D] %s <- %s (%s)\n", std::to_string(out_shape).c_str(),
+               sig.c_str(), op.name.c_str());
         return out_shape;
     }
 

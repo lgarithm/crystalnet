@@ -1,15 +1,10 @@
 #pragma once
 #include <crystalnet.h>
 #include <crystalnet/core/operator.hpp>
+#include <crystalnet/core/tensor.hpp>
 #include <crystalnet/linag/linag.hpp>
 #include <crystalnet/utility/cast.hpp>
 #include <crystalnet/utility/range.hpp>
-
-template <typename T> vector_ref_t<T> cast_to_v(const tensor_ref_t &tensor)
-{
-    r_tensor_ref_t<T> r(tensor);
-    return vector_ref_t<T>(r.shape.dim(), r.data);
-}
 
 struct relu {
     constexpr static uint8_t arity = 1;
@@ -27,10 +22,10 @@ struct relu {
     struct forward : forward_ctx_t {
         void operator()() const
         {
-            auto x = cast_to_v<T>(inputs[0]);
-            auto y = cast_to_v<T>(output);
-            auto n = equally(x.n, y.n);
-            for (auto i : range(n)) {
+            auto x = flatten<T>(inputs[0]);
+            auto y = flatten<T>(output);
+            check(len(x) == len(y));
+            for (auto i : range(len(x))) {
                 y.data[i] = _relu(x.data[i]);
             }
         }
@@ -44,11 +39,12 @@ struct relu {
     struct backward : backward_ctx_t {
         void operator()() const
         {
-            auto x = cast_to_v<T>(inputs[0]);
-            auto gx = cast_to_v<T>(input_gradients[0]);
-            auto gy = cast_to_v<T>(output_gradient);
-            auto n = x.n; // == gx.n == gy.n
-            for (auto i : range(n)) {
+            auto x = flatten<T>(inputs[0]);
+            auto gx = flatten<T>(input_gradients[0]);
+            auto gy = flatten<T>(output_gradient);
+            check(len(x) == len(gx));
+            check(len(gx) == len(gy));
+            for (auto i : range(len(x))) {
                 gx.data[i] = gy.data[i] * _relu_grad(x.data[i]);
             }
         }

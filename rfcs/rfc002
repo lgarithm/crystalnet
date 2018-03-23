@@ -1,20 +1,23 @@
 Resource Management
 ======
 
-We shall use std::unique_ptr to manage memory resource.
+In C APIs, all struct T are declared using forward declaration.
 
-(Currently core/gc.hpp)
+typedef struct T T;
 
-Resource Allocation
-------
-for each struct T, new_t and free_t must be defined.
+All APIs will take pointers of struct.
+
+
+For each struct T, new_t and free_t must be defined.
 new_t must return *T and free_t must accept *T.
 
-Resource Manager
-------
+extern T* new_t(...);
+extern void del_t(T*);
 
-a resource manager manages resources including
+For a pointer returned from new_t, it must be freed using del_t,
+or delegate its ownership to another object.
 
-* tensor
+For a struct T, make_t may be defined. The pointer returned from make_t
+should be managed by GC and should not be freed.
 
-it will release resource automatically after program exits
+We shall use std::unique_ptr to manage memory resource internally.

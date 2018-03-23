@@ -1,4 +1,4 @@
-#include <crystalnet.h>
+#include <crystalnet-internal.h>
 #include <crystalnet/core/gc.hpp>
 #include <crystalnet/model/model.hpp>
 #include <crystalnet/symbol/model.hpp>
@@ -6,7 +6,7 @@
 
 static GC<s_model_ctx_t> gc;
 
-s_model_ctx_t *new_s_model_ctx() { return gc(new s_model_ctx_t); }
+s_model_ctx_t *make_s_model_ctx() { return gc(new s_model_ctx_t); }
 
 s_node_t *var(s_model_ctx_t *ctx, const shape_t *shape)
 {
@@ -38,13 +38,13 @@ s_model_t *new_s_model(s_model_ctx_t *ctx, s_node_t *input, s_node_t *output)
     return new s_model_t(ctx, input, output);
 }
 
-void free_s_model(s_model_t *model) { delete model; }
+void del_s_model(s_model_t *model) { delete model; }
 
 model_t *realize(parameter_ctx_t *p_ctx, const s_model_t *m,
                  uint32_t batch_size)
 {
     static GC<model_ctx_t> gc;
-    printf("[D] realise:\n");
+    printf("[D] realising s_model_t\n");
     model_option_t opt(m->input, batch_size);
     model_ctx_t *ctx = gc(new model_ctx_t(p_ctx));
     auto output = m->output->realize(*ctx, opt);
@@ -55,5 +55,6 @@ model_t *realize(parameter_ctx_t *p_ctx, const s_model_t *m,
         check(false);
     }
     auto inputs = places[0];
-    return new_model(ctx, inputs, output);
+    printf("[D] realized s_model_t\n");
+    return new model_t(ctx, inputs, output);
 }

@@ -42,19 +42,20 @@ tensor_t *load_idx_file(const char *filename)
         EXIT("File Not Found");
     }
     uint32_t magic;
-    fread(&magic, 4, 1, fp);
+    check(std::fread(&magic, 4, 1, fp) == 1);
     reverse_byte_order(magic);
     idx_meta meta(magic);
     std::vector<uint32_t> dims(meta.rank);
     for (auto i = 0; i < meta.rank; ++i) {
         uint32_t dim;
-        fread(&dim, 4, 1, fp);
+        check(std::fread(&dim, 4, 1, fp) == 1);
         reverse_byte_order(dim);
         dims[i] = dim;
     }
     shape_t shape(dims);
-    auto tensor = new tensor_t(shape, meta.type);
-    fread(tensor->data, shape.dim(), dtype_size(meta.type), fp);
+    const auto tensor = new tensor_t(shape, meta.type);
+    const auto count = shape.dim();
+    check(std::fread(tensor->data, dtype_size(meta.type), count, fp) == count);
     fclose(fp);
     return tensor;
 }

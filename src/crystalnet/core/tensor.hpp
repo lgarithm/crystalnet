@@ -148,6 +148,28 @@ ranked_tensor_ref_t<T, r> ranked(const tensor_ref_t &t)
     return ranked_tensor_ref_t<T, r>(ranked<r>(t.shape), (T *)t.data);
 }
 
+template <typename T, uint8_t r>
+uint32_t len(const ranked_tensor_ref_t<T, r> &tensor)
+{
+    return std::get<0>(tensor.shape.dims);
+}
+
+template <typename T, uint8_t r>
+uint32_t wid(const ranked_tensor_ref_t<T, r> &tensor)
+{
+    return std::get<1>(tensor.shape.dims);
+}
+
+template <typename T> using matrix_ref_t = ranked_tensor_ref_t<T, 2>;
+
+template <typename T> using vector_ref_t = ranked_tensor_ref_t<T, 1>;
+
+template <typename T> vector_ref_t<T> flatten(const tensor_ref_t &r)
+{
+    check(r.dtype == idx_type<T>::type);
+    return vector_ref_t<T>(ranked_shape_t<1>(r.shape.dim()), (T *)r.data);
+}
+
 namespace std
 {
 inline string to_string(const tensor_t &t)

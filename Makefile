@@ -61,6 +61,7 @@ format:
 	clang-format -i src/*.h
 	clang-format -i examples/c/*
 	clang-format -i examples/cpp/*
+	clang-format -i tests/src/crystalnet/**/*
 	yapf -i langs/python/crystalnet.py
 
 tidy:

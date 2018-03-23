@@ -3,7 +3,8 @@
 #include <cstring>
 
 #include <cblas.h>
-#include <crystalnet/linag/base.hpp>
+
+#include <crystalnet/core/tensor.hpp>
 
 template <typename R> struct cblas;
 
@@ -34,8 +35,9 @@ template <typename T> struct cblas_impl {
         blas::gemm(CblasRowMajor,
                    trans_a ? CblasTrans : CblasNoTrans, //
                    trans_b ? CblasTrans : CblasNoTrans, //
-                   c.m, c.n, trans_b ? b.n : b.m,       //
-                   alpha, a.data, a.n, b.data, b.n, beta, c.data, c.n);
+                   len(c), wid(c),                      //
+                   trans_b ? wid(b) : len(b),           //
+                   alpha, a.data, wid(a), b.data, wid(b), beta, c.data, wid(c));
     }
 
     // a \times b -> c
@@ -58,20 +60,20 @@ template <typename T> struct cblas_impl {
 
     static void mv(const m_ref_t &a, const v_ref_t &b, const v_ref_t &c)
     {
-        blas::gemv(CblasRowMajor, CblasNoTrans, a.m, a.n, alpha, a.data, a.n,
-                   b.data, inc, beta, c.data, inc);
+        blas::gemv(CblasRowMajor, CblasNoTrans, len(a), wid(a), alpha, a.data,
+                   wid(a), b.data, inc, beta, c.data, inc);
     }
 
     static void vm(const v_ref_t &a, const m_ref_t &b, const v_ref_t &c)
     {
-        blas::gemv(CblasRowMajor, CblasTrans, b.m, b.n, alpha, b.data, b.n,
-                   a.data, inc, beta, c.data, inc);
+        blas::gemv(CblasRowMajor, CblasTrans, len(b), wid(b), alpha, b.data,
+                   wid(b), a.data, inc, beta, c.data, inc);
     }
 
     // a + b -> c
     static void vv(const v_ref_t &a, const v_ref_t &b, const v_ref_t &c)
     {
-        std::memcpy(c.data, b.data, sizeof(T) * c.n);
-        blas::axpy(a.n, alpha, a.data, inc, c.data, inc);
+        std::memcpy(c.data, b.data, sizeof(T) * len(c));
+        blas::axpy(len(a), alpha, a.data, inc, c.data, inc);
     }
 };

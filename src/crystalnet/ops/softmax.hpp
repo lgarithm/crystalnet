@@ -4,7 +4,6 @@
 #include <crystalnet.h>
 #include <crystalnet/core/debug.hpp>
 #include <crystalnet/core/operator.hpp>
-#include <crystalnet/linag/base.hpp>
 #include <crystalnet/linag/linag.hpp>
 #include <crystalnet/ops/batch.hpp>
 #include <crystalnet/utility/cast.hpp>
@@ -14,7 +13,7 @@ template <typename T>
 void softmax_eval_safe(const vector_ref_t<T> &input,
                        const vector_ref_t<T> &output)
 {
-    const auto n = input.n;
+    const auto n = len(input);
     for (auto i : range(n)) {
         T tot = 0;
         for (auto j : range(n)) {
@@ -27,7 +26,7 @@ void softmax_eval_safe(const vector_ref_t<T> &input,
 template <typename T>
 void softmax_grad(const vector_ref_t<T> &output, const matrix_ref_t<T> &grad)
 {
-    const auto n = output.n;
+    const auto n = len(output);
     for (auto i : range(n)) {
         grad.data[i * n + i] = output.data[i] * (1 - output.data[i]);
     }
@@ -54,8 +53,7 @@ struct softmax_1d {
         void operator()() const
         {
             check(inputs.arity() == arity);
-            softmax_eval_safe(as_vector_ref<T>(inputs[0]),
-                              as_vector_ref<T>(output));
+            softmax_eval_safe(ranked<1, T>(inputs[0]), ranked<1, T>(output));
         }
     };
 
@@ -64,10 +62,9 @@ struct softmax_1d {
         {
             auto n = output.shape.dim();
             tensor_t tmp(shape_t(n, n), idx_type<T>::type);
-            softmax_grad(as_vector_ref<T>(output), as_matrix_ref<T>(ref(tmp)));
-            linag<T>::vm(as_vector_ref<T>(output_gradient),
-                         as_matrix_ref<T>(ref(tmp)),
-                         as_vector_ref<T>(input_gradients[0]));
+            softmax_grad(ranked<1, T>(output), ranked<2, T>(ref(tmp)));
+            linag<T>::vm(ranked<1, T>(output_gradient), ranked<2, T>(ref(tmp)),
+                         ranked<1, T>(input_gradients[0]));
         }
     };
 };

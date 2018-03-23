@@ -26,9 +26,9 @@ int main()
     model_t *model = mlp_model(image_shape, shape_dim(label_shape));
     trainer_t *trainer = new_trainer(model, op_xentropy, opt_adam);
     experiment(trainer, ds1, ds2);
-    free_model(model);
-    free_trainer(trainer);
-    free_dataset(ds1);
-    free_dataset(ds2);
+    del_model(model);
+    del_trainer(trainer);
+    del_dataset(ds1);
+    del_dataset(ds2);
     return 0;
 }

@@ -4,7 +4,7 @@
 #include <crystalnet.h>
 #include <crystalnet/core/shape.hpp>
 
-shape_t *make_shape(int n, ...)
+const shape_t *new_shape(int n, ...)
 {
     std::vector<uint32_t> dims;
     va_list list;
@@ -17,15 +17,15 @@ shape_t *make_shape(int n, ...)
     return new shape_t(dims);
 }
 
-void free_shape(shape_t *shape) { delete shape; }
+void del_shape(const shape_t *shape) { delete shape; }
 
 uint32_t shape_rank(const shape_t *shape) { return shape->rank(); }
 
 uint32_t shape_dim(const shape_t *shape) { return shape->dim(); }
 
-shape_ctx_t *make_shape_ctx() { return new shape_ctx_t; }
+shape_ctx_t *new_shape_ctx() { return new shape_ctx_t; }
 
-void free_shape_ctx(shape_ctx_t *ctx) { delete ctx; }
+void del_shape_ctx(shape_ctx_t *ctx) { delete ctx; }
 
 const shape_t *mk_shape(shape_ctx_t *ctx, int n, ...)
 {

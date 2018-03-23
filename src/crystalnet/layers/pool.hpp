@@ -8,8 +8,4 @@ template <> struct op_instance<pool2d_c_max> {
 };
 
 struct pool : unary_op_layer<pool2d_c_max> {
-    static s_layer_t *create(const shape_list_t *shape_list)
-    {
-        return new pool;
-    }
 };

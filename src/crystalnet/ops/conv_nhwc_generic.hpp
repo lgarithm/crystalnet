@@ -5,7 +5,6 @@
 
 #include <crystalnet/core/operator.hpp>
 #include <crystalnet/core/shape.hpp>
-#include <crystalnet/linag/base.hpp>
 #include <crystalnet/linag/linag.hpp>
 #include <crystalnet/ops/batch.hpp>
 #include <crystalnet/utility/cast.hpp>
@@ -20,7 +19,7 @@ matrix_ref_t<T> as_m(const ranked_tensor_ref_t<T, p + q> &t)
     const auto n = std::accumulate(t.shape.dims.begin() + p, //
                                    t.shape.dims.end(),       //
                                    1, std::multiplies<uint32_t>());
-    return matrix_ref_t<T>(m, n, t.data);
+    return matrix_ref_t<T>(ranked_shape_t<2>(m, n), t.data);
 }
 
 struct conv_nhwc_generic {

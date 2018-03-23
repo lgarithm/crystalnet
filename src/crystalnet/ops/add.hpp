@@ -23,8 +23,8 @@ struct add_vv {
     struct forward : forward_ctx_t {
         void operator()() const
         {
-            linag<T>::vv(as_vector_ref<T>(inputs[0]),
-                         as_vector_ref<T>(inputs[1]), as_vector_ref<T>(output));
+            linag<T>::vv(ranked<1, T>(inputs[0]), ranked<1, T>(inputs[1]),
+                         ranked<1, T>(output));
         }
     };
 

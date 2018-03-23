@@ -2,8 +2,19 @@
 #include <crystalnet.h>
 #include <crystalnet/core/debug.hpp>
 #include <crystalnet/core/operator.hpp>
+#include <crystalnet/core/tensor.hpp>
 #include <crystalnet/linag/linag.hpp>
 #include <crystalnet/utility/cast.hpp>
+
+template <typename T> matrix_ref_t<T> col(const vector_ref_t<T> &r)
+{
+    return matrix_ref_t<T>(ranked_shape_t<2>(r.shape.dim(), 1), r.data);
+}
+
+template <typename T> matrix_ref_t<T> row(const vector_ref_t<T> &r)
+{
+    return matrix_ref_t<T>(ranked_shape_t<2>(1, r.shape.dim()), r.data);
+}
 
 struct mul_vm {
     constexpr static uint8_t arity = 2;
@@ -22,20 +33,19 @@ struct mul_vm {
     struct forward : forward_ctx_t {
         void operator()() const
         {
-            linag<T>::vm(as_vector_ref<T>(inputs[0]),
-                         as_matrix_ref<T>(inputs[1]), as_vector_ref<T>(output));
+            linag<T>::vm(ranked<1, T>(inputs[0]), ranked<2, T>(inputs[1]),
+                         ranked<1, T>(output));
         }
     };
 
     struct backward : backward_ctx_t {
         void operator()() const
         {
-            linag<T>::mv(as_matrix_ref<T>(inputs[1]),
-                         as_vector_ref<T>(output_gradient),
-                         as_vector_ref<T>(input_gradients[0]));
-            linag<T>::mm(as_col_matrix_ref(as_vector_ref<T>(inputs[0])),
-                         as_row_matrix_ref(as_vector_ref<T>(output_gradient)),
-                         as_matrix_ref<T>(input_gradients[1]));
+            linag<T>::mv(ranked<2, T>(inputs[1]), ranked<1, T>(output_gradient),
+                         ranked<1, T>(input_gradients[0]));
+            linag<T>::mm(col(ranked<1, T>(inputs[0])),
+                         row(ranked<1, T>(output_gradient)),
+                         ranked<2, T>(input_gradients[1]));
         }
     };
 };
@@ -57,20 +67,20 @@ struct mul_mm {
     struct forward : forward_ctx_t {
         void operator()() const
         {
-            linag<T>::mm(as_matrix_ref<T>(inputs[0]),
-                         as_matrix_ref<T>(inputs[1]), as_matrix_ref<T>(output));
+            linag<T>::mm(ranked<2, T>(inputs[0]), ranked<2, T>(inputs[1]),
+                         ranked<2, T>(output));
         }
     };
 
     struct backward : backward_ctx_t {
         void operator()() const
         {
-            linag<T>::mmt(as_matrix_ref<T>(output_gradient),
-                          as_matrix_ref<T>(inputs[1]),
-                          as_matrix_ref<T>(input_gradients[0]));
-            linag<T>::mtm(as_matrix_ref<T>(inputs[0]),
-                          as_matrix_ref<T>(output_gradient),
-                          as_matrix_ref<T>(input_gradients[1]));
+            linag<T>::mmt(ranked<2, T>(output_gradient),
+                          ranked<2, T>(inputs[1]),
+                          ranked<2, T>(input_gradients[0]));
+            linag<T>::mtm(ranked<2, T>(inputs[0]),
+                          ranked<2, T>(output_gradient),
+                          ranked<2, T>(input_gradients[1]));
         }
     };
 };

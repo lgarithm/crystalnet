@@ -9,12 +9,12 @@ template <typename T, typename linag> struct test_linag {
 
     static auto mref(const tensor_t &tensor)
     {
-        return as_matrix_ref<T>(ref(tensor));
+        return ranked<2, T>(ref(tensor));
     }
 
     static auto vref(const tensor_t &tensor)
     {
-        return as_vector_ref<T>(ref(tensor));
+        return ranked<1, T>(ref(tensor));
     }
 
     static void test_mm(uint32_t k, uint32_t m, uint32_t n)

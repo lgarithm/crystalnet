@@ -1,30 +1,22 @@
 #include <crystalnet.h>
 
-// y = softmax(xw + b)
-model_t *slp_model(shape_t *image_shape, int arity)
+// y = softmax(flatten(x) * w + b)
+s_model_t *slp(const shape_t *image_shape, uint8_t arity)
 {
-    shape_t *lable_shape = make_shape(1, arity);
-    shape_t *weight_shape = make_shape(2, shape_dim(image_shape), arity);
-    shape_t *x_wrap_shape = make_shape(1, shape_dim(image_shape));
+    shape_ctx_t *sc = new_shape_ctx();
+    s_model_ctx_t *ctx = make_s_model_ctx();
 
-    model_ctx_t *m = new_model_ctx();
-    node_t *x_ = make_placeholder(m, image_shape);
-    node_t *x = wrap_node(m, x_wrap_shape, x_);
-    node_t *w = make_parameter(m, weight_shape);
-    node_t *b = make_parameter(m, lable_shape);
+    symbol x = var(ctx, image_shape);
+    symbol x_ = reshape(ctx, mk_shape(sc, 1, shape_dim(image_shape)), x);
+    symbol w = covar(ctx, mk_shape(sc, 2, shape_dim(image_shape), arity));
+    symbol b = covar(ctx, mk_shape(sc, 1, arity));
 
-    node_t *args1[] = {x, w};
-    node_t *op1 = make_operator(m, op_mul, args1);
-    node_t *args2[] = {op1, b};
-    node_t *op2 = make_operator(m, op_add, args2);
+    symbol op1 = apply(ctx, op_mul, (symbol[]){x_, w});
+    symbol op2 = apply(ctx, op_add, (symbol[]){op1, b});
+    symbol op3 = apply(ctx, op_softmax, (symbol[]){op2});
 
-    node_t *args3[] = {op2};
-    node_t *op3 = make_operator(m, op_softmax, args3);
-
-    free_shape(lable_shape);
-    free_shape(weight_shape);
-    free_shape(x_wrap_shape);
-    return new_model(m, x_, op3);
+    del_shape_ctx(sc);
+    return new_s_model(ctx, x, op3);
 }
 
 int main()
@@ -33,17 +25,16 @@ int main()
     int height = 32;
     int depth = 3;
     int n = 10;
-    shape_t *image_shape = make_shape(3, depth, width, height);
-    model_t *model = slp_model(image_shape, n);
-    trainer_t *trainer = new_trainer(model, op_xentropy, opt_sgd);
+    const shape_t *image_shape = new_shape(3, depth, width, height);
+    s_model_t *model = slp(image_shape, n);
+    s_trainer_t *trainer = new_s_trainer(model, op_xentropy, opt_sgd);
     dataset_t *ds1 = load_cifar();
     dataset_t *ds2 = load_cifar();
-    run_trainer(trainer, ds1);
-    test_trainer(trainer, ds2);
-    free_shape(image_shape);
-    free_model(model);
-    free_trainer(trainer);
-    free_dataset(ds1);
-    free_dataset(ds2);
+    s_experiment(trainer, ds1, ds2, 10000);
+    del_shape(image_shape);
+    del_s_trainer(trainer);
+    del_s_model(model);
+    del_dataset(ds1);
+    del_dataset(ds2);
     return 0;
 }
