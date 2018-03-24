@@ -18,15 +18,15 @@ struct s_trainer_t {
 
     static node_t *make_label(model_t *model)
     {
-        return model->ctx->make_placeholder(model->output->shape);
+        // TODO: generate a unique name
+        return model->ctx->make_placeholder("label", model->output->shape);
     }
 
     static node_t *make_loss(model_t *model, node_t *label,
                              operator_t *loss_func)
     {
         node_t *args[] = {label, model->output};
-        return model->ctx->make_operator(*loss_func, args,
-                                         loss_func->name.c_str());
+        return model->ctx->make_operator(loss_func->name, *loss_func, args);
     }
 
     s_trainer_t(const s_model_t *model, operator_t *loss_func,

@@ -8,19 +8,36 @@
 
 struct parameter_ctx_t {
     GC<tensor_t> gc;
+    std::map<std::string, tensor_t *> index;
+    std::vector<std::pair<std::string, tensor_t *>> items;
 
-    using key_t = void const *;
-    std::map<key_t, tensor_t *> index;
-
-    tensor_ref_t make_parameter(const shape_t &shape, const key_t key = nullptr)
+    tensor_ref_t make_parameter(const std::string &name, const shape_t &shape)
     {
-        if (!key) {
-            return ref(*gc(new tensor_t(shape)));
+        if (index.count(name) == 0) {
+            index[name] = gc(new tensor_t(shape));
+            items.push_back(std::make_pair(name, index[name]));
         }
-        if (index.count(key) == 0) {
-            index[key] = gc(new tensor_t(shape));
+        const auto p = ref(*index[name]);
+        check_with_hint(p.shape == shape, auto_hint);
+        return p;
+    }
+
+    void load(const std::string &name, const tensor_ref_t &r) const
+    {
+        const auto pos = index.find(name);
+        if (pos == index.end()) {
+            printf("[W] %s: no parameter named %s\n", __func__, name.c_str());
+            return;
         }
-        // // TODO: validate same shape
-        return ref(*index[key]);
+        const tensor_ref_t value(*pos->second);
+        value.copy_from(r);
+    }
+
+    void debug() const
+    {
+        for (const auto[name, t] : items) {
+            printf("[d] %s %s\n", name.c_str(),
+                   std::to_string(t->shape).c_str());
+        }
     }
 };

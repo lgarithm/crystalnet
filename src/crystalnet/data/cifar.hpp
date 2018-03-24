@@ -1,6 +1,6 @@
 #pragma once
-#include <cstdio>
 #include <cstdint>
+#include <cstdio>
 #include <memory>
 
 #include <crystalnet.h>

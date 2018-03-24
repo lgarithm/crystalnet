@@ -13,36 +13,39 @@
 #include <crystalnet/core/idx.hpp>
 #include <crystalnet/core/shape.hpp>
 
-struct tensor_t {
-    const shape_t shape;
+struct _tensor_meta_t {
     const uint8_t dtype;
+    const shape_t shape;
+    _tensor_meta_t(uint8_t dtype, const shape_t &shape)
+        : dtype(dtype), shape(shape)
+    {
+    }
+};
+
+struct tensor_t : _tensor_meta_t {
     const std::unique_ptr<uint8_t[]> _data;
     void *const data;
 
     explicit tensor_t(const shape_t &shape,
                       uint8_t dtype = idx_type<float>::type)
-        : shape(shape), dtype(dtype),
+        : _tensor_meta_t(dtype, shape),
           _data(new uint8_t[dtype_size(dtype) * shape.dim()]), data(_data.get())
     {
         LOG_TENSOR_USAGE(shape, dtype_size(dtype));
         memset(data, 0, dtype_size(dtype) * shape.dim());
     }
-
-    // TODO: support initializers
 };
 
-struct tensor_ref_t {
-    const shape_t shape;
-    const uint8_t dtype;
+struct tensor_ref_t : _tensor_meta_t {
     void *const data;
 
     tensor_ref_t(const shape_t &shape, uint8_t dtype, void *data)
-        : shape(shape), dtype(dtype), data(data)
+        : _tensor_meta_t(dtype, shape), data(data)
     {
     }
 
     explicit tensor_ref_t(const tensor_t &tensor)
-        : shape(tensor.shape), dtype(tensor.dtype), data(tensor.data)
+        : _tensor_meta_t(tensor.dtype, tensor.shape), data(tensor.data)
     {
     }
 
@@ -63,6 +66,13 @@ struct tensor_ref_t {
         const uint32_t offset = i * sub_shape.dim() * dtype_size(dtype);
         return tensor_ref_t(sub_shape.batch(j - i), dtype,
                             (uint8_t *)(data) + offset);
+    }
+
+    void copy_from(const tensor_ref_t &r) const
+    {
+        check(dtype == r.dtype);
+        check(shape == r.shape);
+        std::memcpy(data, r.data, shape.dim() * dtype_size(dtype));
     }
 };
 

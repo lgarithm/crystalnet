@@ -3,10 +3,52 @@ ABI (Application Binary Interface)
 
 API defines how to serials objects to binary.
 
+
 ABI for Tensors
 ------
-We adopt the idx format for tensor.
-Other ABI format will be encapulation format on top of the idx format.
+We adopt the idx format originally defined at
+<http://yann.lecun.com/exdb/mnist/> for tensor.
+
+             0        8        16       24       32
+             +--------+--------+--------+--------+
+             |  zero  |  zero  |  dtype |  rank  |
+             +--------+--------+--------+--------+
+         MSB |               dim 1 (length)      | LSB
+             +--------+--------+--------+--------+
+             |               dim 2 (width)       |
+             +--------+--------+--------+--------+
+             |               dim 3               |
+             +--------+--------+--------+--------+
+             |               dim 4               |
+             +--------+--------+--------+--------+
+             |               ...                 |
+             +--------+--------+--------+--------+
+             |               dim r               |
+             +--------+--------+--------+--------+
+             |                                   |
+             |               data                |
+             |                                   |
+             +--------+--------+--------+--------+
+
+The length of header is (rank + 1) * 4
+The length of data is dim_1 * ... * dim_r * len(dtype)
+
+dtype can be the following values:
+
+hex  | dec  | name          | len
+----------------------------------
+0x08 |  8   | unsigned byte | 1
+0x09 |  9   | signed byte   | 1
+0x0B |  11  | short         | 2
+0x0C |  12  | int           | 4
+0x0D |  13  | float         | 4
+0x0E |  14  | double        | 8
+
+limitations:
+Size of a single dimension is at most 2^32 - 1.
+
+
+Other ABI format will be encapsulation format on top of the idx format.
 
 ABI for model
 ABI for layer

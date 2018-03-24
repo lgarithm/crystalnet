@@ -30,13 +30,6 @@ foreach(main ${examples})
     target_link_libraries(${bin_name} crystalnet)
 endforeach()
 
-# file(GLOB examples examples/cpp/*.cpp)
-# foreach(main ${examples})
-#     get_filename_component(base_name ${main} NAME)
-#     string(REPLACE "." "_" bin_name ${base_name})
-#     add_executable(${bin_name} ${main})
-#     target_link_libraries(${bin_name} crystalnet)
-# endforeach()
-
 set(CMAKE_INSTALL_PREFIX $ENV{HOME}/local/crystalnet)  # TODO: make it configurable
 install(TARGETS crystalnet LIBRARY DESTINATION lib)
+install(FILES src/crystalnet.h src/crystalnet-ext.h DESTINATION include)  # TODO: use pattern
