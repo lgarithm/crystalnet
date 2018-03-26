@@ -9,18 +9,16 @@
 #include <crystalnet/core/operator.hpp>
 #include <crystalnet/core/shape.hpp>
 #include <crystalnet/core/tensor.hpp>
-#include <crystalnet/linag/base.hpp>
 
 struct node_t {
-    // int idx; // TODO: support index
     const std::string name;
+    const uint8_t dtype; // TODO: pass dtype in constructor
     const shape_t shape;
-    const uint8_t dtype;
 
     static constexpr const auto default_dtype = idx_type<float>::type;
 
-    node_t(const shape_t &shape, const char *pname = nullptr)
-        : name(create_name(pname)), shape(shape), dtype(default_dtype)
+    node_t(const std::string &name, const shape_t &shape)
+        : name(name), dtype(default_dtype), shape(shape)
     {
         // LOG_NODE_USAGE(shape, name);
     }
@@ -38,23 +36,14 @@ struct node_t {
 
     virtual void forward() const = 0;
     virtual void backward() const = 0;
-
-    static std::string create_name(const char *pname)
-    {
-        if (pname) {
-            return pname;
-        }
-        // TODO: check unique
-        return "node";
-    }
 };
 
 struct parameter_node_t : node_t {
     tensor_ref_t _value;
     tensor_t _gradient;
 
-    parameter_node_t(const tensor_ref_t &p, const std::string &name)
-        : node_t(p.shape, name.c_str()), _value(p), _gradient(shape, dtype)
+    parameter_node_t(const std::string &name, const tensor_ref_t &p)
+        : node_t(name, p.shape), _value(p), _gradient(shape, dtype)
     {
     }
 
@@ -68,8 +57,8 @@ struct placeholder_node_t : node_t {
     std::unique_ptr<tensor_ref_t> _value;
     tensor_t _gradient; // TODO: remove it
 
-    placeholder_node_t(const shape_t &shape, const std::string &name)
-        : node_t(shape, name.c_str()), _gradient(shape, dtype)
+    placeholder_node_t(const std::string &name, const shape_t &shape)
+        : node_t(name, shape), _gradient(shape, dtype)
     {
     }
 
@@ -88,8 +77,6 @@ struct placeholder_node_t : node_t {
 struct operator_node_t : node_t {
     static shape_t infer_shape(const operator_t &op, node_t *nodes[])
     {
-        const auto name = std::string(__func__) + "@" + op.name;
-        DEBUG(name.c_str());
         std::vector<shape_t> shapes;
         std::string sig;
         for (auto i = 0; i < op.arity; ++i) {
@@ -99,10 +86,9 @@ struct operator_node_t : node_t {
             }
             sig += std::to_string(nodes[i]->shape);
         }
-        printf("[D] infer shape of %s from inputs shapes: %s\n",
-               op.name.c_str(), sig.c_str());
         auto out_shape = (*op.infer)(shape_list_t(shapes));
-        printf("[D] -> %s\n", std::to_string(out_shape).c_str());
+        printf("[D] %s <- %s (%s)\n", std::to_string(out_shape).c_str(),
+               sig.c_str(), op.name.c_str());
         return out_shape;
     }
 
@@ -113,9 +99,9 @@ struct operator_node_t : node_t {
     tensor_t _value;
     tensor_t _gradient;
 
-    operator_node_t(const operator_t &op, node_t *inputs[],
-                    const std::string &name)
-        : node_t(infer_shape(op, inputs), name.c_str()),
+    operator_node_t(const std::string &name, const operator_t &op,
+                    node_t *inputs[])
+        : node_t(name, infer_shape(op, inputs)),
           inputs(input_list_t(inputs, inputs + op.arity)), op(op),
           _value(this->shape), _gradient(this->shape)
     {
@@ -175,8 +161,9 @@ struct operator_node_t : node_t {
 struct wrap_node_t : node_t {
     const node_t &wrapped;
 
-    wrap_node_t(const shape_t &shape, const node_t &node)
-        : node_t(shape, "wrap"), wrapped(node)
+    wrap_node_t(const std::string &name, const shape_t &shape,
+                const node_t &node)
+        : node_t(name, shape), wrapped(node)
     {
         check(shape.dim() == node.shape.dim());
     }

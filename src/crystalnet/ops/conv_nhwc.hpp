@@ -5,7 +5,6 @@
 
 #include <crystalnet/core/operator.hpp>
 #include <crystalnet/core/shape.hpp>
-#include <crystalnet/linag/base.hpp>
 #include <crystalnet/linag/linag.hpp>
 #include <crystalnet/utility/cast.hpp>
 #include <crystalnet/utility/range.hpp>
@@ -15,7 +14,7 @@ matrix_ref_t<T> cast_to_m(uint32_t m, uint32_t n,
                           const r_tensor_ref_t<T> &tensor)
 {
     check(m * n == tensor.shape.dim());
-    return matrix_ref_t<T>(m, n, tensor.data);
+    return matrix_ref_t<T>(ranked_shape_t<2>(m, n), tensor.data);
 }
 
 struct conv_nhwc {

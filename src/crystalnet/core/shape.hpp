@@ -51,6 +51,8 @@ struct shape_t {
         dims.insert(dims.end(), this->dims.begin(), this->dims.end());
         return shape_t(dims);
     }
+
+    bool operator==(const shape_t &other) const { return dims == other.dims; }
 };
 
 struct shape_list_t {
@@ -79,11 +81,19 @@ template <uint8_t r> struct ranked_shape_t {
     const std::array<uint32_t, r> dims;
 
     explicit ranked_shape_t(const std::array<uint32_t, r> &dims) : dims(dims) {}
+
+    template <typename... I>
+    explicit ranked_shape_t(I... i) : dims({static_cast<uint32_t>(i)...})
+    {
+        static_assert(sizeof...(i) == r);
+    }
+
     uint32_t dim() const
     {
         return std::accumulate(dims.begin(), dims.end(), 1,
                                std::multiplies<uint32_t>());
     }
+
     template <typename... I> uint32_t idx(I... i) const
     {
         static_assert(sizeof...(i) == r);
@@ -117,10 +127,10 @@ inline string to_string(const shape_t &shape)
     string buf;
     for (auto d : shape.dims) {
         if (!buf.empty()) {
-            buf += ",";
+            buf += ", ";
         }
         buf += to_string(d);
     }
-    return "shape(" + buf + ")";
+    return "[" + buf + "]";
 }
 }

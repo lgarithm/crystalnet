@@ -1,11 +1,10 @@
 #pragma once
 #include <utility>
 
-#include <crystalnet.h>
+#include <crystalnet-internal.h>
 #include <crystalnet/data/dataset.hpp>
-#include <crystalnet/linag/base.hpp>
 #include <crystalnet/model/model.hpp>
-#include <crystalnet/symbol/model.hpp>
+#include <crystalnet/ops/argmax.hpp>
 #include <crystalnet/train/optimizer.hpp>
 #include <crystalnet/utility/range.hpp>
 
@@ -19,15 +18,15 @@ struct s_trainer_t {
 
     static node_t *make_label(model_t *model)
     {
-        return model->ctx->make_placeholder(model->output->shape);
+        // TODO: generate a unique name
+        return model->ctx->make_placeholder("label", model->output->shape);
     }
 
     static node_t *make_loss(model_t *model, node_t *label,
                              operator_t *loss_func)
     {
         node_t *args[] = {label, model->output};
-        return model->ctx->make_operator(*loss_func, args,
-                                         loss_func->name.c_str());
+        return model->ctx->make_operator(loss_func->name, *loss_func, args);
     }
 
     s_trainer_t(const s_model_t *model, operator_t *loss_func,
@@ -80,8 +79,8 @@ struct s_trainer_t {
             m->output->forward();
             using T = float;
             for (auto i : range(batch_size)) {
-                auto p = argmax<T>(as_vector_ref<T>(label_s[i]));
-                auto q = argmax<T>(as_vector_ref<T>(m->output->value()[i]));
+                auto p = argmax(r_tensor_ref_t<T>(label_s[i]));
+                auto q = argmax(r_tensor_ref_t<T>(m->output->value()[i]));
                 p == q ? ++yes : ++no;
             }
             printf("test step: %u, %u/%u\n", step, yes, yes + no);
@@ -89,5 +88,3 @@ struct s_trainer_t {
         return std::make_pair(yes, yes + no);
     }
 };
-
-#include <crystalnet/train/trainer_old.hpp>

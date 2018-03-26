@@ -3,8 +3,9 @@
 
 #include <crystalnet.h>
 #include <crystalnet/core/debug.hpp>
+#include <crystalnet/core/error.hpp>
 #include <crystalnet/core/operator.hpp>
-#include <crystalnet/linag/base.hpp>
+#include <crystalnet/core/tensor.hpp>
 #include <crystalnet/utility/cast.hpp>
 #include <crystalnet/utility/range.hpp>
 
@@ -26,13 +27,14 @@ struct xentropy_1d {
         void operator()() const
         {
             check(inputs.arity() == arity);
-            auto a = as_vector_ref<T>(inputs[0]);
-            auto b = as_vector_ref<T>(inputs[1]);
-            auto c = r_tensor_ref_t<T>(output);
-            auto n = equally(a.n, b.n);
+            auto a = ranked<1, T>(inputs[0]);
+            auto b = ranked<1, T>(inputs[1]);
+            auto c = ranked<0, T>(output);
+            auto n = len(a);
+            check(n == len(b));
             T z = 0;
-            for (auto i = 0; i < n; ++i) {
-                z += a(i) * log(b(i));
+            for (auto i : range(n)) {
+                z += a.data[i] * log(b.data[i]);
             }
             c.data[0] = -z;
         }
@@ -42,12 +44,13 @@ struct xentropy_1d {
         void operator()() const
         {
             const T g = r_tensor_ref_t<T>(output_gradient).data[0];
-            const auto x = as_vector_ref<T>(inputs[0]);
-            const auto y = as_vector_ref<T>(inputs[1]);
-            const auto gx = as_vector_ref<T>(input_gradients[0]);
-            const auto gy = as_vector_ref<T>(input_gradients[1]);
-            const auto n = equally(x.n, y.n); // == gx.n == gy.n
-            for (auto i = 0; i < n; ++i) {
+            const auto x = ranked<1, T>(inputs[0]);
+            const auto y = ranked<1, T>(inputs[1]);
+            const auto gx = ranked<1, T>(input_gradients[0]);
+            const auto gy = ranked<1, T>(input_gradients[1]);
+            auto n = len(x);
+            check(n == len(y));
+            for (auto i : range(n)) {
                 gx.data[i] = g * -log(y.data[i]);
                 gy.data[i] = g * (-x.data[i] / y.data[i]);
             }

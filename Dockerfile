@@ -1,9 +1,8 @@
-FROM ubuntu:bionic
+FROM lgarithm/crystalnet-dev:ubuntu
 
-RUN apt update && \
-    apt install -y cmake g++ python3 golang-go valgrind cloc
 COPY . /crystalnet
 WORKDIR /crystalnet
+RUN ./utils/download-mnist.sh
 RUN make install && \
     make test && \
     make python_example && \

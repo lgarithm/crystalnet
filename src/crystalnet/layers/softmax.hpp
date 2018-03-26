@@ -8,8 +8,4 @@ template <> struct op_instance<softmax> {
 };
 
 struct softmax_layer : unary_op_layer<softmax> {
-    static s_layer_t *create(const shape_list_t *shape_list)
-    {
-        return new softmax_layer();
-    }
 };

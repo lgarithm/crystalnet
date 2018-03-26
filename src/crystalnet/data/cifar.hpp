@@ -1,6 +1,6 @@
 #pragma once
-
 #include <cstdint>
+#include <cstdio>
 #include <memory>
 
 #include <crystalnet.h>
@@ -29,8 +29,8 @@ dataset_t *load_cifar10_data(const std::string &filename)
     FILE *fp = fopen(filename.c_str(), "r");
     uint8_t *p = (uint8_t *)images->data;
     for (auto l = 0; l < n; ++l) {
-        fread((char *)labels->data + l, 1, 1, fp);
-        fread((char *)buffer, 3, 32 * 32, fp);
+        check(std::fread((char *)labels->data + l, 1, 1, fp) == 1);
+        check(std::fread((char *)buffer, 3, 32 * 32, fp) == 32 * 32);
         // [c, n, n] -> [n, n, c]
         // fread((char *)images->data + i * 32 * 32 * 3, 3, 32 * 32, fp);
         for (auto i = 0; i < 32; ++i) {

@@ -1,15 +1,15 @@
 #include <assert.h>
 
-#include <crystalnet.h>
+#include <crystalnet-internal.h>
 
 // y = softmax(flatten(x) * w + b)
-s_model_t *slp(shape_t *image_shape, uint8_t arity)
+s_model_t *slp(const shape_t *image_shape, uint8_t arity)
 {
-    shape_t *lable_shape = make_shape(1, arity);
-    shape_t *weight_shape = make_shape(2, shape_dim(image_shape), arity);
-    shape_t *x_wrap_shape = make_shape(1, shape_dim(image_shape));
+    const shape_t *lable_shape = new_shape(1, arity);
+    const shape_t *weight_shape = new_shape(2, shape_dim(image_shape), arity);
+    const shape_t *x_wrap_shape = new_shape(1, shape_dim(image_shape));
 
-    s_model_ctx_t *ctx = new_s_model_ctx();
+    s_model_ctx_t *ctx = make_s_model_ctx();
     s_node_t *x = var(ctx, image_shape);
     s_node_t *x_ = reshape(ctx, x_wrap_shape, x);
     s_node_t *w = covar(ctx, weight_shape);
@@ -22,18 +22,25 @@ s_model_t *slp(shape_t *image_shape, uint8_t arity)
     s_node_t *args3[] = {op2};
     s_node_t *op3 = apply(ctx, op_softmax, args3);
 
-    free_shape(lable_shape);
-    free_shape(weight_shape);
+    del_shape(lable_shape);
+    del_shape(weight_shape);
+    del_shape(x_wrap_shape);
     return new_s_model(ctx, x, op3);
 }
 
 void test_1()
 {
     uint8_t arity = 10;
-    shape_t *image_shape = make_shape(2, 28, 28);
-    s_model_t *model = slp(image_shape, arity);
-    free_s_model(model);
-    free_shape(image_shape);
+    const shape_t *image_shape = new_shape(2, 28, 28);
+    s_model_t *sm = slp(image_shape, arity);
+    parameter_ctx_t *pc = new_parameter_ctx();
+    for (int i = 1; i <= 3; ++i) {
+        model_t *pm = realize(pc, sm, i);
+        del_model(pm);
+    }
+    del_parameter_ctx(pc);
+    del_s_model(sm);
+    del_shape(image_shape);
 }
 
 int main()

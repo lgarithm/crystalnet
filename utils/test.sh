@@ -1,4 +1,8 @@
 #!/bin/sh
 
 set -e
-find tests/build/bin -type f -print -exec {} \;
+
+for t in $(find tests/build/bin -type f); do
+    echo "running $t"
+    $t
+done
