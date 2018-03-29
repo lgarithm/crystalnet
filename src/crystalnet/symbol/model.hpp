@@ -54,11 +54,11 @@ struct s_model_ctx_t {
 };
 
 struct s_model_t {
-    const s_model_ctx_t *const ctx;
-    const s_node_t *const input;
-    const s_node_t *const output;
+    const s_model_ctx_t &ctx;
+    const s_node_t &input;
+    const s_node_t &output;
 
-    s_model_t(s_model_ctx_t *ctx, s_node_t *input, s_node_t *output)
+    s_model_t(s_model_ctx_t &ctx, s_node_t &input, s_node_t &output)
         : ctx(ctx), input(input), output(output)
     {
     }

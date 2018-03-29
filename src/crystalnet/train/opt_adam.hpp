@@ -26,7 +26,7 @@ struct adam_optimizer_t : optimizer_t {
 
             uint32_t step;
 
-            p_ctx(const node_t *node)
+            explicit p_ctx(const node_t *node)
                 : node(node), _value(node->value()),
                   _gradient(node->gradient()), _delta(node->shape, node->dtype),
                   _moment(node->shape, node->dtype),
@@ -68,9 +68,9 @@ struct adam_optimizer_t : optimizer_t {
         // model_t *model;
         std::vector<std::unique_ptr<p_ctx>> p_ctxs;
 
-        ctx(model_t *model)
+        explicit ctx(model_t *model)
         {
-            for (auto node : model->ctx->params.items) {
+            for (auto node : model->ctx.params.items) {
                 p_ctxs.push_back(std::make_unique<p_ctx>(node));
             }
         }

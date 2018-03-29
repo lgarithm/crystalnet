@@ -1,6 +1,15 @@
 #include <crystalnet.h>
 #include <crystalnet/core/tensor.hpp>
 
+tensor_t::tensor_t(const shape_t &shape, uint8_t dtype)
+    : _tensor_meta_t(dtype, shape),
+      _data(new uint8_t[dtype_size(dtype) * shape.dim()]), data(_data.get()),
+      self(ref(*this))
+{
+    // LOG_TENSOR_USAGE(shape, dtype_size(dtype));
+    memset(data, 0, dtype_size(dtype) * shape.dim());
+}
+
 tensor_t *new_tensor(const shape_t *shape, uint8_t dtype)
 {
     return new tensor_t(*shape, dtype);
@@ -8,13 +17,18 @@ tensor_t *new_tensor(const shape_t *shape, uint8_t dtype)
 
 void del_tensor(const tensor_t *tensor) { delete tensor; }
 
-const tensor_ref_t *new_tensor_ref(const tensor_t *tensor)
+tensor_ref_t ref(const tensor_t &tensor)
 {
-    return new tensor_ref_t(*tensor);
+    return tensor_ref_t(tensor.shape, tensor.dtype, tensor.data);
 }
 
-void del_tensor_ref(const tensor_ref_t *r) { delete r; }
+const uint8_t tensor_dtype(const tensor_ref_t *tensor) { return tensor->dtype; }
+
+const shape_t *tensor_shape(const tensor_ref_t *tensor)
+{
+    return &tensor->shape;
+}
+
+const tensor_ref_t *tensor_ref(const tensor_t *tensor) { return &tensor->self; }
 
 void *tensor_data_ptr(const tensor_ref_t *r) { return r->data; }
-
-const shape_t *tensor_shape(tensor_t *tensor) { return &tensor->shape; }

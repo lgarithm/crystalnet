@@ -15,6 +15,7 @@
 * mini batch (done)
 * fix python binding crash on mac (done)
 * fix auto batch when batch_size = 1 (done)
+* make use of std::initializer_list
 * add configure
 * add C++ binding
 * add Haskell binding

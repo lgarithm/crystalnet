@@ -4,11 +4,11 @@
 #include <vector>
 
 #include <crystalnet.h>
-#include <crystalnet/core/debug.hpp>
 #include <crystalnet/core/error.hpp>
 #include <crystalnet/core/operator.hpp>
 #include <crystalnet/core/shape.hpp>
 #include <crystalnet/core/tensor.hpp>
+#include <crystalnet/core/tracer.hpp>
 
 struct node_t {
     const std::string name;
@@ -65,6 +65,7 @@ struct placeholder_node_t : node_t {
     void bind(const tensor_ref_t &r) override
     {
         check(r.dtype == dtype);
+        check(r.shape == shape);
         _value.reset(new tensor_ref_t(r));
     }
 
@@ -75,32 +76,23 @@ struct placeholder_node_t : node_t {
 };
 
 struct operator_node_t : node_t {
-    static shape_t infer_shape(const operator_t &op, node_t *nodes[])
+    static shape_t infer_shape(const operator_t &op, const node_t *nodes[])
     {
         std::vector<shape_t> shapes;
-        std::string sig;
         for (auto i = 0; i < op.arity; ++i) {
             shapes.push_back(nodes[i]->shape);
-            if (sig.size() > 0) {
-                sig += ", ";
-            }
-            sig += std::to_string(nodes[i]->shape);
         }
-        auto out_shape = (*op.infer)(shape_list_t(shapes));
-        printf("[D] %s <- %s (%s)\n", std::to_string(out_shape).c_str(),
-               sig.c_str(), op.name.c_str());
-        return out_shape;
+        return (*op.infer)(shape_list_t(shapes));
     }
 
-    using input_list_t = std::vector<node_t *>;
-    input_list_t inputs;
-
+    using input_list_t = std::vector<const node_t *>;
+    const input_list_t inputs;
     const operator_t &op;
     tensor_t _value;
     tensor_t _gradient;
 
     operator_node_t(const std::string &name, const operator_t &op,
-                    node_t *inputs[])
+                    const node_t *inputs[])
         : node_t(name, infer_shape(op, inputs)),
           inputs(input_list_t(inputs, inputs + op.arity)), op(op),
           _value(this->shape), _gradient(this->shape)
@@ -113,18 +105,18 @@ struct operator_node_t : node_t {
     tensor_ref_list_t _input_refs() const
     {
         std::vector<tensor_ref_t> input_refs;
-        for (auto i : this->inputs) {
-            input_refs.push_back(i->value());
-        }
+        std::transform(inputs.begin(), inputs.end(),
+                       std::back_inserter(input_refs),
+                       [](auto i) { return i->value(); });
         return tensor_ref_list_t(input_refs);
     }
 
     tensor_ref_list_t _input_grad_refs() const
     {
         std::vector<tensor_ref_t> grad_refs;
-        for (auto i : this->inputs) {
-            grad_refs.push_back(i->gradient());
-        }
+        std::transform(inputs.begin(), inputs.end(),
+                       std::back_inserter(grad_refs),
+                       [](auto i) { return i->gradient(); });
         return tensor_ref_list_t(grad_refs);
     }
 
@@ -136,7 +128,7 @@ struct operator_node_t : node_t {
         // TODO: op.forward must be present
         if (op.forward) {
             forward_ctx_t ctx(_input_refs(), ref(_value));
-            (*op.forward)(ctx);
+            TRACE_NAME(op.name, (*op.forward)(ctx));
         }
     }
 
@@ -144,13 +136,9 @@ struct operator_node_t : node_t {
     {
         // TODO: op.backward should be present
         if (op.backward) {
-            tensor_ref_list_t input = _input_refs();
-            tensor_ref_list_t input_grads = _input_grad_refs();
-            tensor_ref_t grad(_gradient);
-
             backward_ctx_t ctx(_input_refs(), ref(_value), _input_grad_refs(),
                                ref(_gradient));
-            (*op.backward)(ctx);
+            TRACE_NAME(op.name, (*op.backward)(ctx));
         }
         for (auto i : inputs) {
             i->backward();

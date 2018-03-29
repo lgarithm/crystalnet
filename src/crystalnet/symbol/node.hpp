@@ -123,7 +123,7 @@ struct s_operator_node_t : s_node_t {
 
     node_t *realize(model_ctx_t &ctx, const model_option_t &opt) const override
     {
-        std::vector<node_t *> _args;
+        std::vector<const node_t *> _args;
         for (auto p : inputs.nodes) {
             _args.push_back(p->realize(ctx, opt));
         }

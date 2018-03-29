@@ -5,4 +5,4 @@
 
 cv::Mat square_normalize(const cv::Mat &, int r);
 void info(const cv::Mat &, const std::string &);
-std::size_t to_hwc(const cv::Mat &, void *);
+std::size_t to_hwc(const cv::Mat &, const tensor_ref_t *);

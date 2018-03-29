@@ -42,6 +42,7 @@ extern s_node_t *transform_all(s_model_ctx_t *, p_layer_t layers[], s_node_t *);
 // debug APIs
 extern void s_model_info(const s_model_t *);
 extern dataset_t *new_fake_dataset(const shape_t *, uint32_t);
+extern void debug_tensor(const char *, const tensor_ref_t *);
 
 // high level export APIs
 typedef s_model_t *(classification_model_func_t)(const shape_t *, uint32_t);
@@ -52,6 +53,8 @@ extern void del_classifier(const classifier_t *);
 extern void classifier_load(const classifier_t *, const char *,
                             const tensor_ref_t *);
 extern uint32_t most_likely(const classifier_t *, const tensor_ref_t *);
+extern void top_likely(const classifier_t *, const tensor_ref_t *, uint32_t,
+                       int32_t *);
 
 #ifdef __cplusplus
 }

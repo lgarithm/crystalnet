@@ -8,7 +8,6 @@
 #include <vector>
 
 #include <crystalnet.h>
-#include <crystalnet/core/debug.hpp>
 #include <crystalnet/core/error.hpp>
 #include <crystalnet/core/idx.hpp>
 #include <crystalnet/core/shape.hpp>
@@ -22,30 +21,11 @@ struct _tensor_meta_t {
     }
 };
 
-struct tensor_t : _tensor_meta_t {
-    const std::unique_ptr<uint8_t[]> _data;
-    void *const data;
-
-    explicit tensor_t(const shape_t &shape,
-                      uint8_t dtype = idx_type<float>::type)
-        : _tensor_meta_t(dtype, shape),
-          _data(new uint8_t[dtype_size(dtype) * shape.dim()]), data(_data.get())
-    {
-        LOG_TENSOR_USAGE(shape, dtype_size(dtype));
-        memset(data, 0, dtype_size(dtype) * shape.dim());
-    }
-};
-
 struct tensor_ref_t : _tensor_meta_t {
     void *const data;
 
     tensor_ref_t(const shape_t &shape, uint8_t dtype, void *data)
         : _tensor_meta_t(dtype, shape), data(data)
-    {
-    }
-
-    explicit tensor_ref_t(const tensor_t &tensor)
-        : _tensor_meta_t(tensor.dtype, tensor.shape), data(tensor.data)
     {
     }
 
@@ -76,6 +56,17 @@ struct tensor_ref_t : _tensor_meta_t {
     }
 };
 
+struct tensor_t : _tensor_meta_t {
+    const std::unique_ptr<uint8_t[]> _data;
+    void *const data;
+    const tensor_ref_t self;
+
+    explicit tensor_t(const shape_t &shape,
+                      uint8_t dtype = idx_type<float>::type);
+};
+
+tensor_ref_t ref(const tensor_t &);
+
 struct tensor_ref_list_t {
     const std::vector<tensor_ref_t> _args;
     explicit tensor_ref_list_t(const std::vector<tensor_ref_t> &args)
@@ -93,8 +84,6 @@ struct tensor_ref_list_t {
         return shape_list_t(shapes);
     }
 };
-
-inline tensor_ref_t ref(const tensor_t &tensor) { return tensor_ref_t(tensor); }
 
 template <typename R> struct r_tensor_ref_t {
     const shape_t shape;
@@ -144,7 +133,20 @@ template <typename R, uint8_t r> struct ranked_tensor_ref_t {
         : shape(shape), data(data)
     {
     }
+
     void fill(R x) const { std::fill(data, data + shape.dim(), x); }
+
+    auto operator[](uint32_t idx) const
+    {
+        static_assert(r > 0);
+        check(idx < shape.dims[0]);
+        const shape_t _new_shape(
+            std::vector<uint32_t>(shape.dims.begin() + 1, shape.dims.end()));
+        const auto new_shape = ranked<r - 1>(_new_shape);
+        return ranked_tensor_ref_t<R, r - 1>(new_shape,
+                                             data + idx * new_shape.dim());
+    }
+
     template <typename... I> R &at(I... i) const
     {
         return data[shape.idx(i...)];
@@ -196,8 +198,15 @@ inline string to_string(const tensor_ref_t &t)
 }
 }
 
+template <typename T> std::string summary(const r_tensor_ref_t<T> &r)
+{
+    constexpr const char *const fmt = "min: %12f    meam: %12f    max: %12f";
+    char line[256];
+    sprintf(line, fmt, r.min(), r.mean(), r.max());
+    return line;
+}
+
 template <typename T> void print(const r_tensor_ref_t<T> &r)
 {
-    constexpr const char *const fmt = "min: %12f    meam: %12f    max: %12f\n";
-    printf(fmt, r.min(), r.mean(), r.max());
+    printf("%s\n", summary(r).c_str());
 }

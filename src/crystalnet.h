@@ -47,10 +47,10 @@ extern const shape_list_t *mk_shape_list(shape_ctx_t *,
 
 extern tensor_t *new_tensor(const shape_t *, uint8_t);
 extern void del_tensor(const tensor_t *);
-extern const tensor_ref_t *new_tensor_ref(const tensor_t *);
-extern void del_tensor_ref(const tensor_ref_t *);
+extern const tensor_ref_t *tensor_ref(const tensor_t *);
 extern void *tensor_data_ptr(const tensor_ref_t *);
-extern const shape_t *tensor_shape(tensor_t *);
+extern const shape_t *tensor_shape(const tensor_ref_t *);
+extern const uint8_t tensor_dtype(const tensor_ref_t *);
 
 // operators
 extern operator_t *register_op(const char *const, uint8_t, shape_func_t *,

@@ -18,14 +18,14 @@ void test_1()
 {
     {
         tensor_t *t = _load_mnist("t10k-labels-idx1-ubyte");
-        const shape_t *s = tensor_shape(t);
+        const shape_t *s = tensor_shape(tensor_ref(t));
         assert(shape_rank(s) == 1);
         assert(shape_dim(s) == 10000);
         del_tensor(t);
     }
     {
         tensor_t *t = _load_mnist("t10k-images-idx3-ubyte");
-        const shape_t *s = tensor_shape(t);
+        const shape_t *s = tensor_shape(tensor_ref(t));
         assert(shape_rank(s) == 3);
         assert(shape_dim(s) == 28 * 28 * 10000);
         del_tensor(t);

@@ -7,8 +7,6 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 
 add_definitions(-funroll-loops)
-add_definitions(-DCRYSTALNET_DEBUG)  # TODO: make it optional
-add_definitions(-DENABLE_DEBUG_TIMER)  # TODO: make it optional
 if (${USE_OPENBLAS})
     add_definitions(-DCRYSTALNET_USE_CBLAS)
 endif()

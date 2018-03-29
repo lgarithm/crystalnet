@@ -6,7 +6,7 @@ void s_model_info(const s_model_t *m)
 {
     uint32_t tot = 0;
     uint32_t idx = 0;
-    for (const auto &n : m->ctx->params.items) {
+    for (const auto &n : m->ctx.params.items) {
         ++idx;
         tot += n->shape.dim();
         printf("[i] %-4u %-12u %s\n", idx, n->shape.dim(),

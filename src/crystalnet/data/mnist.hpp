@@ -15,7 +15,6 @@ tensor_t *_load_mnist(const std::string &name)
 
 dataset_t *load_mnist_data(const std::string &name)
 {
-    DEBUG(__func__);
     auto images =
         std::unique_ptr<tensor_t>(_load_mnist(name + "-images-idx3-ubyte"));
     tensor_t *images_ = cast_to<float>(r_tensor_ref_t<uint8_t>(*images));

@@ -51,9 +51,10 @@ cv::Mat square_normalize(const cv::Mat &img, int r)
     return normalize(img);
 }
 
-std::size_t to_hwc(const cv::Mat &img, void *tensor)
+std::size_t to_hwc(const cv::Mat &img, const tensor_ref_t *tensor)
 {
     const auto len = img.dataend - img.data;
-    memcpy(tensor, img.data, len);
+    assert(tensor_dtype(tensor) == dtypes.u8);
+    memcpy(tensor_data_ptr(tensor), img.data, len);
     return len;
 }

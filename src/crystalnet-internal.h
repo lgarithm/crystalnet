@@ -7,6 +7,7 @@ extern "C" {
 #endif
 
 typedef struct model_t model_t;
+typedef struct model_ctx_t model_ctx_t;
 typedef struct parameter_ctx_t parameter_ctx_t;
 
 extern model_t *realize(parameter_ctx_t *, const s_model_t *, uint32_t);

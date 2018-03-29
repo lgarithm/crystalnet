@@ -1,6 +1,5 @@
 #pragma once
 #include <crystalnet.h>
-#include <crystalnet/core/debug.hpp>
 #include <crystalnet/core/operator.hpp>
 #include <crystalnet/core/tensor.hpp>
 #include <crystalnet/linag/linag.hpp>
