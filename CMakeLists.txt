@@ -31,3 +31,8 @@ endforeach()
 set(CMAKE_INSTALL_PREFIX $ENV{HOME}/local/crystalnet)  # TODO: make it configurable
 install(TARGETS crystalnet LIBRARY DESTINATION lib)
 install(FILES src/crystalnet.h src/crystalnet-ext.h DESTINATION include)  # TODO: use pattern
+
+
+add_custom_target(doxygen COMMAND doxygen ${CMAKE_SOURCE_DIR}/docs/Doxyfile)
+# add_custom_target(sphinx-doc COMMAND sphinx-build -b html html sphinx/build/html
+#                   DEPENDS doxygen)

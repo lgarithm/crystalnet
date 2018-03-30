@@ -48,6 +48,12 @@ struct tensor_ref_t : _tensor_meta_t {
                             (uint8_t *)(data) + offset);
     }
 
+    tensor_ref_t reshape(const shape_t &new_shape) const
+    {
+        check(shape.dim() == new_shape.dim());
+        return tensor_ref_t(new_shape, dtype, data);
+    }
+
     void copy_from(const tensor_ref_t &r) const
     {
         check(dtype == r.dtype);
@@ -184,17 +190,9 @@ template <typename T> vector_ref_t<T> flatten(const tensor_ref_t &r)
 
 namespace std
 {
-inline string to_string(const tensor_t &t)
-{
-    return string("tensor(dtype=") + dtype_name(t.dtype) + ",rank" +
-           to_string(t.shape.rank()) + ",dim" + to_string(t.shape.dim());
-}
 inline string to_string(const tensor_ref_t &t)
 {
-    return string("tensor_ref(dtype=") + dtype_name(t.dtype) +
-           ",rank=" + to_string(t.shape.rank()) +
-           ",dim=" + to_string(t.shape.dim()) + ",shape=" + to_string(t.shape) +
-           ")";
+    return dtype_name(t.dtype) + to_string(t.shape);
 }
 }
 

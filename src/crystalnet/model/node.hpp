@@ -158,13 +158,12 @@ struct wrap_node_t : node_t {
 
     tensor_ref_t value() const override
     {
-        auto v = wrapped.value();
-        return tensor_ref_t(this->shape, v.dtype, v.data);
+        return wrapped.value().reshape(shape);
     }
+
     tensor_ref_t gradient() const override
     {
-        auto v = wrapped.gradient();
-        return tensor_ref_t(this->shape, v.dtype, v.data);
+        return wrapped.gradient().reshape(shape);
     }
 
     void forward() const override { wrapped.forward(); }
