@@ -3,10 +3,10 @@
 #include <tuple>
 #include <vector>
 
+#include <crystalnet/core/cast.hpp>
 #include <crystalnet/core/operator.hpp>
 #include <crystalnet/core/shape.hpp>
 #include <crystalnet/linag/linag.hpp>
-#include <crystalnet/utility/cast.hpp>
 #include <crystalnet/utility/range.hpp>
 
 template <typename T>
@@ -23,9 +23,9 @@ struct conv_nhwc {
     // [n, h, w, c], [r, s, c, d] -> [n, u, v, d]
     static shape_t infer(const shape_list_t &shape_list)
     {
-        const auto[p, q] = cast<arity>(shape_list.shapes);
-        const auto[n, h, w, c] = cast<4>(p.dims);
-        const auto[r, s, _c, d] = cast<4>(q.dims);
+        const auto[p, q] = cast<arity>(shape_list.shapes, auto_hint);
+        const auto[n, h, w, c] = cast<4>(p.dims, auto_hint);
+        const auto[r, s, _c, d] = cast<4>(q.dims, auto_hint);
         check(c == _c);
         return shape_t(n, h - r + 1, w - s + 1, d);
     }
@@ -35,8 +35,8 @@ struct conv_nhwc {
     static void lowering(const r_tensor_ref_t<T> &x,
                          const r_tensor_ref_t<T> &x_)
     {
-        const auto[n, h, w, c] = cast<4>(x.shape.dims);
-        const auto[_n, u, v, r, s, _c] = cast<6>(x_.shape.dims);
+        const auto[n, h, w, c] = cast<4>(x.shape.dims, auto_hint);
+        const auto[_n, u, v, r, s, _c] = cast<6>(x_.shape.dims, auto_hint);
         T *px_ = x_.data;
         for (auto l : range(n)) {
             for (auto i : range(u)) {
@@ -61,8 +61,8 @@ struct conv_nhwc {
     static void uppering(const r_tensor_ref_t<T> &x,
                          const r_tensor_ref_t<T> &x_)
     {
-        const auto[n, h, w, c] = cast<4>(x.shape.dims);
-        const auto[_n, u, v, r, s, _c] = cast<6>(x_.shape.dims);
+        const auto[n, h, w, c] = cast<4>(x.shape.dims, auto_hint);
+        const auto[_n, u, v, r, s, _c] = cast<6>(x_.shape.dims, auto_hint);
         x.fill(0);
         T *px_ = x_.data;
         for (auto l : range(n)) {
@@ -89,9 +89,9 @@ struct conv_nhwc {
             const auto y = r_tensor_ref_t<T>(inputs[1]);
             const auto z = r_tensor_ref_t<T>(output);
 
-            const auto[n, h, w, c] = cast<4>(x.shape.dims);
-            const auto[r, s, _c, d] = cast<4>(y.shape.dims);
-            const auto[_n, u, v, _d] = cast<4>(z.shape.dims);
+            const auto[n, h, w, c] = cast<4>(x.shape.dims, auto_hint);
+            const auto[r, s, _c, d] = cast<4>(y.shape.dims, auto_hint);
+            const auto[_n, u, v, _d] = cast<4>(z.shape.dims, auto_hint);
             // TODO: use mpool
 
             tensor_t x__(shape_t(n, u, v, r, s, c), idx_type<T>::type);
@@ -114,9 +114,9 @@ struct conv_nhwc {
             const auto gy = r_tensor_ref_t<T>(input_gradients[1]);
             const auto gz = r_tensor_ref_t<T>(output_gradient);
 
-            const auto[n, h, w, c] = cast<4>(x.shape.dims);
-            const auto[r, s, _c, d] = cast<4>(y.shape.dims);
-            const auto[_n, u, v, _d] = cast<4>(z.shape.dims);
+            const auto[n, h, w, c] = cast<4>(x.shape.dims, auto_hint);
+            const auto[r, s, _c, d] = cast<4>(y.shape.dims, auto_hint);
+            const auto[_n, u, v, _d] = cast<4>(z.shape.dims, auto_hint);
 
             tensor_t gx__(shape_t(n, u, v, r, s, c), idx_type<T>::type);
             const auto gx_ = r_tensor_ref_t<T>(gx__);
@@ -142,9 +142,9 @@ struct conv_hwc {
     // [h, w, c], [r, s, c, d] -> [h - r + 1, w - s + 1, d]
     static shape_t infer(const shape_list_t &shape_list)
     {
-        const auto[p, q] = cast<arity>(shape_list.shapes);
-        const auto[h, w, c] = cast<3>(p.dims);
-        const auto[r, s, _c, d] = cast<4>(q.dims);
+        const auto[p, q] = cast<arity>(shape_list.shapes, auto_hint);
+        const auto[h, w, c] = cast<3>(p.dims, auto_hint);
+        const auto[r, s, _c, d] = cast<4>(q.dims, auto_hint);
         check(c == _c);
         return shape_t(h - r + 1, w - s + 1, d);
     }
@@ -185,7 +185,7 @@ struct conv2d {
 
     static shape_t infer(const shape_list_t &shape_list)
     {
-        const auto[p, q] = cast<arity>(shape_list.shapes);
+        const auto[p, q] = cast<arity>(shape_list.shapes, auto_hint);
         if (p.rank() == 3) {
             return conv_hwc::infer(shape_list);
         } else {
@@ -199,7 +199,7 @@ struct conv2d {
     struct forward : forward_ctx_t {
         void operator()() const
         {
-            const auto[p, q] = cast<2>(inputs.shapes().shapes);
+            const auto[p, q] = cast<2>(inputs.shapes().shapes, auto_hint);
             if (p.rank() == 3) {
                 forward_ctx_t ctx(*this);
                 call<conv_hwc::forward>(ctx);
@@ -214,7 +214,7 @@ struct conv2d {
     struct backward : backward_ctx_t {
         void operator()() const
         {
-            const auto[p, q] = cast<2>(inputs.shapes().shapes);
+            const auto[p, q] = cast<2>(inputs.shapes().shapes, auto_hint);
             if (p.rank() == 3) {
                 backward_ctx_t ctx(*this);
                 call<conv_hwc::backward>(ctx);

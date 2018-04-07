@@ -1,7 +1,7 @@
 #include <assert.h>
 #include <stdio.h>
 
-#include <crystalnet.h>
+#include <crystalnet-internal.h>
 
 typedef shape_t const *p_shape_t;
 
@@ -13,7 +13,7 @@ void test_1()
                 mk_shape(sc, 3, 28, 28, 32),
                 NULL,
             });
-    operator_t *op = make_op_pool2d(2, 2, 2, 2);
+    const operator_t *op = make_op_pool2d(2, 2, 2, 2);
     shape_t *out_shape = infer(op, shape_list);
     assert(shape_rank(out_shape) == 3);
     assert(shape_dim(out_shape) == 14 * 14 * 32);
@@ -29,7 +29,7 @@ void test_2()
                 mk_shape(sc, 4, 10, 28, 28, 32),
                 NULL,
             });
-    operator_t *op = make_op_pool2d(2, 2, 2, 2);
+    const operator_t *op = make_op_pool2d(2, 2, 2, 2);
     shape_t *out_shape = infer(op, shape_list);
     assert(shape_rank(out_shape) == 4);
     assert(shape_dim(out_shape) == 10 * 14 * 14 * 32);

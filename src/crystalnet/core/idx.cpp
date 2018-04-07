@@ -3,6 +3,15 @@
 #include <crystalnet/core/idx.hpp>
 #include <crystalnet/core/tensor.hpp>
 
+const dtypes_t dtypes = {
+    idx_type<uint8_t>::type, //
+    idx_type<int8_t>::type,  //
+    idx_type<int16_t>::type, //
+    idx_type<int32_t>::type, //
+    idx_type<float>::type,   //
+    idx_type<double>::type,  //
+};
+
 void _reverse_byte_order(uint32_t &x)
 {
     x = (x << 24) | ((x << 8) & 0xff0000) | ((x >> 8) & 0xff00) | (x >> 24);

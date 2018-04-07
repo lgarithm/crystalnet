@@ -2,8 +2,8 @@
 #include <crystalnet/train/agent.hpp>
 #include <crystalnet/train/trainer.hpp>
 
-s_trainer_t *new_s_trainer(s_model_t *model, operator_t *loss,
-                           optimizer_t *optimizer)
+s_trainer_t *new_s_trainer(const s_model_t *model, const operator_t *loss,
+                           const optimizer_t *optimizer)
 {
     return new s_trainer_t(model, loss, optimizer);
 }

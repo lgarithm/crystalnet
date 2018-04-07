@@ -14,8 +14,8 @@ struct s_trainer_t {
 
     parameter_ctx_t p_ctx;
     const s_model_t *const model;
-    operator_t *const loss_func;
-    optimizer_t *const optimizer;
+    const operator_t *const loss_func;
+    const optimizer_t *const optimizer;
 
     static node_t *make_label(model_t *model)
     {
@@ -24,14 +24,14 @@ struct s_trainer_t {
     }
 
     static node_t *make_loss(model_t *model, node_t *label,
-                             operator_t *loss_func)
+                             const operator_t *loss_func)
     {
         const node_t *args[] = {label, &(model->output)};
         return model->ctx.make_operator(loss_func->name, *loss_func, args);
     }
 
-    s_trainer_t(const s_model_t *model, operator_t *loss_func,
-                optimizer_t *optimizer)
+    s_trainer_t(const s_model_t *model, const operator_t *loss_func,
+                const optimizer_t *optimizer)
         : model(model), loss_func(loss_func), optimizer(optimizer)
     {
     }

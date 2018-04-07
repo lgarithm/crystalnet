@@ -1,9 +1,9 @@
 #pragma once
 #include <crystalnet.h>
+#include <crystalnet/core/cast.hpp>
 #include <crystalnet/core/operator.hpp>
 #include <crystalnet/core/tensor.hpp>
 #include <crystalnet/linag/linag.hpp>
-#include <crystalnet/utility/cast.hpp>
 #include <crystalnet/utility/range.hpp>
 
 struct relu {
@@ -11,7 +11,7 @@ struct relu {
 
     static shape_t infer(const shape_list_t &shape_list)
     {
-        const auto[p] = cast<arity>(shape_list.shapes);
+        const auto[p] = cast<arity>(shape_list.shapes, auto_hint);
         return p;
     }
 

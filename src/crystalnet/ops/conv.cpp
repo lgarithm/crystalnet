@@ -4,8 +4,8 @@
 #include <crystalnet/core/shape.hpp>
 #include <crystalnet/ops/conv_nhwc_generic.hpp>
 
-operator_t *make_op_conv2d(uint32_t padding_h, uint32_t padding_w,
-                           uint32_t stride_h, uint32_t stride_w)
+const operator_t *make_op_conv2d(uint32_t padding_h, uint32_t padding_w,
+                                 uint32_t stride_h, uint32_t stride_w)
 {
     static GC<op_conv2d_impl_t> gc;
     const auto op = gc(new op_conv2d_impl_t(

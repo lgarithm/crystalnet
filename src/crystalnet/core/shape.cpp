@@ -1,7 +1,7 @@
 #include <cstdarg>
 #include <vector>
 
-#include <crystalnet.h>
+#include <crystalnet-internal.h>
 #include <crystalnet/core/shape.hpp>
 
 const shape_t *new_shape(int n, ...)

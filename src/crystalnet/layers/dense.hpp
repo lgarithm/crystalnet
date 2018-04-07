@@ -4,7 +4,6 @@
 #include <crystalnet/layers/layer.hpp>
 #include <crystalnet/ops/const.hpp>
 #include <crystalnet/ops/truncated_normal.hpp>
-#include <crystalnet/utility/cast.hpp>
 
 struct dense : s_layer_t {
     const uint32_t n;

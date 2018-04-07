@@ -2,10 +2,10 @@
 #include <cmath>
 
 #include <crystalnet.h>
+#include <crystalnet/core/cast.hpp>
 #include <crystalnet/core/operator.hpp>
 #include <crystalnet/linag/linag.hpp>
 #include <crystalnet/ops/batch.hpp>
-#include <crystalnet/utility/cast.hpp>
 #include <crystalnet/utility/range.hpp>
 
 template <typename T>
@@ -42,7 +42,7 @@ struct softmax_1d {
 
     static shape_t infer(const shape_list_t &shape_list)
     {
-        const auto[p] = cast<arity>(shape_list.shapes);
+        const auto[p] = cast<arity>(shape_list.shapes, auto_hint);
         return p;
     }
 
@@ -74,7 +74,7 @@ struct softmax {
 
     static shape_t infer(const shape_list_t &shape_list)
     {
-        const auto[p] = cast<arity>(shape_list.shapes);
+        const auto[p] = cast<arity>(shape_list.shapes, auto_hint);
         return p;
     }
 
@@ -83,7 +83,7 @@ struct softmax {
     struct forward : forward_ctx_t {
         void operator()() const
         {
-            const auto[p] = cast<1>(inputs.shapes().shapes);
+            const auto[p] = cast<1>(inputs.shapes().shapes, auto_hint);
             if (p.rank() == 1) {
                 (*(softmax_1d::forward *)this)();
             } else {
@@ -96,7 +96,7 @@ struct softmax {
     struct backward : backward_ctx_t {
         void operator()() const
         {
-            const auto[p] = cast<1>(inputs.shapes().shapes);
+            const auto[p] = cast<1>(inputs.shapes().shapes, auto_hint);
             if (p.rank() == 1) {
                 (*(softmax_1d::backward *)this)();
             } else {

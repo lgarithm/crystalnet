@@ -2,10 +2,10 @@
 #include <cmath>
 
 #include <crystalnet.h>
+#include <crystalnet/core/cast.hpp>
 #include <crystalnet/core/error.hpp>
 #include <crystalnet/core/operator.hpp>
 #include <crystalnet/core/tensor.hpp>
-#include <crystalnet/utility/cast.hpp>
 #include <crystalnet/utility/range.hpp>
 
 struct xentropy_1d {
@@ -13,7 +13,7 @@ struct xentropy_1d {
 
     static shape_t infer(const shape_list_t &shape_list)
     {
-        const auto[p, q] = cast<arity>(shape_list.shapes);
+        const auto[p, q] = cast<arity>(shape_list.shapes, auto_hint);
         check(p.rank() == 1);
         check(q.rank() == 1);
         check(p.dim() == q.dim());
@@ -63,9 +63,9 @@ struct xentropy_2d {
     struct forward : forward_ctx_t {
         void operator()() const
         {
-            const auto[p, q] = cast<2>(inputs.shapes().shapes);
-            const auto[m, n] = cast<2>(p.dims);
-            const auto[x, y] = cast<2>(inputs._args);
+            const auto[p, q] = cast<2>(inputs.shapes().shapes, auto_hint);
+            const auto[m, n] = cast<2>(p.dims, auto_hint);
+            const auto[x, y] = cast<2>(inputs._args, auto_hint);
             for (auto i : range(m)) {
                 forward_ctx_t ctx(tensor_ref_list_t({x[i], y[i]}), output[i]);
                 (*(xentropy_1d::forward *)&ctx)();
@@ -76,10 +76,10 @@ struct xentropy_2d {
     struct backward : backward_ctx_t {
         void operator()() const
         {
-            const auto[p, q] = cast<2>(inputs.shapes().shapes);
-            const auto[m, n] = cast<2>(p.dims);
-            const auto[x, y] = cast<2>(inputs._args);
-            const auto[gx, gy] = cast<2>(input_gradients._args);
+            const auto[p, q] = cast<2>(inputs.shapes().shapes, auto_hint);
+            const auto[m, n] = cast<2>(p.dims, auto_hint);
+            const auto[x, y] = cast<2>(inputs._args, auto_hint);
+            const auto[gx, gy] = cast<2>(input_gradients._args, auto_hint);
             for (auto i : range(m)) {
                 backward_ctx_t ctx(tensor_ref_list_t({x[i], y[i]}), output[i],
                                    tensor_ref_list_t({gx[i], gy[i]}),
@@ -95,7 +95,7 @@ struct xentropy {
 
     static shape_t infer(const shape_list_t &shape_list)
     {
-        const auto[p, q] = cast<arity>(shape_list.shapes);
+        const auto[p, q] = cast<arity>(shape_list.shapes, auto_hint);
         check(p.dims == q.dims);
         return shape_t(std::vector<uint32_t>(p.dims.begin(), p.dims.end() - 1));
     }
@@ -105,7 +105,7 @@ struct xentropy {
     struct forward : forward_ctx_t {
         void operator()() const
         {
-            const auto[p, q] = cast<arity>(inputs.shapes().shapes);
+            const auto[p, q] = cast<arity>(inputs.shapes().shapes, auto_hint);
             if (p.rank() == 1) {
                 (*(xentropy_1d::forward *)this)();
             } else {
@@ -118,7 +118,7 @@ struct xentropy {
     struct backward : backward_ctx_t {
         void operator()() const
         {
-            const auto[p, q] = cast<arity>(inputs.shapes().shapes);
+            const auto[p, q] = cast<arity>(inputs.shapes().shapes, auto_hint);
             if (p.rank() == 1) {
                 (*(xentropy_1d::backward *)this)();
             } else {

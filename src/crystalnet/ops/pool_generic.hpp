@@ -2,10 +2,10 @@
 #include <algorithm>
 #include <limits>
 
+#include <crystalnet/core/cast.hpp>
 #include <crystalnet/core/operator.hpp>
 #include <crystalnet/core/shape.hpp>
 #include <crystalnet/ops/batch.hpp>
-#include <crystalnet/utility/cast.hpp>
 #include <crystalnet/utility/range.hpp>
 
 struct pool2d_c {
@@ -41,8 +41,8 @@ struct pool2d_c {
     static shape_t infer(const shape_list_t &shape_list,
                          const trait_t &t = trait_t())
     {
-        const auto[p] = cast<arity>(shape_list.shapes);
-        const auto[n, h, w, c] = cast<4>(p.dims);
+        const auto[p] = cast<arity>(shape_list.shapes, auto_hint);
+        const auto[n, h, w, c] = cast<4>(p.dims, auto_hint);
         const auto h_ = output_size(h, t.filter.dims[0], t.stride.dims[0]);
         const auto w_ = output_size(w, t.filter.dims[1], t.stride.dims[1]);
         return shape_t(n, h_, w_, c);
@@ -123,7 +123,7 @@ struct op_pool2d_impl_t {
 
     shape_t infer(const shape_list_t &shape_list) const
     {
-        const auto[p] = cast<arity>(shape_list.shapes);
+        const auto[p] = cast<arity>(shape_list.shapes, auto_hint);
         if (p.rank() == 3) {
             return pool2d_c::infer(shape_list_t({p.batch(1)}), t).sub();
         }
@@ -132,7 +132,7 @@ struct op_pool2d_impl_t {
 
     void forward(const forward_ctx_t &ctx) const
     {
-        const auto[p] = cast<arity>(ctx.inputs.shapes().shapes);
+        const auto[p] = cast<arity>(ctx.inputs.shapes().shapes, auto_hint);
         if (p.rank() == 3) {
             call<pool2d_c::forward>(embed(0, ctx), t);
             return;
@@ -143,7 +143,7 @@ struct op_pool2d_impl_t {
 
     void backward(const backward_ctx_t &ctx) const
     {
-        const auto[p] = cast<arity>(ctx.inputs.shapes().shapes);
+        const auto[p] = cast<arity>(ctx.inputs.shapes().shapes, auto_hint);
         if (p.rank() == 3) {
             call<pool2d_c::backward>(embed(0, ctx), t);
             return;

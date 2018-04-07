@@ -15,7 +15,7 @@ print(image_shape)
 
 def slp(image_shape: c.Shape, arity: int):
     x = c.var(image_shape)
-    x_ = c.reshape(x, c.Shape(image_shape.dim()))
+    x_ = c.reshape(c.Shape(image_shape.dim()), x)
     w = c.covar(c.Shape(image_shape.dim(), arity))
     b = c.covar(c.Shape(arity))
     y = c.apply(c.mul, x_, w)
@@ -24,4 +24,5 @@ def slp(image_shape: c.Shape, arity: int):
     return c.Model(x, o)
 
 
-# m = slp(image_shape, 10)
+m = slp(image_shape, 10)
+print(m)

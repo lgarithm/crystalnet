@@ -7,9 +7,9 @@
 #include <utility>
 #include <vector>
 
+#include <crystalnet/core/cast.hpp>
 #include <crystalnet/core/error.hpp>
 #include <crystalnet/core/gc.hpp>
-#include <crystalnet/utility/cast.hpp>
 
 struct shape_t {
     const std::vector<uint32_t> dims;
@@ -116,7 +116,7 @@ template <typename... Dim> ranked_shape_t<sizeof...(Dim)> r_shape(Dim... dim)
 template <uint8_t r> ranked_shape_t<r> ranked(const shape_t &shape)
 {
     check(shape.rank() == r);
-    const auto dims = cast<r>(shape.dims);
+    const auto dims = cast<r>(shape.dims, auto_hint);
     return ranked_shape_t<r>(dims);
 }
 

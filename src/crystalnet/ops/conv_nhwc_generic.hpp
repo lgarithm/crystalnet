@@ -3,11 +3,11 @@
 #include <tuple>
 #include <vector>
 
+#include <crystalnet/core/cast.hpp>
 #include <crystalnet/core/operator.hpp>
 #include <crystalnet/core/shape.hpp>
 #include <crystalnet/linag/linag.hpp>
 #include <crystalnet/ops/batch.hpp>
-#include <crystalnet/utility/cast.hpp>
 #include <crystalnet/utility/range.hpp>
 
 template <uint8_t p, uint8_t q, typename T>
@@ -208,7 +208,7 @@ struct op_conv2d_impl_t {
 
     shape_t infer(const shape_list_t &shape_list) const
     {
-        const auto[p, q] = cast<arity>(shape_list.shapes);
+        const auto[p, q] = cast<arity>(shape_list.shapes, auto_hint);
         if (p.rank() == 3) {
             return conv_nhwc_generic::infer(shape_list_t({p.batch(1), q}), t)
                 .sub();
@@ -220,7 +220,7 @@ struct op_conv2d_impl_t {
 
     void forward(const forward_ctx_t &ctx) const
     {
-        const auto[p, q] = cast<arity>(ctx.inputs.shapes().shapes);
+        const auto[p, q] = cast<arity>(ctx.inputs.shapes().shapes, auto_hint);
         if (p.rank() == 3) {
             call<conv_nhwc_generic::forward>(embed(0, ctx), t);
             return;
@@ -231,7 +231,7 @@ struct op_conv2d_impl_t {
 
     void backward(const backward_ctx_t &ctx) const
     {
-        const auto[p, q] = cast<arity>(ctx.inputs.shapes().shapes);
+        const auto[p, q] = cast<arity>(ctx.inputs.shapes().shapes, auto_hint);
         if (p.rank() == 3) {
             call<conv_nhwc_generic::backward>(embed(0, ctx), t);
             return;

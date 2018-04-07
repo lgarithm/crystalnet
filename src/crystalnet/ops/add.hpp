@@ -1,10 +1,10 @@
 #pragma once
 #include <crystalnet.h>
+#include <crystalnet/core/cast.hpp>
 #include <crystalnet/core/operator.hpp>
 #include <crystalnet/core/shape.hpp>
 #include <crystalnet/linag/linag.hpp>
 #include <crystalnet/ops/batch.hpp>
-#include <crystalnet/utility/cast.hpp>
 
 // [n], [n] -> [n]
 struct add_vv {
@@ -12,7 +12,7 @@ struct add_vv {
 
     static shape_t infer(const shape_list_t &shape_list)
     {
-        const auto[p, q] = cast<arity>(shape_list.shapes);
+        const auto[p, q] = cast<arity>(shape_list.shapes, auto_hint);
         check(p.dim() == q.dim());
         return shape_t(p);
     }
@@ -53,7 +53,7 @@ struct add {
 
     static shape_t infer(const shape_list_t &shape_list)
     {
-        const auto[p, q] = cast<arity>(shape_list.shapes);
+        const auto[p, q] = cast<arity>(shape_list.shapes, auto_hint);
         if (p.rank() > q.rank()) {
             check(is_sub(q, p));
             return shape_t(p);
@@ -71,14 +71,14 @@ struct add {
     struct forward : forward_ctx_t {
         void operator()() const
         {
-            const auto[p, q] = cast<arity>(inputs.shapes().shapes);
+            const auto[p, q] = cast<arity>(inputs.shapes().shapes, auto_hint);
             if (p.rank() > q.rank()) {
                 check(is_sub(q, p));
                 const shape_t r(std::vector<uint32_t>(
                     p.dims.begin(), p.dims.begin() + (p.rank() - q.rank())));
                 const auto m = r.dim();
                 const auto n = q.dim();
-                const auto[x, y] = cast<arity>(inputs._args);
+                const auto[x, y] = cast<arity>(inputs._args, auto_hint);
                 forward_ctx_t ctx(tensor_ref_list_t({ref_as(shape_t(m, n), x),
                                                      ref_as(shape_t(n), y)}),
                                   ref_as(shape_t(m, n), output));
@@ -94,15 +94,16 @@ struct add {
     struct backward : backward_ctx_t {
         void operator()() const
         {
-            const auto[p, q] = cast<arity>(inputs.shapes().shapes);
+            const auto[p, q] = cast<arity>(inputs.shapes().shapes, auto_hint);
             if (p.rank() > q.rank()) {
                 check(is_sub(q, p));
                 const shape_t r(std::vector<uint32_t>(
                     p.dims.begin(), p.dims.begin() + (p.rank() - q.rank())));
                 const auto m = r.dim();
                 const auto n = q.dim();
-                const auto[x, y] = cast<arity>(inputs._args);
-                const auto[gx, gy] = cast<arity>(input_gradients._args);
+                const auto[x, y] = cast<arity>(inputs._args, auto_hint);
+                const auto[gx, gy] =
+                    cast<arity>(input_gradients._args, auto_hint);
                 backward_ctx_t ctx(tensor_ref_list_t({ref_as(shape_t(m, n), x),
                                                       ref_as(shape_t(n), y)}),
                                    ref_as(shape_t(m, n), output),

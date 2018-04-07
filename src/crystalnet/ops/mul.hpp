@@ -1,9 +1,9 @@
 #pragma once
 #include <crystalnet.h>
+#include <crystalnet/core/cast.hpp>
 #include <crystalnet/core/operator.hpp>
 #include <crystalnet/core/tensor.hpp>
 #include <crystalnet/linag/linag.hpp>
-#include <crystalnet/utility/cast.hpp>
 
 template <typename T> matrix_ref_t<T> col(const vector_ref_t<T> &r)
 {
@@ -20,9 +20,9 @@ struct mul_vm {
 
     static shape_t infer(const shape_list_t &shape_list)
     {
-        const auto[p, q] = cast<arity>(shape_list.shapes);
-        const auto[m] = cast<1>(p.dims);
-        const auto[_m, n] = cast<2>(q.dims);
+        const auto[p, q] = cast<arity>(shape_list.shapes, auto_hint);
+        const auto[m] = cast<1>(p.dims, auto_hint);
+        const auto[_m, n] = cast<2>(q.dims, auto_hint);
         check(m == _m);
         return shape_t(n);
     }
@@ -54,9 +54,9 @@ struct mul_mm {
 
     static shape_t infer(const shape_list_t &shape_list)
     {
-        const auto[p, q] = cast<arity>(shape_list.shapes);
-        const auto[k, m] = cast<2>(p.dims);
-        const auto[_m, n] = cast<2>(q.dims);
+        const auto[p, q] = cast<arity>(shape_list.shapes, auto_hint);
+        const auto[k, m] = cast<2>(p.dims, auto_hint);
+        const auto[_m, n] = cast<2>(q.dims, auto_hint);
         check(m == _m);
         return shape_t(k, n);
     }
@@ -89,7 +89,7 @@ struct mul {
 
     static shape_t infer(const shape_list_t &shape_list)
     {
-        const auto[p, q] = cast<arity>(shape_list.shapes);
+        const auto[p, q] = cast<arity>(shape_list.shapes, auto_hint);
         if (p.rank() == 1 && q.rank() == 2) {
             return mul_vm::infer(shape_list);
         }
@@ -100,7 +100,7 @@ struct mul {
     struct forward : forward_ctx_t {
         void operator()() const
         {
-            const auto[p, q] = cast<arity>(inputs.shapes().shapes);
+            const auto[p, q] = cast<arity>(inputs.shapes().shapes, auto_hint);
             if (p.rank() == 1 && q.rank() == 2) {
                 (*(mul_vm::forward *)this)();
             } else {
@@ -113,7 +113,7 @@ struct mul {
     struct backward : backward_ctx_t {
         void operator()() const
         {
-            const auto[p, q] = cast<arity>(inputs.shapes().shapes);
+            const auto[p, q] = cast<arity>(inputs.shapes().shapes, auto_hint);
             if (p.rank() == 1 && q.rank() == 2) {
                 (*(mul_vm::backward *)this)();
             } else {

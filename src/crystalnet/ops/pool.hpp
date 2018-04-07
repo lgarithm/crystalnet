@@ -1,8 +1,8 @@
 #pragma once
+#include <crystalnet/core/cast.hpp>
 #include <crystalnet/core/operator.hpp>
 #include <crystalnet/core/shape.hpp>
 #include <crystalnet/ops/batch.hpp>
-#include <crystalnet/utility/cast.hpp>
 #include <crystalnet/utility/range.hpp>
 
 struct pool2d_c_max {
@@ -15,8 +15,8 @@ struct pool2d_c_max {
     // [w, h, c] -> [w', h', c]
     static shape_t infer(const shape_list_t &shape_list)
     {
-        const auto[p] = cast<arity>(shape_list.shapes);
-        const auto[h, w, c] = cast<3>(p.dims);
+        const auto[p] = cast<arity>(shape_list.shapes, auto_hint);
+        const auto[h, w, c] = cast<3>(p.dims, auto_hint);
         check(h % r == 0);
         check(w % s == 0);
         return shape_t(h / r, w / s, c);
@@ -35,8 +35,8 @@ struct pool2d_c_max {
         {
             const auto x = r_tensor_ref_t<T>(inputs[0]);
             const auto y = r_tensor_ref_t<T>(output);
-            const auto[h, w, c] = cast<3>(x.shape.dims);
-            const auto[_u, v, _c] = cast<3>(y.shape.dims);
+            const auto[h, w, c] = cast<3>(x.shape.dims, auto_hint);
+            const auto[_u, v, _c] = cast<3>(y.shape.dims, auto_hint);
             y.fill(0);
             T *px = x.data;
             for (auto i : range(h)) {
@@ -55,8 +55,8 @@ struct pool2d_c_max {
         {
             const auto gx = r_tensor_ref_t<T>(input_gradients[0]);
             const auto gy = r_tensor_ref_t<T>(output_gradient);
-            const auto[h, w, c] = cast<3>(gx.shape.dims);
-            const auto[u, v, _c] = cast<3>(gy.shape.dims);
+            const auto[h, w, c] = cast<3>(gx.shape.dims, auto_hint);
+            const auto[u, v, _c] = cast<3>(gy.shape.dims, auto_hint);
             for (auto p : range(u)) {
                 for (auto q : range(v)) {
                     for (auto i : range(p * r, p * r + r)) {
@@ -80,7 +80,7 @@ struct pool2d_n_c_max {
 
     static shape_t infer(const shape_list_t &shape_list)
     {
-        const auto[p] = cast<arity>(shape_list.shapes);
+        const auto[p] = cast<arity>(shape_list.shapes, auto_hint);
         if (p.rank() == 3) {
             return pool2d_c_max::infer(shape_list);
         } else {
@@ -93,7 +93,7 @@ struct pool2d_n_c_max {
     struct forward : forward_ctx_t {
         void operator()() const
         {
-            const auto[p] = cast<arity>(inputs.shapes().shapes);
+            const auto[p] = cast<arity>(inputs.shapes().shapes, auto_hint);
             if (p.rank() == 3) {
                 forward_ctx_t ctx(*this);
                 call<pool2d_c_max::forward>(ctx);
@@ -108,7 +108,7 @@ struct pool2d_n_c_max {
     struct backward : backward_ctx_t {
         void operator()() const
         {
-            const auto[p] = cast<arity>(inputs.shapes().shapes);
+            const auto[p] = cast<arity>(inputs.shapes().shapes, auto_hint);
             if (p.rank() == 3) {
                 backward_ctx_t ctx(*this);
                 call<pool2d_c_max::backward>(ctx);

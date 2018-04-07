@@ -4,7 +4,7 @@
 #include <string>
 #include <type_traits>
 
-#include <crystalnet.h>
+#include <crystalnet-internal.h>
 #include <crystalnet/core/tensor.hpp>
 
 struct forward_ctx_t {
@@ -104,7 +104,7 @@ template <typename T> struct simple_backward_func_t : backward_func_t {
     }
 };
 
-template <typename T> operator_t *_register_bi_op(const char *const name)
+template <typename T> const operator_t *_register_bi_op(const char *const name)
 {
     return register_op(name, T::arity, new simple_shape_func_t(T::infer),
                        new simple_forward_func_t<T>,
@@ -139,7 +139,7 @@ template <typename T> struct generic_backward_func_t : backward_func_t {
 };
 
 template <typename T>
-operator_t *_register_generic_bi_op(const char *const name, const T *op)
+const operator_t *_register_generic_bi_op(const char *const name, const T *op)
 {
     return register_op(name, T::arity, //
                        new generic_shape_func_t<T>(*op),

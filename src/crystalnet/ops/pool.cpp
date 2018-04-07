@@ -4,8 +4,8 @@
 #include <crystalnet/core/shape.hpp>
 #include <crystalnet/ops/pool_generic.hpp>
 
-operator_t *make_op_pool2d(uint32_t r, uint32_t s, //
-                           uint32_t stride_r, uint32_t stride_s)
+const operator_t *make_op_pool2d(uint32_t r, uint32_t s, //
+                                 uint32_t stride_r, uint32_t stride_s)
 {
     static GC<op_pool2d_impl_t> gc;
     const auto op = gc(

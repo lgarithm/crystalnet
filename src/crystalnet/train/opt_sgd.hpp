@@ -23,7 +23,7 @@ struct sgd_optimizer_t : optimizer_t {
         }
     };
 
-    optimizer_ctx_t *optimize(model_t *model) override
+    optimizer_ctx_t *optimize(model_t *model) const override
     {
         return new ctx(model);
     }

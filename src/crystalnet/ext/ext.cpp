@@ -22,8 +22,8 @@ s_layer_t *const new_layer_pool2d(const filter_trait_t *p_filter,
     check(p_filter != nullptr);
     const auto filter = *p_filter;
     const auto stride = p_stride ? *p_stride : stride_trait_t(shape_t(1, 1));
-    const auto[r, s] = cast<2>(filter.shape.dims);
-    const auto[stride_r, stride_s] = cast<2>(stride.shape.dims);
+    const auto[r, s] = cast<2>(filter.shape.dims, auto_hint);
+    const auto[stride_r, stride_s] = cast<2>(stride.shape.dims, auto_hint);
     const auto op = make_op_pool2d(r, s, stride_r, stride_s);
     return new pool2d_layer(op);
 }
@@ -74,8 +74,8 @@ s_layer_t *const new_layer_conv2d(const filter_trait_t *p_filter,
                                    : padding_trait_t(shape_t(0, 0));
     const auto stride = p_stride ? *p_stride : stride_trait_t(shape_t(1, 1));
 
-    const auto[padding_r, padding_s] = cast<2>(padding.shape.dims);
-    const auto[stride_r, stride_s] = cast<2>(stride.shape.dims);
+    const auto[padding_r, padding_s] = cast<2>(padding.shape.dims, auto_hint);
+    const auto[stride_r, stride_s] = cast<2>(stride.shape.dims, auto_hint);
     const auto op = make_op_conv2d(padding_r, padding_s, stride_r, stride_s);
     return new conv2d_layer(op, filter);
 }
