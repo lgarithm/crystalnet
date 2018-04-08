@@ -2,7 +2,7 @@
 
 set -e
 
-for t in $(find tests/build/bin -type f); do
+for t in $(find tests/build/$(uname)/bin -type f); do
     echo "running $t"
     $t
 done

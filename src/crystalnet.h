@@ -54,6 +54,11 @@ extern s_node_t *covar(s_model_ctx_t *, const shape_t *);
 extern s_node_t *reshape(s_model_ctx_t *, const shape_t *, const s_node_t *);
 extern s_node_t *apply(s_model_ctx_t *, const operator_t *, s_node_t *args[]);
 
+// IO APIs
+extern void save_tensor(const char *, const tensor_ref_t *);
+extern tensor_t *_load_idx_file(const char *);
+extern void _idx_file_info(const char *);
+
 // high level APIs
 typedef struct dataset_t dataset_t;
 typedef struct optimizer_t optimizer_t;
@@ -75,8 +80,6 @@ extern dataset_t *load_mnist(const char *const); // train | t10k
 extern dataset_t *load_cifar();
 
 // unstable APIs
-extern tensor_t *_load_idx_file(const char *);
-extern void _idx_file_info(const char *);
 extern void s_experiment(s_trainer_t *, dataset_t *, dataset_t *, uint32_t);
 
 // operators

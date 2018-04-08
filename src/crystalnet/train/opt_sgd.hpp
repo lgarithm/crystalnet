@@ -7,7 +7,7 @@ struct sgd_optimizer_t : optimizer_t {
         static constexpr T eta = 1e-3; // TODO: make it configrable
 
         model_t *model;
-        ctx(model_t *model) : model(model) {}
+        explicit ctx(model_t *model) : model(model) {}
         void operator()() override
         {
             for (auto p : model->ctx.params.items) {

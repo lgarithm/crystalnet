@@ -9,7 +9,7 @@ add_definitions(-DCRYSTALNET_DEBUG)
 add_definitions(-DENABLE_DEBUG_TIMER)
 
 include_directories(${CMAKE_SOURCE_DIR}/../src)
-link_directories(${CMAKE_SOURCE_DIR}/../build/lib)
+link_directories(${CMAKE_SOURCE_DIR}/../build/${CMAKE_SYSTEM_NAME}/lib)
 
 file(GLOB tests src/crystalnet/**/*)
 foreach(main ${tests})

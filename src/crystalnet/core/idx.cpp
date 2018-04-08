@@ -1,3 +1,5 @@
+#include <fstream>
+
 #include <crystalnet.h>
 
 #include <crystalnet/core/idx.hpp>
@@ -50,4 +52,22 @@ void _idx_file_info(const char *filename)
     printf("%s%s\n", dtype_name(meta.dtype),
            std::to_string(meta.shape).c_str());
     std::fclose(fp);
+}
+
+void save_tensor(const char *filename, const tensor_ref_t *r)
+{
+    std::fstream f(filename, std::ios::out | std::ios::binary);
+    const uint8_t rank = r->shape.rank();
+    uint32_t _magic = 0;
+    char *magic = reinterpret_cast<char *>(&_magic);
+    magic[2] = r->dtype;
+    magic[3] = rank;
+    f.write(magic, 4);
+    for (int i = 0; i < rank; ++i) {
+        uint32_t dim = r->shape.dims[i];
+        _reverse_byte_order(dim);
+        f.write(reinterpret_cast<char *>(&dim), 4);
+    }
+    f.write(reinterpret_cast<char *>(r->data),
+            r->shape.dim() * dtype_size(r->dtype));
 }

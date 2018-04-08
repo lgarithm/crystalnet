@@ -1,3 +1,6 @@
+ROOT = $(shell pwd)
+BUILD_DIR = $(ROOT)/build/$(shell uname)
+
 ifeq ($(shell uname), Darwin)
 	NPROC = $(shell sysctl -n hw.ncpu)
 else
@@ -5,4 +8,4 @@ else
 endif
 
 tests:
-	mkdir -p build; cd build; cmake ..; make -j $(NPROC)
+	mkdir -p $(BUILD_DIR); cd $(BUILD_DIR); cmake $(ROOT); make -j $(NPROC)

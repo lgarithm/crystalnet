@@ -3,7 +3,7 @@
 import platform
 from ctypes import c_char_p, c_void_p, cdll
 
-prefix = './build/lib'
+prefix = './build/%s/lib' % platform.uname()[0]
 # prefix = os.path.join(os.getenv('HOME'), 'local/crystalnet/lib')
 suffix = 'so' if platform.uname()[0] != 'Darwin' else 'dylib'
 libpath = '%s/libcrystalnet.%s' % (prefix, suffix)

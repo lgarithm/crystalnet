@@ -1,10 +1,12 @@
 *.gch
+*.idx
 *.log
 *.o
 *.swp
 *~
 .DS_store
 /.gopath
+/.vscode/settings.json
 /build
 /compile_commands.json
 /xtleak.kcg.*

@@ -1,4 +1,4 @@
-// docker build -t lgarithm/crystalnet-dev:ubuntu -f Dockerfile.dev .
+# docker build -t lgarithm/crystalnet-dev:ubuntu -f Dockerfile.dev .
 
 FROM ubuntu:bionic
 
