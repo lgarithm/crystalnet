@@ -32,9 +32,7 @@ struct tensor_ref_t : _tensor_meta_t {
     tensor_ref_t operator[](uint32_t idx) const
     {
         check(idx < shape.len());
-        if (shape.rank() == 0) {
-            return *this;
-        }
+        if (shape.rank() == 0) { return *this; }
         const auto new_shape = shape.sub();
         const uint32_t offset = idx * new_shape.dim() * dtype_size(dtype);
         return tensor_ref_t(new_shape, dtype, (uint8_t *)(data) + offset);
@@ -84,9 +82,7 @@ struct tensor_ref_list_t {
     shape_list_t shapes() const
     {
         std::vector<shape_t> shapes;
-        for (auto t : _args) {
-            shapes.push_back(t.shape);
-        }
+        for (auto t : _args) { shapes.push_back(t.shape); }
         return shape_list_t(shapes);
     }
 };
@@ -194,7 +190,7 @@ inline string to_string(const tensor_ref_t &t)
 {
     return dtype_name(t.dtype) + to_string(t.shape);
 }
-}
+}  // namespace std
 
 template <typename T> std::string summary(const r_tensor_ref_t<T> &r)
 {
@@ -202,9 +198,4 @@ template <typename T> std::string summary(const r_tensor_ref_t<T> &r)
     char line[256];
     sprintf(line, fmt, r.min(), r.mean(), r.max());
     return line;
-}
-
-template <typename T> void print(const r_tensor_ref_t<T> &r)
-{
-    printf("%s\n", summary(r).c_str());
 }

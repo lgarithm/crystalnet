@@ -1,13 +1,16 @@
+*.bmp
+*.dot
 *.gch
 *.idx
 *.log
 *.o
+*.svg
 *.swp
 *~
 .DS_store
 /.gopath
 /.vscode/settings.json
-/build
 /compile_commands.json
 /xtleak.kcg.*
 __pycache__
+build

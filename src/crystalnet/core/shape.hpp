@@ -9,7 +9,6 @@
 
 #include <crystalnet/core/cast.hpp>
 #include <crystalnet/core/error.hpp>
-#include <crystalnet/core/gc.hpp>
 
 struct shape_t {
     const std::vector<uint32_t> dims;
@@ -31,9 +30,7 @@ struct shape_t {
 
     uint32_t len() const
     {
-        if (dims.size() > 0) {
-            return dims[0];
-        }
+        if (dims.size() > 0) { return dims[0]; }
         return 1;
     }
 
@@ -64,19 +61,6 @@ struct shape_list_t {
     uint8_t size() const { return shapes.size(); }
 };
 
-struct shape_ctx_t {
-    GC<shape_t> gc0;
-    GC<shape_list_t> gc1;
-    const shape_t *make_shape(const std::vector<uint32_t> &dims)
-    {
-        return gc0(new shape_t(dims));
-    }
-    const shape_list_t *make_shape_list(const std::vector<shape_t> &shapes)
-    {
-        return gc1(new shape_list_t(shapes));
-    }
-};
-
 template <uint8_t r> struct ranked_shape_t {
     const std::array<uint32_t, r> dims;
 
@@ -99,9 +83,7 @@ template <uint8_t r> struct ranked_shape_t {
         static_assert(sizeof...(i) == r);
         const std::array<uint32_t, r> offs{static_cast<uint32_t>(i)...};
         uint32_t off = 0;
-        for (uint8_t i = 0; i < r; ++i) {
-            off = off * dims[i] + offs[i];
-        }
+        for (uint8_t i = 0; i < r; ++i) { off = off * dims[i] + offs[i]; }
         return off;
     }
 };
@@ -126,11 +108,9 @@ inline string to_string(const shape_t &shape)
 {
     string buf;
     for (auto d : shape.dims) {
-        if (!buf.empty()) {
-            buf += ", ";
-        }
+        if (!buf.empty()) { buf += ", "; }
         buf += to_string(d);
     }
     return "[" + buf + "]";
 }
-}
+}  // namespace std

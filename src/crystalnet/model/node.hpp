@@ -12,7 +12,7 @@
 
 struct node_t {
     const std::string name;
-    const uint8_t dtype; // TODO: pass dtype in constructor
+    const uint8_t dtype;  // TODO: pass dtype in constructor
     const shape_t shape;
 
     static constexpr const auto default_dtype = idx_type<float>::type;
@@ -49,13 +49,17 @@ struct parameter_node_t : node_t {
 
     tensor_ref_t value() const override { return _value; }
     tensor_ref_t gradient() const override { return ref(_gradient); }
-    void forward() const override { /* noop */}
-    void backward() const override { /* noop */}
+    void forward() const override
+    { /* noop */
+    }
+    void backward() const override
+    { /* noop */
+    }
 };
 
 struct placeholder_node_t : node_t {
     std::unique_ptr<tensor_ref_t> _value;
-    tensor_t _gradient; // TODO: remove it
+    tensor_t _gradient;  // TODO: remove it
 
     placeholder_node_t(const std::string &name, const shape_t &shape)
         : node_t(name, shape), _gradient(shape, dtype)
@@ -71,8 +75,12 @@ struct placeholder_node_t : node_t {
 
     tensor_ref_t value() const override { return *_value; }
     tensor_ref_t gradient() const override { return ref(_gradient); }
-    void forward() const override { /* noop */}
-    void backward() const override { /* noop */}
+    void forward() const override
+    { /* noop */
+    }
+    void backward() const override
+    { /* noop */
+    }
 };
 
 struct operator_node_t : node_t {
@@ -122,13 +130,11 @@ struct operator_node_t : node_t {
 
     void forward() const override
     {
-        for (auto i : inputs) {
-            i->forward();
-        }
+        for (auto i : inputs) { i->forward(); }
         // TODO: op.forward must be present
         if (op.forward) {
             forward_ctx_t ctx(_input_refs(), ref(_value));
-            TRACE_NAME(op.name, (*op.forward)(ctx));
+            TRACE_NAME(name, (*op.forward)(ctx));
         }
     }
 
@@ -138,11 +144,9 @@ struct operator_node_t : node_t {
         if (op.backward) {
             backward_ctx_t ctx(_input_refs(), ref(_value), _input_grad_refs(),
                                ref(_gradient));
-            TRACE_NAME(op.name, (*op.backward)(ctx));
+            TRACE_NAME(name, (*op.backward)(ctx));
         }
-        for (auto i : inputs) {
-            i->backward();
-        }
+        for (auto i : inputs) { i->backward(); }
     }
 };
 

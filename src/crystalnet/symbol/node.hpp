@@ -10,10 +10,12 @@
 
 struct model_option_t;
 
+using index_t = std::map<const s_node_t *, node_t *>;
+
 struct s_node_t {
     static void on_create(const shape_t &shape, const char *type)
     {
-        printf("[D] %s %s\n", type, std::to_string(shape).c_str());
+        logf("new %s node, shape: %s", type, std::to_string(shape).c_str());
     }
 
     const std::string name;
@@ -24,13 +26,14 @@ struct s_node_t {
     {
     }
     virtual ~s_node_t() {}
-    virtual node_t *realize(model_ctx_t &, const model_option_t &) const = 0;
+    virtual node_t *realize(model_ctx_t &, const model_option_t &,
+                            index_t &) const = 0;
 };
 
 struct model_option_t {
     const std::string input;
     const uint32_t batch_size;
-    const bool batch = true; // TODO: support unbatched realization
+    // const bool batch = true; // TODO: support unbatched realization
 
     model_option_t(const std::string &input, uint32_t batch_size)
         : input(input), batch_size(batch_size)
@@ -39,8 +42,8 @@ struct model_option_t {
 };
 
 struct s_node_list_t {
-    using T = std::vector<s_node_t *>;
-    const T nodes;
+    using owner_t = std::vector<s_node_t *>;
+    const owner_t nodes;
 
     template <typename... T>
     explicit s_node_list_t(const T... node)
@@ -48,14 +51,18 @@ struct s_node_list_t {
     {
     }
 
-    explicit s_node_list_t(const T &nodes) : nodes(nodes) {}
+    // TODO: deprecate
+    explicit s_node_list_t(const owner_t &nodes) : nodes(nodes) {}
+
+    explicit s_node_list_t(const std::initializer_list<s_node_t *> &init)
+        : nodes(init)
+    {
+    }
 
     auto shapes() const
     {
         std::vector<shape_t> v;
-        for (auto n : nodes) {
-            v.push_back(n->shape);
-        }
+        for (auto n : nodes) { v.push_back(n->shape); }
         return v;
     }
 };
@@ -70,14 +77,15 @@ struct s_parameter_node_t : s_node_t {
         on_create(shape, "covar");
     }
 
-    node_t *realize(model_ctx_t &ctx, const model_option_t &opt) const override
+    node_t *realize(model_ctx_t &ctx, const model_option_t &opt,
+                    index_t &index) const override
     {
+        if (index.count(this) > 0) { return index[this]; }
         const auto p = ctx.make_parameter(name, shape);
-        if (init) {
-            (*init)(p->value());
-        }
-        printf("[D] s_parameter_node_t::realize %s -> %s\n",
-               std::to_string(shape).c_str(), std::to_string(p->shape).c_str());
+        if (init) { (*init)(p->value()); }
+        logf("[D] s_parameter_node_t::realize %s -> %s",
+             std::to_string(shape).c_str(), std::to_string(p->shape).c_str());
+        index[this] = p;
         return p;
     }
 };
@@ -89,18 +97,18 @@ struct s_placeholder_node_t : s_node_t {
         on_create(shape, "var");
     }
 
-    node_t *realize(model_ctx_t &ctx, const model_option_t &opt) const override
+    node_t *realize(model_ctx_t &ctx, const model_option_t &opt,
+                    index_t &index) const override
     {
+        if (index.count(this) > 0) { return index[this]; }
         const auto result_shape = [&]() {
-            if (name == opt.input) {
-                return shape.batch(opt.batch_size);
-            }
+            if (name == opt.input) { return shape.batch(opt.batch_size); }
             return shape;
         }();
         const auto ret = ctx.make_placeholder(name, result_shape);
-        printf("[D] s_placeholder_node_t::realize %s -> %s\n",
-               std::to_string(shape).c_str(),
-               std::to_string(ret->shape).c_str());
+        logf("s_placeholder_node_t::realize %s -> %s",
+             std::to_string(shape).c_str(), std::to_string(ret->shape).c_str());
+        index[this] = ret;
         return ret;
     }
 };
@@ -121,13 +129,20 @@ struct s_operator_node_t : s_node_t {
         on_create(shape, ("op." + op.name).c_str());
     }
 
-    node_t *realize(model_ctx_t &ctx, const model_option_t &opt) const override
+    node_t *realize(model_ctx_t &ctx, const model_option_t &opt,
+                    index_t &index) const override
     {
+        if (index.count(this) > 0) { return index[this]; }
         std::vector<const node_t *> _args;
         for (auto p : inputs.nodes) {
-            _args.push_back(p->realize(ctx, opt));
+            _args.push_back(p->realize(ctx, opt, index));
         }
-        return ctx.make_operator(name, op, _args.data());
+        // TODO:
+        // batched_op = auto_batch(op);
+        // return ctx.make_operator(name, batched_op, _args.data());
+        const auto ret = ctx.make_operator(name, op, _args.data());
+        index[this] = ret;
+        return ret;
     }
 };
 
@@ -145,19 +160,21 @@ struct s_wrap_node_t : s_node_t {
                std::to_string(shape).c_str());
     }
 
-    node_t *realize(model_ctx_t &ctx, const model_option_t &opt) const override
+    node_t *realize(model_ctx_t &ctx, const model_option_t &opt,
+                    index_t &index) const override
     {
+        if (index.count(this) > 0) { return index[this]; }
         const auto ret = [&]() {
-            node_t *node = wrapped->realize(ctx, opt);
+            node_t *node = wrapped->realize(ctx, opt, index);
             if (!(node->shape == original_shape)) {
                 check(node->shape == original_shape.batch(opt.batch_size));
                 return ctx.wrap(name, shape.batch(opt.batch_size), *node);
             }
             return ctx.wrap(name, shape, *node);
         }();
-        printf("[D] s_wrap_node_t::realize %s -> %s\n",
-               std::to_string(shape).c_str(),
-               std::to_string(ret->shape).c_str());
+        logf("s_wrap_node_t::realize %s -> %s",  //
+             std::to_string(shape).c_str(), std::to_string(ret->shape).c_str());
+        index[this] = ret;
         return ret;
     }
 };

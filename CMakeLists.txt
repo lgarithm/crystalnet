@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.9)
 project(crystalnet)
 
-# set(USE_OPENBLAS on)
+if ((${CMAKE_SYSTEM_NAME} MATCHES "Darwin"))
+    set(USE_OPENBLAS on)
+endif()
 set(CMAKE_CXX_STANDARD 17)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
@@ -9,6 +11,9 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 add_definitions(-funroll-loops)
 if (${USE_OPENBLAS})
     add_definitions(-DCRYSTALNET_USE_CBLAS)
+    set(OPENBLAS_PATH $ENV{HOME}/local/openblas)
+    include_directories(${OPENBLAS_PATH}/include)
+    link_directories(${OPENBLAS_PATH}/lib)
 endif()
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
@@ -30,9 +35,19 @@ endforeach()
 
 set(CMAKE_INSTALL_PREFIX $ENV{HOME}/local/crystalnet)  # TODO: make it configurable
 install(TARGETS crystalnet LIBRARY DESTINATION lib)
-install(FILES src/crystalnet.h src/crystalnet-ext.h DESTINATION include)  # TODO: use pattern
+file(GLOB headers src/*.h)
+install(FILES ${headers} DESTINATION include)
 
 
 add_custom_target(doxygen COMMAND doxygen ${CMAKE_SOURCE_DIR}/docs/Doxyfile)
 # add_custom_target(sphinx-doc COMMAND sphinx-build -b html html sphinx/build/html
 #                   DEPENDS doxygen)
+
+
+# https://gitlab.kitware.com/cmake/community/wikis/doc/cpack/PackageGenerators
+SET(CPACK_GENERATOR "TGZ")
+# if ((${CMAKE_SYSTEM_NAME} MATCHES "Linux"))
+    # SET(CPACK_GENERATOR "TGZ;DEB")
+    # SET(CPACK_GENERATOR "TGZ;RPM")
+# endif()
+INCLUDE(CPack)

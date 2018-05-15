@@ -7,7 +7,7 @@ else
 	NPROC = $(shell nproc)
 endif
 
-default: libcrystalnet _tests
+default: libcrystalnet _tests package
 
 CMAKE_FLAGS = \
     -DCMAKE_EXPORT_COMPILE_COMMANDS=1 \
@@ -19,6 +19,9 @@ cmake_targets:
 
 libcrystalnet: cmake_targets
 	make -C $(BUILD_DIR) -j $(NPROC)
+
+package: cmake_targets
+	make -C $(BUILD_DIR) package
 
 release:
 # TODO
