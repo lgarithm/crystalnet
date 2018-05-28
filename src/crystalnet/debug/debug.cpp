@@ -4,8 +4,6 @@
 #include <crystalnet/model/model.hpp>
 #include <crystalnet/symbol/model.hpp>
 
-#define p_str(x) std::to_string(x).c_str()
-
 void debug(const std::string &name, const tensor_ref_t &t)
 {
     using T = float;
@@ -87,18 +85,13 @@ void show_layers(const model_ctx_t &ctx, const s_model_ctx_t &s_ctx)
     uint32_t idx = 0;
     logf("%d layers", s_ctx._layers.items.size());
     for (const auto l : s_ctx._layers.items) {
-        const auto node_it = ctx.index.find(l->name);
-        if (node_it == ctx.index.end()) {
-            fprintf(stderr, "[e] layer %s NOT Found in model.\n",
-                    l->name.c_str());
-            continue;
-        }
-        const auto node = node_it->second;
+        const auto node = ctx.index.at(l->name);
         using T = float;
         const auto r = r_tensor_ref_t<T>(node->value());
         const auto brief = summary(r);
-        logf("layer %6d  %-16s  %-32s    %s", idx++, l->name.c_str(),
-             std::to_string(l->shape).c_str(), brief.c_str());
+        // logf("layer %6d  %-16s  %-32s    %s", idx++, l->name.c_str(),
+        //      std::to_string(l->shape).c_str(), brief.c_str());
+        logf("layer %-3d %s", idx++, summary(r).c_str());
     }
 }
 

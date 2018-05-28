@@ -1,7 +1,5 @@
 // http://www.netlib.org/blas/
 #pragma once
-#include <cstring>
-
 #include <cblas.h>
 
 #include <crystalnet/core/tensor.hpp>
@@ -29,14 +27,14 @@ template <typename T> struct cblas_impl {
     using v_ref_t = vector_ref_t<T>;
     using blas = cblas<T>;
 
-    static void _gemm(const m_ref_t &a, bool trans_a, //
+    static void _gemm(const m_ref_t &a, bool trans_a,  //
                       const m_ref_t &b, bool trans_b, const m_ref_t &c)
     {
         blas::gemm(CblasRowMajor,
-                   trans_a ? CblasTrans : CblasNoTrans, //
-                   trans_b ? CblasTrans : CblasNoTrans, //
-                   len(c), wid(c),                      //
-                   trans_b ? wid(b) : len(b),           //
+                   trans_a ? CblasTrans : CblasNoTrans,  //
+                   trans_b ? CblasTrans : CblasNoTrans,  //
+                   len(c), wid(c),                       //
+                   trans_b ? wid(b) : len(b),            //
                    alpha, a.data, wid(a), b.data, wid(b), beta, c.data, wid(c));
     }
 

@@ -48,19 +48,19 @@ struct s_trainer_t {
 
         printf("[D] training, batch size: %u\n", batch_size);
         uint32_t step = 0;
-        for (auto[images, label_s] : batch(ds, batch_size)) {
+        for (auto [images, label_s] : batch(ds, batch_size)) {
             ++step;
             printf("[D] begin step %u\n", step);
             m->input.bind(images);
             label->bind(label_s);
-            TRACE_IT(loss->forward());
+            TRACE_IT(forward(loss));
             r_tensor_ref_t<float>(loss->gradient()).fill_uni();
-            TRACE_IT(loss->backward());
+            TRACE_IT(backward(loss));
             (*optimize)();
             debug(*m);
             printf("train step: %u\n", step);
             if (test_ds) {
-                const auto[yes, tot] = test(*test_ds);
+                const auto [yes, tot] = test(*test_ds);
                 printf("test acc: %g\n", yes / (float)tot);
             }
         }
@@ -75,10 +75,10 @@ struct s_trainer_t {
         auto m = realize(&p_ctx, model, batch_size);
         std::unique_ptr<model_t> __m(m);
         uint32_t step = 0;
-        for (auto[images, label_s] : batch(ds, batch_size)) {
+        for (auto [images, label_s] : batch(ds, batch_size)) {
             ++step;
             m->input.bind(images);
-            TRACE_IT(m->output.forward());
+            TRACE_IT(m->forward());
             using T = float;
             for (auto i : range(batch_size)) {
                 auto p = argmax(r_tensor_ref_t<T>(label_s[i]));

@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <vector>
 
 #include <crystalnet.h>
 #include <crystalnet/core/context.hpp>
@@ -49,8 +50,14 @@ struct model_t {
     node_t &input;
     const node_t &output;
 
-    model_t(model_ctx_t &ctx, node_t &input, node_t &output)
+    model_t(model_ctx_t &ctx, node_t &input, const node_t &output)
         : ctx(ctx), input(input), output(output)
     {
     }
+
+    void forward() const;
+    void backward() const;
 };
+
+void forward(const node_t *);
+void backward(const node_t *);

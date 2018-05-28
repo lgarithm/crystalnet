@@ -8,3 +8,22 @@ A graph of symbols.
 Physical graph
 ------
 A graph of symbols with their instances realized.
+
+A bi-directional operator is a pair of tensor functions (F, G), where
+
+    F : (X_1, \dots, X_k) -> Y
+    G : dY -> (dX_1, \dots, dX_k)
+
+dX_i has the same shape as X_i, dY has the same shape with Y.
+
+realise is a function that takes a symbolic model and generates a physical model,
+
+    realise : SM -> PM
+
+realise can take traits: including
+
+    batch_size :: optional<int>
+    forward_only :: bool
+
+realise<Some<b>> generates a trainable physical model of batch size b
+realise<None, true> generates a inference physical model without batch

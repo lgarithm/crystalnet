@@ -34,8 +34,12 @@ struct node_t {
     virtual tensor_ref_t value() const = 0;
     virtual tensor_ref_t gradient() const = 0;
 
-    virtual void forward() const = 0;
-    virtual void backward() const = 0;
+    virtual void forward_eval() const {}
+    virtual void backward_eval() const {}
+
+    using node_list_t = std::vector<const node_t *>;
+
+    virtual node_list_t predecessors() const { return {}; }
 };
 
 struct parameter_node_t : node_t {
@@ -49,12 +53,6 @@ struct parameter_node_t : node_t {
 
     tensor_ref_t value() const override { return _value; }
     tensor_ref_t gradient() const override { return ref(_gradient); }
-    void forward() const override
-    { /* noop */
-    }
-    void backward() const override
-    { /* noop */
-    }
 };
 
 struct placeholder_node_t : node_t {
@@ -75,12 +73,6 @@ struct placeholder_node_t : node_t {
 
     tensor_ref_t value() const override { return *_value; }
     tensor_ref_t gradient() const override { return ref(_gradient); }
-    void forward() const override
-    { /* noop */
-    }
-    void backward() const override
-    { /* noop */
-    }
 };
 
 struct operator_node_t : node_t {
@@ -93,8 +85,7 @@ struct operator_node_t : node_t {
         return (*op.infer)(shape_list_t(shapes));
     }
 
-    using input_list_t = std::vector<const node_t *>;
-    const input_list_t inputs;
+    const node_list_t inputs;
     const operator_t &op;
     tensor_t _value;
     tensor_t _gradient;
@@ -102,7 +93,8 @@ struct operator_node_t : node_t {
     operator_node_t(const std::string &name, const operator_t &op,
                     const node_t *inputs[])
         : node_t(name, infer_shape(op, inputs)),
-          inputs(input_list_t(inputs, inputs + op.arity)), op(op),
+          inputs(inputs, inputs + op.arity),  //
+          op(op),                             //
           _value(this->shape), _gradient(this->shape)
     {
     }
@@ -128,26 +120,28 @@ struct operator_node_t : node_t {
         return tensor_ref_list_t(grad_refs);
     }
 
-    void forward() const override
+    void forward_eval() const override
     {
-        for (auto i : inputs) { i->forward(); }
         // TODO: op.forward must be present
         if (op.forward) {
             forward_ctx_t ctx(_input_refs(), ref(_value));
-            TRACE_NAME(name, (*op.forward)(ctx));
+            // TRACE_NAME(name, (*op.forward)(ctx));
+            (*op.forward)(ctx);
         }
     }
 
-    void backward() const override
+    void backward_eval() const override
     {
         // TODO: op.backward should be present
         if (op.backward) {
             backward_ctx_t ctx(_input_refs(), ref(_value), _input_grad_refs(),
                                ref(_gradient));
-            TRACE_NAME(name, (*op.backward)(ctx));
+            // TRACE_NAME(name, (*op.backward)(ctx));
+            (*op.backward)(ctx);
         }
-        for (auto i : inputs) { i->backward(); }
     }
+
+    node_list_t predecessors() const override { return inputs; }
 };
 
 struct wrap_node_t : node_t {
@@ -170,6 +164,5 @@ struct wrap_node_t : node_t {
         return wrapped.gradient().reshape(shape);
     }
 
-    void forward() const override { wrapped.forward(); }
-    void backward() const override { wrapped.backward(); }
+    node_list_t predecessors() const override { return {&wrapped}; }
 };

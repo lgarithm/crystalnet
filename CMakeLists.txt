@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 
-add_definitions(-funroll-loops)
+# add_definitions(-funroll-loops)
 if (${USE_OPENBLAS})
     add_definitions(-DCRYSTALNET_USE_CBLAS)
     set(OPENBLAS_PATH $ENV{HOME}/local/openblas)
@@ -42,6 +42,20 @@ install(FILES ${headers} DESTINATION include)
 add_custom_target(doxygen COMMAND doxygen ${CMAKE_SOURCE_DIR}/docs/Doxyfile)
 # add_custom_target(sphinx-doc COMMAND sphinx-build -b html html sphinx/build/html
 #                   DEPENDS doxygen)
+
+
+# contrib
+find_package(opencv)
+
+file(GLOB yolo_srcs src/crystalnet-contrib/**/*.cpp
+                    src/crystalnet-contrib/**/*.c)
+add_executable(yolo ${yolo_srcs})
+target_link_libraries(yolo crystalnet)
+IF("${CMAKE_SYSTEM}" MATCHES "Linux")
+    target_link_libraries(yolo stdc++fs)
+endif()
+
+target_link_libraries(yolo opencv_core opencv_imgproc opencv_highgui opencv_imgcodecs)
 
 
 # https://gitlab.kitware.com/cmake/community/wikis/doc/cpack/PackageGenerators

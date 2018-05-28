@@ -37,7 +37,7 @@ struct s_model_ctx_t : named_context_t<s_node_t> {
     s_node_t *make_operator(const operator_t &op, const s_node_list_t &args,
                             const std::string &_name = "")
     {
-        const std::string name = _name.empty() ? gen_name("op") : _name;
+        const std::string name = _name.empty() ? gen_name(op.name) : _name;
         return own(ops(new s_operator_node_t(name, op, args)), name);
     }
 

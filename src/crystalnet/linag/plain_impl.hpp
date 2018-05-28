@@ -25,13 +25,11 @@ template <typename T> struct plain_impl {
         const auto m = equally(len(a), len(c));
         const auto n = equally(wid(b), wid(c));
         const auto l = equally(wid(a), len(b));
+        std::memset(c.data, 0, sizeof(T) * c.shape.dim());
         for (auto i = 0; i < m; ++i) {
-            for (auto j = 0; j < n; ++j) {
-                T tmp = 0;
-                for (auto k = 0; k < l; ++k) {
-                    tmp += a.at(i, k) * b.at(k, j);
-                }
-                c.at(i, j) = tmp;
+            for (auto k = 0; k < l; ++k) {
+                const T aa = a.at(i, k);
+                for (auto j = 0; j < n; ++j) { c.at(i, j) += aa * b.at(k, j); }
             }
         }
     }
@@ -45,9 +43,7 @@ template <typename T> struct plain_impl {
         for (auto i = 0; i < m; ++i) {
             for (auto j = 0; j < n; ++j) {
                 T tmp = 0;
-                for (auto k = 0; k < l; ++k) {
-                    tmp += a.at(i, k) * b.at(j, k);
-                }
+                for (auto k = 0; k < l; ++k) { tmp += a.at(i, k) * b.at(j, k); }
                 c.at(i, j) = tmp;
             }
         }
@@ -62,9 +58,7 @@ template <typename T> struct plain_impl {
         for (auto i = 0; i < m; ++i) {
             for (auto j = 0; j < n; ++j) {
                 T tmp = 0;
-                for (auto k = 0; k < l; ++k) {
-                    tmp += a.at(k, i) * b.at(k, j);
-                }
+                for (auto k = 0; k < l; ++k) { tmp += a.at(k, i) * b.at(k, j); }
                 c.at(i, j) = tmp;
             }
         }
@@ -77,9 +71,7 @@ template <typename T> struct plain_impl {
         const auto n = equally(wid(a), len(b));
         for (auto i = 0; i < m; ++i) {
             T tmp = 0;
-            for (auto j = 0; j < n; ++j) {
-                tmp += a.at(i, j) * b.at(j);
-            }
+            for (auto j = 0; j < n; ++j) { tmp += a.at(i, j) * b.at(j); }
             c.at(i) = tmp;
         }
     }
@@ -92,9 +84,7 @@ template <typename T> struct plain_impl {
         const auto n = equally(wid(b), len(c));
         for (auto i = 0; i < n; ++i) {
             T tmp = 0;
-            for (auto j = 0; j < m; ++j) {
-                tmp += a.at(j) * b.at(j, i);
-            }
+            for (auto j = 0; j < m; ++j) { tmp += a.at(j) * b.at(j, i); }
             c.at(i) = tmp;
         }
     }
@@ -103,8 +93,6 @@ template <typename T> struct plain_impl {
     static void vv(const v_ref_t &a, const v_ref_t &b, const v_ref_t &c)
     {
         const auto l = equally(len(a), len(b), len(c));
-        for (auto i = 0; i < l; ++i) {
-            c.data[i] = a.data[i] + b.data[i];
-        }
+        for (auto i = 0; i < l; ++i) { c.data[i] = a.data[i] + b.data[i]; }
     }
 };

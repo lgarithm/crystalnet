@@ -113,4 +113,15 @@ inline string to_string(const shape_t &shape)
     }
     return "[" + buf + "]";
 }
+
+template <uint8_t r> inline string to_string(const ranked_shape_t<r> &shape)
+{
+    string buf;
+    for (auto d : shape.dims) {
+        if (!buf.empty()) { buf += ", "; }
+        buf += to_string(d);
+    }
+    return "[" + buf + "]";
+}
+
 }  // namespace std

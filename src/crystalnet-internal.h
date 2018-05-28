@@ -14,8 +14,8 @@ extern model_t *realize(parameter_ctx_t *, const s_model_t *, uint32_t);
 
 // testing APIs
 extern parameter_ctx_t *new_parameter_ctx();
-extern void del_parameter_ctx(parameter_ctx_t *);
-extern void del_model(model_t *);
+extern void del_parameter_ctx(const parameter_ctx_t *);
+extern void del_model(const model_t *);
 
 // unstable APIs
 typedef struct shape_list_t shape_list_t;

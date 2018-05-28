@@ -26,7 +26,7 @@ struct classifier_t {
                  const uint32_t class_number)
         : image_shape(image_shape), class_number(class_number),
           s_model(func(&image_shape, class_number)),
-          model(realize(&p_ctx, s_model.get(), 1)) // TODO: support batch
+          model(realize(&p_ctx, s_model.get(), 1))  // TODO: support batch
     {
     }
 
@@ -41,7 +41,7 @@ struct classifier_t {
         using T = float;
         k = std::min(k, class_number);
         model->input.bind(embed(input));
-        TRACE_IT(model->output.forward());
+        TRACE_IT(model->forward());
         TRACE_IT(debug(*model));
         const auto output = ranked<2, T>(model->output.value());
         tensor_t _indexes(shape_t(k), idx_type<int32_t>::type);
@@ -60,7 +60,7 @@ struct classifier_t {
     {
         TRACE(__func__);
         model->input.bind(embed(input));
-        model->output.forward();
+        model->forward();
         using T = float;
         r_tensor_ref_t<T> output(model->output.value());
         return argmax(r_tensor_ref_t<T>(output));
@@ -90,7 +90,5 @@ void top_likely(const classifier_t *c, const tensor_ref_t *input, uint32_t k,
                 int32_t *result)
 {
     const auto r = c->top_likely(*input, k);
-    for (auto i : range(r.size())) {
-        result[i] = r[i];
-    }
+    for (auto i : range(r.size())) { result[i] = r[i]; }
 }

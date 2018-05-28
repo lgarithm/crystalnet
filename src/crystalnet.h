@@ -11,8 +11,8 @@ extern const char *version();
 typedef struct dtypes_t dtypes_t;
 
 struct dtypes_t {
-    const uint8_t i8;
     const uint8_t u8;
+    const uint8_t i8;
     const uint8_t i16;
     const uint8_t i32;
     const uint8_t f32;
@@ -48,7 +48,7 @@ typedef struct s_model_t s_model_t;
 typedef struct s_model_ctx_t s_model_ctx_t;
 extern s_model_ctx_t *make_s_model_ctx();
 extern s_model_t *new_s_model(s_model_ctx_t *, s_node_t *, s_node_t *);
-extern void del_s_model(s_model_t *);
+extern void del_s_model(const s_model_t *);
 extern s_node_t *var(s_model_ctx_t *, const shape_t *);
 extern s_node_t *covar(s_model_ctx_t *, const shape_t *);
 extern s_node_t *reshape(s_model_ctx_t *, const shape_t *, const s_node_t *);
@@ -76,7 +76,7 @@ extern void s_trainer_run(s_trainer_t *, dataset_t *);
 extern void s_rtainer_test(s_trainer_t *, dataset_t *);
 
 // dataset
-extern dataset_t *load_mnist(const char *const); // train | t10k
+extern dataset_t *load_mnist(const char *const);  // train | t10k
 extern dataset_t *load_cifar();
 
 // unstable APIs
