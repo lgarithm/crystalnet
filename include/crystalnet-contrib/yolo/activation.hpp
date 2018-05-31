@@ -4,8 +4,8 @@
 
 #include <crystalnet-internal.h>
 #include <crystalnet/core/cast.hpp>
+#include <crystalnet/core/layer.hpp>
 #include <crystalnet/core/operator.hpp>  // TODO: don't include private headers
-#include <crystalnet/layers/layer.hpp>
 #include <crystalnet/linag/linag.hpp>
 #include <crystalnet/utility/range.hpp>
 

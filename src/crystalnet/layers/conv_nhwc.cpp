@@ -1,7 +1,6 @@
-#pragma once
-#include <crystalnet.h>
+#include <crystalnet-ext.h>
 #include <crystalnet/core/gc.hpp>
-#include <crystalnet/layers/layer.hpp>
+#include <crystalnet/core/layer.hpp>
 #include <crystalnet/ops/const.hpp>
 #include <crystalnet/ops/truncated_normal.hpp>
 
@@ -21,8 +20,6 @@ struct conv_nhwc : s_layer_t {
 
     s_node_t *operator()(s_model_ctx_t &ctx, s_node_t *x) const override
     {
-        static GC<initializer_t> gc;
-
         const auto bias_init = gc(new constant_initializer_t(0.1));
         const auto weight_init = gc(new truncated_normal_initializer_t(0.1));
         const auto c = last_dim(x->shape);
@@ -34,3 +31,8 @@ struct conv_nhwc : s_layer_t {
         return y;
     }
 };
+
+s_layer_t *const new_layer_conv_nhwc(uint32_t r, uint32_t s, uint32_t d)
+{
+    return new conv_nhwc(r, s, d);
+}

@@ -39,7 +39,7 @@ doc: cmake_targets
 PKG=$(shell cat langs/go/crystalnet/.goimportpath)
 GOPATH=$(ROOT)/.gopath
 # TODO: GOPATH=$(shell mktemp -d)
-CGO_CFLAGS="-I$(ROOT)/src"
+CGO_CFLAGS="-I$(ROOT)/include"
 CGO_LDFLAGS="-L$(BUILD_DIR)/lib"
 
 go: libcrystalnet

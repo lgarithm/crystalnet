@@ -7,9 +7,8 @@
 const operator_t *make_op_conv2d(uint32_t padding_h, uint32_t padding_w,
                                  uint32_t stride_h, uint32_t stride_w)
 {
-    static GC<op_conv2d_impl_t> gc;
     const auto op = gc(new op_conv2d_impl_t(
-        conv_nhwc_generic::trait_t(r_shape(padding_h, padding_w), //
+        conv_nhwc_generic::trait_t(r_shape(padding_h, padding_w),  //
                                    r_shape(stride_h, stride_w))));
-    return _register_generic_bi_op("conv2d", op);
+    return _register_generic_bi_op(op);
 }

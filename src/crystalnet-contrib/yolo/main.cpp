@@ -35,7 +35,7 @@ void run(const options_t &opt)
     // logf("input image: %s", std::to_string(input->shape).c_str());
 
     const s_model_t *s_model = []() {
-        // TRACE(__func__);
+        TRACE("main::build symbolic model");
         return yolov2();
     }();
     {
@@ -45,8 +45,14 @@ void run(const options_t &opt)
         system("dot -Tsvg graph.dot -O");
     }
     const auto p_ctx = new_parameter_ctx();
-    const model_t *p_model = [&]() { return realize(p_ctx, s_model, 1); }();
-    load_parameters(p_model, opt.model_dir);
+    const model_t *p_model = [&]() {
+        TRACE("main::build physical model");
+        return realize(p_ctx, s_model, 1);
+    }();
+    {
+        TRACE("main::load parameters");
+        load_parameters(p_model, opt.model_dir);
+    }
     {
         TRACE("main::inference");
         const auto r = ref(*input);

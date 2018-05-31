@@ -6,8 +6,8 @@
 #include <crystalnet-contrib/yolo/yolo.hpp>
 #include <crystalnet-internal.h>
 #include <crystalnet/core/cast.hpp>
+#include <crystalnet/core/layer.hpp>
 #include <crystalnet/core/operator.hpp>  // TODO: don't include private headers
-#include <crystalnet/layers/layer.hpp>
 #include <crystalnet/linag/linag.hpp>
 #include <crystalnet/utility/range.hpp>
 
@@ -179,17 +179,17 @@ template <typename Activate, bool BN> struct conv_layer : s_layer_t {
         const auto weight = ctx.make_parameter(weight_shape, prefix + "_W");
         const auto bias = ctx.make_parameter(bias_shape, prefix + "_b");
 
+        const auto conv_op =
+            _register_generic_bi_op(gc(new conv_nchw_op(stride, padding)));
+        const auto add_bias_op = _register_generic_bi_op(gc(new add_bias()));
+        const auto act_op =
+            _register_generic_bi_op(gc(new pointwise_op<Activate>()));
+
         if (BN) {
-            const auto conv_op = _register_generic_bi_op(
-                "", new conv_nchw_op(stride, padding));  // TODO: gc
-            const auto bn_op = _register_generic_bi_op(
-                "", new op_batch_norm<float>());  // TODO: gc
+            const auto bn_op =
+                _register_generic_bi_op(gc(new op_batch_norm<float>()));
             const auto scale_bias_op =
-                _register_generic_bi_op("", new scale_bias());  // TODO: gc
-            const auto add_bias_op =
-                _register_generic_bi_op("", new add_bias());  // TODO: gc
-            const auto act_op = _register_generic_bi_op(
-                "", new pointwise_op<Activate>());  // TODO: gc
+                _register_generic_bi_op(gc(new scale_bias()));
 
             const auto scales =
                 ctx.make_parameter(bias_shape, prefix + "_scales");
@@ -209,13 +209,6 @@ template <typename Activate, bool BN> struct conv_layer : s_layer_t {
                                               "add_bias" + suffix);
             return ctx.make_operator(*act_op, {y4}, "act" + suffix);
         } else {
-            const auto conv_op = _register_generic_bi_op(
-                "", new conv_nchw_op(stride, padding));  // TODO: gc
-            const auto add_bias_op =
-                _register_generic_bi_op("", new add_bias());  // TODO: gc
-            const auto act_op = _register_generic_bi_op(
-                "", new pointwise_op<Activate>());  // TODO: gc
-
             const auto y =
                 ctx.make_operator(*conv_op, {x, weight}, "conv" + suffix);
             const auto z =

@@ -5,6 +5,7 @@
 #include <type_traits>
 
 #include <crystalnet-internal.h>
+#include <crystalnet/core/context.hpp>
 #include <crystalnet/core/tensor.hpp>
 
 struct forward_ctx_t {
@@ -20,7 +21,7 @@ struct forward_ctx_t {
 struct backward_ctx_t {
     tensor_ref_list_t inputs;
     tensor_ref_t output;
-    tensor_ref_list_t input_gradients; // TODO: make items of it optional
+    tensor_ref_list_t input_gradients;  // TODO: make items of it optional
     tensor_ref_t output_gradient;
 
     backward_ctx_t(const tensor_ref_list_t &inputs, const tensor_ref_t &output,
@@ -138,10 +139,19 @@ template <typename T> struct generic_backward_func_t : backward_func_t {
     void operator()(const backward_ctx_t &ctx) override { op.backward(ctx); }
 };
 
+struct operator_registry_t : named_context_t<operator_t> {
+    operator_registry_t() : named_context_t<operator_t>("operator") {}
+};
+
+extern operator_registry_t operator_registry;
+
 template <typename T>
-const operator_t *_register_generic_bi_op(const char *const name, const T *op)
+const operator_t *_register_generic_bi_op(const T *op,
+                                          const std::string &_name = "")
 {
-    return register_op(name, T::arity, //
+    const std::string name =
+        _name.empty() ? operator_registry.gen_name() : _name;
+    return register_op(name.c_str(), T::arity,  //
                        new generic_shape_func_t<T>(*op),
                        new generic_forward_func_t<T>(*op),
                        new generic_backward_func_t<T>(*op));

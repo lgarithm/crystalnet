@@ -3,8 +3,9 @@ import sys
 
 excludes = ['crystalnet/linag/cblas_impl.hpp']
 
+
 def gen_test_prog(src):
-    include_name = src[len('../../src/'):]
+    include_name = src[len('../../include/'):]
     if include_name in excludes:
         return
     test_prog = include_name.replace('/', '_').replace('.', '_') + '.cpp'
@@ -12,6 +13,7 @@ def gen_test_prog(src):
     with open(test_prog, 'w') as f:
         f.write('#include <%s>\n' % include_name)
         f.write('int main(){ return 0; }')
+
 
 def main(args):
     for src in args:

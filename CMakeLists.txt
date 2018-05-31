@@ -16,7 +16,7 @@ if (${USE_OPENBLAS})
     link_directories(${OPENBLAS_PATH}/lib)
 endif()
 
-include_directories(${CMAKE_SOURCE_DIR}/src)
+include_directories(${CMAKE_SOURCE_DIR}/include)
 link_directories(${LIBRARY_OUTPUT_PATH})
 
 file(GLOB srcs src/crystalnet/**/*.cpp)
@@ -35,9 +35,7 @@ endforeach()
 
 set(CMAKE_INSTALL_PREFIX $ENV{HOME}/local/crystalnet)  # TODO: make it configurable
 install(TARGETS crystalnet LIBRARY DESTINATION lib)
-file(GLOB headers src/*.h)
-install(FILES ${headers} DESTINATION include)
-
+install(DIRECTORY include DESTINATION .)
 
 add_custom_target(doxygen COMMAND doxygen ${CMAKE_SOURCE_DIR}/docs/Doxyfile)
 # add_custom_target(sphinx-doc COMMAND sphinx-build -b html html sphinx/build/html

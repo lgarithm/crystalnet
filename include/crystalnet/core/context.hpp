@@ -24,8 +24,12 @@ template <typename T> struct named_context_t : generic_context_t<T> {
     // own takes the ownership of a named resource.
     T *own(T *resource, const std::string &name)
     {
+        if (name.empty()) {
+            throw std::invalid_argument(__str__() + ": name is empty");
+        }
         if (index.count(name) > 0) {
-            throw std::invalid_argument("duplicated name: " + name);
+            throw std::invalid_argument(__str__() +
+                                        ": duplicated name: " + name);
         }
         index[name] = resource;
         items.push_back(std::make_pair(name, resource));
@@ -47,4 +51,5 @@ template <typename T> struct named_context_t : generic_context_t<T> {
 
   private:
     const std::string default_prefix;
+    std::string __str__() const { return "context(" + default_prefix + ")"; }
 };
