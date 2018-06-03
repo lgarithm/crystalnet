@@ -125,8 +125,7 @@ struct operator_node_t : node_t {
         // TODO: op.forward must be present
         if (op.forward) {
             forward_ctx_t ctx(_input_refs(), ref(_value));
-            // TRACE_NAME(name, (*op.forward)(ctx));
-            (*op.forward)(ctx);
+            trace_call<true>(name + "::forward", *op.forward, ctx);
         }
     }
 
@@ -136,8 +135,7 @@ struct operator_node_t : node_t {
         if (op.backward) {
             backward_ctx_t ctx(_input_refs(), ref(_value), _input_grad_refs(),
                                ref(_gradient));
-            // TRACE_NAME(name, (*op.backward)(ctx));
-            (*op.backward)(ctx);
+            trace_call(name, *op.backward, ctx);
         }
     }
 

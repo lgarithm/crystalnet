@@ -20,6 +20,8 @@
 namespace fs = std::experimental::filesystem;
 
 const fs::path home(std::getenv("HOME"));
+const fs::path work_dir(std::getenv("PWD"));
+const fs::path log_dir = work_dir / "log";
 
 void run(const options_t &opt)
 {
@@ -61,7 +63,7 @@ void run(const options_t &opt)
     }
     {
         TRACE("main::print layers");
-        SET_TRACE_LOG(home / "Desktop/diff/cn-layers.txt");
+        SET_TRACE_LOG(log_dir / "cn-layers.txt");
         using T = float;
         logf("input %-3d %s", 0, summary(r_tensor_ref_t<T>(*input)).c_str());
         show_layers(*p_model, *s_model);
@@ -77,7 +79,7 @@ void run(const options_t &opt)
     }();
     {
         TRACE("main::print detections");
-        SET_TRACE_LOG(home / "Desktop/diff/cn-bboxes.txt");
+        SET_TRACE_LOG(log_dir / "cn-bboxes.txt");
         int i = 0;
         for (const auto &d : dets) {
             const auto b = d->bbox;
@@ -118,6 +120,7 @@ void run(const options_t &opt)
 
 int main(int argc, char *argv[])
 {
+    TRACE(__func__);
     const auto opt = parse_flags(argc, argv);
     try {
         run(opt);

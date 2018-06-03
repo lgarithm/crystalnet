@@ -27,15 +27,25 @@ struct xterm_t {
         e;                                                                     \
     }
 
+template <typename T>
+std::chrono::duration<T>
+since(const std::chrono::time_point<std::chrono::system_clock> &t0)
+{
+    return std::chrono::system_clock::now() - t0;
+}
+
 tracer_ctx_t::~tracer_ctx_t()
 {
-    FILE *fp = fopen("trace.log", "w");
+    constexpr const char *filename = "trace.log";
+    logf("profile info logged to %s", filename);
+    FILE *fp = fopen(filename, "w");
     report(fp);
     fclose(fp);
 }
 
 void tracer_ctx_t::report(FILE *fp) const
 {
+    const auto total = since<double>(t0);
     using item_t = std::tuple<duration_t, uint32_t, std::string>;
     std::vector<item_t> list;
     for (const auto [name, duration] : total_durations) {
@@ -44,13 +54,15 @@ void tracer_ctx_t::report(FILE *fp) const
     std::sort(list.rbegin(), list.rend());
 
     const std::string hr(80, '-');
-    fprintf(fp, "\tsummary of %s::%s\n", "tracer_ctx_t", name.c_str());
+    fprintf(fp, "\tsummary of %s::%s (%f)\n", "tracer_ctx_t",  //
+            name.c_str(), total.count());
     fprintf(fp, "%s\n", hr.c_str());
-    fprintf(fp, "%8s    %16s    %s\n", "count", "total duration", "name");
+    fprintf(fp, "%8s    %16s    %12s    %s\n",  //
+            "count", "cumulative (s)", "%", "call site");
     fprintf(fp, "%s\n", hr.c_str());
     for (const auto &[duration, count, name] : list) {
-        fprintf(fp, "%8d    %16fs    %s\n",  //
-                count, duration.count(), name.c_str());
+        fprintf(fp, "%8d    %16f    %12.2f    %s\n",  //
+                count, duration.count(), duration * 100 / total, name.c_str());
     }
 }
 
@@ -79,8 +91,7 @@ tracer_t::tracer_t(const std::string &name, tracer_ctx_t &ctx)
 
 tracer_t::~tracer_t()
 {
-    const auto now = std::chrono::system_clock::now();
-    const std::chrono::duration<double> d = now - t0;
+    const auto d = since<double>(t0);
     ctx.out(name, d);
     char buffer[128];
     sprintf(buffer, "[%s] took %fs", name.c_str(), d.count());

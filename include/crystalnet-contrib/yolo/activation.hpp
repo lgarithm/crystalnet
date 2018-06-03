@@ -1,6 +1,5 @@
 #pragma once
 #include <algorithm>
-#include <cmath>
 
 #include <crystalnet-internal.h>
 #include <crystalnet/core/cast.hpp>
@@ -13,10 +12,6 @@ template <typename T, typename F> void pointwise(T *begin, T *end, const F &f)
 {
     std::transform(begin, end, begin, f);
 }
-
-template <typename T> struct logistic {
-    T operator()(T x) const { return (T)1. / ((T)1. + std::exp(-x)); }
-};
 
 template <typename T> struct leaky_relu {
     T operator()(T x) const { return x > 0 ? x : .1 * x; }

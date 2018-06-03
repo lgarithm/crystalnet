@@ -1,7 +1,7 @@
-#pragma once
 #include <cmath>
 #include <memory>
 
+#include <crystalnet/core/gc.hpp>
 #include <crystalnet/train/optimizer.hpp>
 
 struct adam_optimizer_t : optimizer_t {
@@ -59,9 +59,7 @@ struct adam_optimizer_t : optimizer_t {
                 }
 
                 ref_t value(_value);
-                for (auto i = 0; i < n; ++i) {
-                    value.data[i] += delta.data[i];
-                }
+                for (auto i = 0; i < n; ++i) { value.data[i] += delta.data[i]; }
             }
         };
 
@@ -77,9 +75,7 @@ struct adam_optimizer_t : optimizer_t {
 
         void operator()() override
         {
-            for (auto &p : p_ctxs) {
-                (*p)();
-            }
+            for (auto &p : p_ctxs) { (*p)(); }
         }
     };
 
@@ -88,3 +84,5 @@ struct adam_optimizer_t : optimizer_t {
         return new ctx(model);
     }
 };
+
+const optimizer_t *opt_adam = gc(new adam_optimizer_t);

@@ -1,4 +1,3 @@
-#include <crystalnet-contrib/darknet/darknet.h>
 #include <crystalnet-contrib/yolo/activation.hpp>
 #include <crystalnet-contrib/yolo/batch_normalization.hpp>
 #include <crystalnet-contrib/yolo/bias_layer.hpp>
@@ -82,7 +81,8 @@ struct conv_nchw_op {
                     for (const auto j_ : range(w_)) {
                         const uint32_t i = index(i_, u);
                         const uint32_t j = index(j_, v);
-                        if (i >= padding && j >= padding) {
+                        if (padding <= i && padding <= j &&  //
+                            i < h + padding && j < w + padding) {
                             y.at(u, v, i_, j_) = x.at(i - padding, j - padding);
                         } else {
                             y.at(u, v, i_, j_) = 0;
@@ -99,8 +99,7 @@ struct conv_nchw_op {
     {
         const auto [c, h, w] = x.shape.dims;
         const auto [_c, r, s, h_, w_] = y.shape.dims;
-        im2col_cpu(x.data, c, h, w, r, stride, padding, y.data);
-        // for (auto i : range(c)) { im2col(x[i], y[i]); }
+        for (auto i : range(c)) { im2col(x[i], y[i]); }
     }
 
     void forward(const forward_ctx_t &ctx) const

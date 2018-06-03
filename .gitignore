@@ -1,3 +1,5 @@
+__pycache__
+.DS_store
 *.bmp
 *.dot
 *.gch
@@ -7,10 +9,9 @@
 *.svg
 *.swp
 *~
-.DS_store
 /.gopath
 /.vscode/settings.json
 /compile_commands.json
+/log
 /xtleak.kcg.*
-__pycache__
 build

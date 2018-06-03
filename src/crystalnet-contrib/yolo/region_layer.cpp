@@ -2,6 +2,7 @@
 
 #include <crystalnet-contrib/darknet/darknet.h>
 #include <crystalnet-contrib/yolo/activation.hpp>
+#include <crystalnet-contrib/yolo/cmath.h>
 #include <crystalnet-contrib/yolo/region_layer.h>
 #include <crystalnet-contrib/yolo/yolo.hpp>
 #include <crystalnet-internal.h>
@@ -37,7 +38,7 @@ void softmax(uint32_t n, uint32_t stride, T *input, T *output)
 
     T sum = 0;
     for (auto i : range(n)) {
-        const T e = std::exp(x[i] - x_max);
+        const T e = c_exp(x[i] - x_max);
         sum += e;
         y[i] = e;
     }
@@ -45,7 +46,7 @@ void softmax(uint32_t n, uint32_t stride, T *input, T *output)
     for (auto i : range(n)) { y[i] /= sum; }
 }
 
-template <bool use_origin = true> struct region_op_t {
+struct region_op_t {
     constexpr static uint8_t arity = 2;
 
     const int n;        // 5
@@ -101,23 +102,16 @@ template <bool use_origin = true> struct region_op_t {
         const auto x = ranked<5, T>(_x.reshape(new_shape));
         const auto y = ranked<5, T>(_y.reshape(new_shape));
 
-        if (use_origin) {
-            forward_region_layer(x.data, batch_size, y.data, n * m * h * w,  //
-                                 n, w, h);
-            return;
-        }
-
-        const auto act = logistic<T>();
-
+        // const auto act = logistic<T>();
         for (auto b : range(batch_size)) {
             for (auto nn : range(n)) {
                 const auto yy = y[b][nn];  // [C + 1 + K, h, w]
                 const uint32_t stride = h * w;
                 for (auto i : range(h)) {
                     for (auto j : range(w)) {
-                        act(yy[0].at(i, j));
-                        act(yy[1].at(i, j));
-                        act(yy[4].at(i, j));
+                        yy.at(0, i, j) = c_logistic(yy.at(0, i, j));
+                        yy.at(1, i, j) = c_logistic(yy.at(1, i, j));
+                        yy.at(4, i, j) = c_logistic(yy.at(4, i, j));
                         const auto data = yy[5].data + i * w + j;
                         softmax(classes, stride, data, data);
                     }
@@ -140,13 +134,12 @@ struct region_layer : s_layer_t {
     const int h;  // 13
     const int w;  // 13
 
-    using region_op = region_op_t<true>;
     const operator_t *op;
 
     region_layer(int h, int w, int n, int classes, int coords)
         : h(h), w(w), n(n), classes(classes), coords(coords),
           op(_register_generic_bi_op(
-              gc(new region_op(h, w, n, classes, coords)), "darknet::region"))
+              gc(new region_op_t(h, w, n, classes, coords)), "darknet::region"))
     {
     }
 

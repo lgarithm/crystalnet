@@ -4,7 +4,8 @@
 extern "C" {
 #endif
 
-extern float logistic_activate(float x);
+extern float c_exp(float x);
+extern float c_logistic(float x);
 
 #ifdef __cplusplus
 }

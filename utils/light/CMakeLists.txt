@@ -14,3 +14,7 @@ link_directories(${DARKNET_PATH}/lib)
 file(GLOB srcs src/*.cpp)
 add_executable(light ${srcs})
 target_link_libraries(light crystalnet darknet)
+IF("${CMAKE_SYSTEM}" MATCHES "Linux")
+    target_link_libraries(light stdc++fs)
+endif()
+
