@@ -35,10 +35,10 @@ void run(const options_t &opt)
         return load_test_image(opt.filename.c_str());
     }();
     // logf("input image: %s", std::to_string(input->shape).c_str());
-
-    const s_model_t *s_model = []() {
+    context_t *ctx = new_context();
+    const s_model_t *s_model = [&]() {
         TRACE("main::build symbolic model");
-        return yolov2();
+        return yolov2(ctx);
     }();
     {
         FILE *fp = fopen("graph.dot", "w");
@@ -114,7 +114,7 @@ void run(const options_t &opt)
     }
 
     del_model(p_model);
-    del_s_model(s_model);
+    del_context(ctx);
     del_tensor(input);
 }
 

@@ -27,31 +27,29 @@ auto load_class_names()
     std::vector<std::string> names;
     std::string line;
     std::ifstream in(filename);
-    while (std::getline(in, line)) {
-        names.push_back(line);
-    }
+    while (std::getline(in, line)) { names.push_back(line); }
     return names;
 }
 
 void load_weight(classifier_t *classifier)
 {
     std::vector<std::string> names({
-        "conv1_1_W", "conv1_1_b", //
-        "conv1_2_W", "conv1_2_b", //
-        "conv2_1_W", "conv2_1_b", //
-        "conv2_2_W", "conv2_2_b", //
-        "conv3_1_W", "conv3_1_b", //
-        "conv3_2_W", "conv3_2_b", //
-        "conv3_3_W", "conv3_3_b", //
-        "conv4_1_W", "conv4_1_b", //
-        "conv4_2_W", "conv4_2_b", //
-        "conv4_3_W", "conv4_3_b", //
-        "conv5_1_W", "conv5_1_b", //
-        "conv5_2_W", "conv5_2_b", //
-        "conv5_3_W", "conv5_3_b", //
-        "fc6_W",     "fc6_b",     //
-        "fc7_W",     "fc7_b",     //
-        "fc8_W",     "fc8_b",     //
+        "conv1_1_W", "conv1_1_b",  //
+        "conv1_2_W", "conv1_2_b",  //
+        "conv2_1_W", "conv2_1_b",  //
+        "conv2_2_W", "conv2_2_b",  //
+        "conv3_1_W", "conv3_1_b",  //
+        "conv3_2_W", "conv3_2_b",  //
+        "conv3_3_W", "conv3_3_b",  //
+        "conv4_1_W", "conv4_1_b",  //
+        "conv4_2_W", "conv4_2_b",  //
+        "conv4_3_W", "conv4_3_b",  //
+        "conv5_1_W", "conv5_1_b",  //
+        "conv5_2_W", "conv5_2_b",  //
+        "conv5_3_W", "conv5_3_b",  //
+        "fc6_W",     "fc6_b",      //
+        "fc7_W",     "fc7_b",      //
+        "fc8_W",     "fc8_b",      //
     });
 
     uint32_t i = 0;
@@ -77,9 +75,7 @@ void preprocess(const fs::path &p, const tensor_ref_t *input_image)
     T *data = reinterpret_cast<T *>(tensor_data_ptr(input_image));
     uint8_t *tmp = (uint8_t *)tensor_data_ptr(tensor_ref(_tmp));
     const T mean[3] = {123.68, 116.779, 103.939};
-    for (auto i = 0; i < dim; ++i) {
-        data[i] = tmp[i] - mean[i % 3];
-    }
+    for (auto i = 0; i < dim; ++i) { data[i] = tmp[i] - mean[i % 3]; }
     del_tensor(_tmp);
 }
 
@@ -91,9 +87,7 @@ const tensor_t *load_test_image(const fs::path &p)
     using T = float;
     T *data = reinterpret_cast<T *>(tensor_data_ptr(image));
     const T mean[3] = {123.68, 116.779, 103.939};
-    for (auto i = 0; i < dim; ++i) {
-        data[i] -= mean[i % 3];
-    }
+    for (auto i = 0; i < dim; ++i) { data[i] -= mean[i % 3]; }
     return _image;
 }
 

@@ -1,5 +1,6 @@
 #include <crystalnet-ext.h>
 #include <crystalnet-internal.h>
+#include <crystalnet/core/user_context.hpp>
 #include <crystalnet/debug/debug.hpp>
 #include <crystalnet/model/model.hpp>
 #include <crystalnet/symbol/model.hpp>

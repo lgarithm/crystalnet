@@ -11,7 +11,7 @@ const uint32_t alexnet_image_size = 227;
 const uint32_t alexnet_class_number = 1000;
 
 // https://papers.nips.cc/paper/4824-imagenet-classification-with-deep-convolutional-neural-networks.pdf
-s_model_t *alexnet(const shape_t *, uint32_t);
+s_model_t *alexnet(context_t *ctx, const shape_t *, uint32_t);
 
 #ifdef __cplusplus
 }

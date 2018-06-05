@@ -11,13 +11,10 @@
 
 const uint32_t yolov2_input_size = 416;
 
-s_model_t *yolov2()
+s_model_t *yolov2(context_t *ctx)
 {
-    shape_ctx_t *sc = new_shape_ctx();
-    s_model_ctx_t *ctx = make_s_model_ctx();
-
     const shape_t *input_shape =
-        mk_shape(sc, 3, 3, yolov2_input_size, yolov2_input_size);
+        mk_shape(ctx, 3, 3, yolov2_input_size, yolov2_input_size);
 
     s_layer_t *max_pool2 = pool(2, 2);
     s_layer_t *reorg = make_reorg_layer();
@@ -86,5 +83,5 @@ s_model_t *yolov2()
         },
         l28);
 
-    return new_s_model(ctx, x, y);
+    return make_s_model(ctx, x, y);
 }

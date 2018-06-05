@@ -49,11 +49,11 @@ struct s_model_ctx_t : named_context_t<s_node_t> {
 };
 
 struct s_model_t {
-    const s_model_ctx_t &ctx;
+    const context_t &ctx;
     const s_node_t &input;
     const s_node_t &output;
 
-    s_model_t(s_model_ctx_t &ctx, s_node_t &input, s_node_t &output)
+    s_model_t(const context_t &ctx, s_node_t &input, s_node_t &output)
         : ctx(ctx), input(input), output(output)
     {
     }

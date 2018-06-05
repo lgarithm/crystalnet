@@ -1,4 +1,5 @@
 #include <crystalnet-ext.h>
+#include <crystalnet/core/user_context.hpp>
 #include <crystalnet/data/dataset.hpp>
 #include <crystalnet/symbol/model.hpp>
 

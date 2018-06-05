@@ -1,7 +1,8 @@
-#include <crystalnet.h>
-#include <crystalnet/symbol/model.hpp>
-
 #include <cstdio>
+
+#include <crystalnet.h>
+#include <crystalnet/core/user_context.hpp>
+#include <crystalnet/symbol/model.hpp>
 
 void graphviz(const s_model_t &m, FILE *fp)
 {

@@ -2,6 +2,7 @@
 #include <crystalnet-internal.h>
 #include <crystalnet/core/cast.hpp>
 #include <crystalnet/core/operator.hpp>  // TODO: don't include private headers
+#include <crystalnet/core/user_context.hpp>
 #include <crystalnet/symbol/model.hpp>
 #include <crystalnet/utility/range.hpp>
 
@@ -92,12 +93,12 @@ const operator_t *route_1_opl =
 const operator_t *route_2_opl =
     _register_bi_op<darknet::route_2>("darknet::route_2");
 
-symbol route_1(s_model_ctx_t *ctx, symbol p)
+symbol route_1(context_t *ctx, symbol p)
 {
     return ctx->_layers(ctx->make_operator(*route_1_opl, {p}, "route_1"));
 }
 
-symbol route_2(s_model_ctx_t *ctx, symbol p1, symbol p2)
+symbol route_2(context_t *ctx, symbol p1, symbol p2)
 {
     symbol l = ctx->make_operator(*route_2_opl, {p1, p2}, "route_2");
     return ctx->_layers(l);

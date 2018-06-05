@@ -4,6 +4,7 @@
 #include <crystalnet-internal.h>
 #include <crystalnet/core/tensor.hpp>
 #include <crystalnet/core/tracer.hpp>
+#include <crystalnet/core/user_context.hpp>
 #include <crystalnet/debug/debug.hpp>
 #include <crystalnet/ops/argmax.hpp>
 #include <crystalnet/ops/batch.hpp>
@@ -15,9 +16,8 @@ struct classifier_t {
     const uint32_t class_number;
 
     parameter_ctx_t p_ctx;
-
-    using s_model_owner_t = std::unique_ptr<s_model_t>;
-    const s_model_owner_t s_model;
+    context_t ctx;
+    const s_model_t *s_model;
 
     using mode_owner_t = std::unique_ptr<model_t>;
     const mode_owner_t model;
@@ -25,8 +25,8 @@ struct classifier_t {
     classifier_t(classification_model_func_t func, const shape_t &image_shape,
                  const uint32_t class_number)
         : image_shape(image_shape), class_number(class_number),
-          s_model(func(&image_shape, class_number)),
-          model(realize(&p_ctx, s_model.get(), 1))  // TODO: support batch
+          s_model(func(&ctx, &image_shape, class_number)),
+          model(realize(&p_ctx, s_model, 1))  // TODO: support batch
     {
     }
 
@@ -50,7 +50,7 @@ struct classifier_t {
         std::vector<int32_t> result;
         for (auto i : range(k)) {
             const auto idx = indexes.data[i];
-            printf("[d] %d %f\n", idx, output[0].data[idx]);
+            logf("[d] %d %f", idx, output[0].data[idx]);
             result.push_back(idx);
         }
         return result;

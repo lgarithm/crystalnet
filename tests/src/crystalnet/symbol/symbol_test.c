@@ -3,13 +3,12 @@
 #include <crystalnet-internal.h>
 
 // y = softmax(flatten(x) * w + b)
-s_model_t *slp(const shape_t *image_shape, uint8_t arity)
+s_model_t *slp(context_t *ctx, const shape_t *image_shape, uint8_t arity)
 {
     const shape_t *lable_shape = new_shape(1, arity);
     const shape_t *weight_shape = new_shape(2, shape_dim(image_shape), arity);
     const shape_t *x_wrap_shape = new_shape(1, shape_dim(image_shape));
 
-    s_model_ctx_t *ctx = make_s_model_ctx();
     s_node_t *x = var(ctx, image_shape);
     s_node_t *x_ = reshape(ctx, x_wrap_shape, x);
     s_node_t *w = covar(ctx, weight_shape);
@@ -25,21 +24,22 @@ s_model_t *slp(const shape_t *image_shape, uint8_t arity)
     del_shape(lable_shape);
     del_shape(weight_shape);
     del_shape(x_wrap_shape);
-    return new_s_model(ctx, x, op3);
+    return make_s_model(ctx, x, op3);
 }
 
 void test_1()
 {
     uint8_t arity = 10;
     const shape_t *image_shape = new_shape(2, 28, 28);
-    s_model_t *sm = slp(image_shape, arity);
+    context_t *ctx = new_context();
+    s_model_t *sm = slp(ctx, image_shape, arity);
     parameter_ctx_t *pc = new_parameter_ctx();
     for (int i = 1; i <= 3; ++i) {
         model_t *pm = realize(pc, sm, i);
         del_model(pm);
     }
     del_parameter_ctx(pc);
-    del_s_model(sm);
+    del_context(ctx);
     del_shape(image_shape);
 }
 

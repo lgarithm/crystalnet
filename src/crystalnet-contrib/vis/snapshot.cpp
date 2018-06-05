@@ -1,5 +1,6 @@
 #include <crystalnet-contrib/vis/snapshot.hpp>
 #include <crystalnet/core/tensor.hpp>
+#include <crystalnet/core/user_context.hpp>
 #include <crystalnet/model/model.hpp>
 #include <crystalnet/symbol/model.hpp>
 

@@ -17,7 +17,7 @@ lib.shape_rank.argtypes = [c_void_p]
 lib.shape_dim.argtypes = [c_void_p]
 
 apis = [
-    (0, lib.make_s_model_ctx),
+    (0, lib.new_context),
     (2, lib.var),
     (2, lib.covar),
     (3, lib.reshape),
@@ -63,11 +63,11 @@ class Shape(object):
 
 class Global(object):
     def __init__(self):
-        self.s_model_ctx = lib.make_s_model_ctx()
+        self.context = lib.new_context()
 
 
 g = Global()
-ctx = g.s_model_ctx
+ctx = g.context
 
 
 class Tensor(object):

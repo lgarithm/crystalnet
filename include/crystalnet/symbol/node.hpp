@@ -11,8 +11,6 @@
 
 struct model_option_t;
 
-using index_t = std::map<const s_node_t *, node_t *>;
-
 struct s_node_t {
     const std::string name;
     const shape_t shape;

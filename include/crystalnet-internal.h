@@ -19,7 +19,7 @@ extern void del_model(const model_t *);
 
 // unstable APIs
 typedef struct shape_list_t shape_list_t;
-extern const shape_list_t *mk_shape_list(shape_ctx_t *,
+extern const shape_list_t *mk_shape_list(context_t *,
                                          const shape_t *const p_shapes[]);
 
 // TODO: make it possible to add user defined operators

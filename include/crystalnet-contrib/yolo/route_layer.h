@@ -6,8 +6,8 @@
 extern "C" {
 #endif
 
-extern symbol route_1(s_model_ctx_t *, symbol);
-extern symbol route_2(s_model_ctx_t *, symbol, symbol);
+extern symbol route_1(context_t *, symbol);
+extern symbol route_2(context_t *, symbol, symbol);
 
 #ifdef __cplusplus
 }

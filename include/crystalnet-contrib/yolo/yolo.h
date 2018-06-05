@@ -7,8 +7,8 @@ extern "C" {
 
 extern const uint32_t yolov2_input_size;
 
-extern s_model_t *yolov2();
-extern s_model_t *yolov3();
+extern s_model_t *yolov2(context_t *);
+extern s_model_t *yolov3(context_t *);  // TODO
 
 #ifdef __cplusplus
 }

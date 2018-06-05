@@ -20,8 +20,11 @@ struct dtypes_t {
 };
 extern const dtypes_t dtypes;
 
+typedef struct context_t context_t;
+extern context_t *new_context();
+extern void del_context(context_t *);
+
 typedef struct shape_t shape_t;
-typedef struct shape_ctx_t shape_ctx_t;
 typedef struct tensor_t tensor_t;
 typedef struct tensor_ref_t tensor_ref_t;
 typedef struct operator_t operator_t;
@@ -30,9 +33,7 @@ extern const shape_t *new_shape(int, ...);
 extern void del_shape(const shape_t *);
 extern uint32_t shape_dim(const shape_t *);
 extern uint32_t shape_rank(const shape_t *);
-extern shape_ctx_t *new_shape_ctx();
-extern void del_shape_ctx(shape_ctx_t *);
-extern const shape_t *mk_shape(shape_ctx_t *, int, ...);
+extern const shape_t *mk_shape(context_t *, int, ...);
 
 extern tensor_t *new_tensor(const shape_t *, uint8_t);
 extern void del_tensor(const tensor_t *);
@@ -45,14 +46,11 @@ extern const uint8_t tensor_dtype(const tensor_ref_t *);
 typedef struct s_node_t s_node_t;
 typedef s_node_t *symbol;
 typedef struct s_model_t s_model_t;
-typedef struct s_model_ctx_t s_model_ctx_t;
-extern s_model_ctx_t *make_s_model_ctx();
-extern s_model_t *new_s_model(s_model_ctx_t *, s_node_t *, s_node_t *);
-extern void del_s_model(const s_model_t *);
-extern s_node_t *var(s_model_ctx_t *, const shape_t *);
-extern s_node_t *covar(s_model_ctx_t *, const shape_t *);
-extern s_node_t *reshape(s_model_ctx_t *, const shape_t *, const s_node_t *);
-extern s_node_t *apply(s_model_ctx_t *, const operator_t *, s_node_t *args[]);
+extern s_model_t *make_s_model(context_t *, s_node_t *, s_node_t *);
+extern s_node_t *var(context_t *, const shape_t *);
+extern s_node_t *covar(context_t *, const shape_t *);
+extern s_node_t *reshape(context_t *, const shape_t *, const s_node_t *);
+extern s_node_t *apply(context_t *, const operator_t *, symbol[]);
 
 // IO APIs
 extern void save_tensor(const char *, const tensor_ref_t *);
