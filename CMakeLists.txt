@@ -57,7 +57,9 @@ target_link_libraries(yolo opencv_core opencv_imgproc opencv_highgui opencv_imgc
 
 
 # https://gitlab.kitware.com/cmake/community/wikis/doc/cpack/PackageGenerators
+SET(CPACK_PACKAGE_DIRECTORY ${CMAKE_SOURCE_DIR}/release)
 SET(CPACK_GENERATOR "TGZ")
+SET(CPACK_PACKAGE_VERSION "latest")
 # if ((${CMAKE_SYSTEM_NAME} MATCHES "Linux"))
     # SET(CPACK_GENERATOR "TGZ;DEB")
     # SET(CPACK_GENERATOR "TGZ;RPM")

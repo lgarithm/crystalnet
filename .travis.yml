@@ -7,9 +7,27 @@ services:
 
 before_install:
 - docker info
-- docker build -t crystalnet .
+- docker build --rm -t crystalnet -f docker/Dockerfile .
 
 script:
 # The default is
 # - ./configure && make && make test
-- docker run -it crystalnet make test
+- docker run --rm -it crystalnet make test
+
+env:
+  global:
+  # travis encrypt -r lgarithm/crystalnet GITHUB_PERSONAL_TOKEN=***
+  - secure: "H9frUOvVTmbxE/JBZMweD4D/rJtjyWQn3+eLojJ/YhIg0sYf0l7yDzzvCbYegd/ptBpx1tC61acxPK+epB00ENnAq+D8DCljqEBPgV2PYEYq2L+pcx5jOKVBXQPUp0rdTIwbJerQHlQo92zB7X3YctMN5FOliUBOOfIwjyMjy1ccsQXoXn844Jb7CCAypipV/EJU7rlqGPqG7kMQXBnxDdzUXLk2jMCfFu2drSGmpre/98AuMS5LRpux9Dks3oTXhSRdnho+arz8R5nbXLqrlbzpFhuuMFPdk2JXmq3+4YEkDyK2dpqVxa4pbs8IIE466i1axKvLeJLD4p5fXA620OEbuTJzwaVtQhF313BQ0NtU/Cpsnpw1so/XmTYg8nUnY0JLNDiCdc2cZMCcgkVaO07TmDuzhn5kHQfAX4byuWCOgBngTq+1/MO4OGyYjSotObyl9bE5MEjr7cv+OUTSMCXbouIatDBzo5dRcKd+P4tErTYhRRcnRk0OWAho5sGxAyOfbCOpkIFYas9l6zkCXyjmpubTKnztf4p34M18/aPAm5BMsM2G1FomWkSoyQS+q1ONt2ZcmW2H124IZ0I9CknYyeYKV7HPXOH+aeKRgD4hR5sHPv22fItGxET+AGM0ngNSwWvzcqpK9YmGPGoT3OQ5z15G9KJUb3Aywj00GUE="
+
+# https://docs.travis-ci.com/user/deployment/releases/
+before_deploy:
+- docker run --rm -v$(pwd)/release:/crystalnet/release -it crystalnet make package
+
+deploy:
+  provider: releases
+  api_key: "$GITHUB_PERSONAL_TOKEN"
+  file:
+  - release/crystalnet-latest-Linux.tar.gz
+  skip_cleanup: true
+  # on:
+  #   tags: true

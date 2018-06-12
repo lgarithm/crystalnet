@@ -13,5 +13,6 @@ __pycache__
 /.vscode/settings.json
 /compile_commands.json
 /log
+/release
 /xtleak.kcg.*
 build

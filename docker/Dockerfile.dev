@@ -2,7 +2,7 @@
 
 FROM ubuntu:bionic
 
-# ADD sources.list.ustc /etc/apt/sources.list
+ADD apt/sources.list.ustc /etc/apt/sources.list
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt update && \
     apt install -y cmake g++ python3 ruby golang-go valgrind cloc curl libopencv-dev
