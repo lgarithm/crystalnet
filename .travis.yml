@@ -25,6 +25,7 @@ before_deploy:
 
 deploy:
   provider: releases
+  prerelease: true
   api_key: "$GITHUB_PERSONAL_TOKEN"
   file:
   - release/crystalnet-latest-Linux.tar.gz
