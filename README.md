@@ -1,4 +1,4 @@
-# Crystalnet: A fast deep learning library in 1K lines.
+# Crystalnet: A minimalist deep learning library in modern C++.
 
 Crystalnet is a novel deep learning library written in modern C and C++. Its core library has less than 1K lines of code. Though small, it is able to achieve high-performance comparable to giant engines such as Google TenserFlow.
 
