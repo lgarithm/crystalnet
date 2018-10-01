@@ -3,7 +3,7 @@
 
 #include <crystalnet-internal.h>
 #include <crystalnet/core/context.hpp>
-#include <crystalnet/core/tracer.hpp>
+#include <stdtracer>
 
 #define p_str(x) std::to_string(x).c_str()
 

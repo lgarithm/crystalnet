@@ -1,11 +1,12 @@
 #pragma once
+#include <stdtracer>
+
 #include <crystalnet-contrib/vis/vis.hpp>
 #include <crystalnet-contrib/yolo/detection.hpp>
 #include <crystalnet-contrib/yolo/input.hpp>
 #include <crystalnet-contrib/yolo/options.hpp>
 #include <crystalnet-contrib/yolo/yolo.h>
 #include <crystalnet-ext.h>
-#include <crystalnet/core/tracer.hpp>  // TODO: don't include private headers
 #include <crystalnet/debug/debug.hpp>
 #include <crystalnet/model/model.hpp>
 

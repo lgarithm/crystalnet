@@ -1,67 +1,81 @@
-cmake_minimum_required(VERSION 3.9)
-project(crystalnet)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.9)
+PROJECT(crystalnet)
 
-if ((${CMAKE_SYSTEM_NAME} MATCHES "Darwin"))
-    set(USE_OPENBLAS on)
-endif()
-set(CMAKE_CXX_STANDARD 17)
-set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
+IF((${CMAKE_SYSTEM_NAME} MATCHES "Darwin"))
+    SET(USE_OPENBLAS on)
+ENDIF()
+SET(CMAKE_CXX_STANDARD 17)
+SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
+SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
+
+INCLUDE(ExternalProject)
+EXTERNALPROJECT_ADD(libstdtracer
+                    GIT_REPOSITORY
+                    https://github.com/lgarithm/stdtracer
+                    GIT_TAG
+                    05c6d71afd272b6008504fce66099877c4cec1ef
+                    CMAKE_ARGS
+                    -DCMAKE_INSTALL_PREFIX=${CMAKE_SOURCE_DIR}/3rdparty
+                    -DCMAKE_CXX_FLAGS=-fPIC) # TODO:  fix in upstream
 
 # add_definitions(-funroll-loops)
-if (${USE_OPENBLAS})
-    add_definitions(-DCRYSTALNET_USE_CBLAS)
-    set(OPENBLAS_PATH $ENV{HOME}/local/openblas)
-    include_directories(${OPENBLAS_PATH}/include)
-    link_directories(${OPENBLAS_PATH}/lib)
-endif()
+IF(${USE_OPENBLAS})
+    ADD_DEFINITIONS(-DCRYSTALNET_USE_CBLAS)
+    SET(OPENBLAS_PATH $ENV{HOME}/local/openblas)
+    INCLUDE_DIRECTORIES(${OPENBLAS_PATH}/include)
+    LINK_DIRECTORIES(${OPENBLAS_PATH}/lib)
+ENDIF()
 
-include_directories(${CMAKE_SOURCE_DIR}/include)
-link_directories(${LIBRARY_OUTPUT_PATH})
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
+LINK_DIRECTORIES(${LIBRARY_OUTPUT_PATH})
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/3rdparty/include)
+LINK_DIRECTORIES(${CMAKE_SOURCE_DIR}/3rdparty/lib)
 
-file(GLOB srcs src/crystalnet/**/*.cpp)
-add_library(crystalnet SHARED ${srcs})
-if (USE_OPENBLAS)
-    target_link_libraries(crystalnet openblas)
-endif()
+FILE(GLOB srcs src/crystalnet/**/*.cpp)
+ADD_LIBRARY(crystalnet SHARED ${srcs})
+ADD_DEPENDENCIES(crystalnet libstdtracer)
+TARGET_LINK_LIBRARIES(crystalnet stdtracer)
+IF(USE_OPENBLAS)
+    TARGET_LINK_LIBRARIES(crystalnet openblas)
+ENDIF()
 
-file(GLOB examples examples/c/*.c)
-foreach(main ${examples})
-    get_filename_component(base_name ${main} NAME)
-    string(REPLACE "." "_" bin_name ${base_name})
-    add_executable(${bin_name} ${main})
-    target_link_libraries(${bin_name} crystalnet)
-endforeach()
+FILE(GLOB examples examples/c/*.c)
+FOREACH(main ${examples})
+    GET_FILENAME_COMPONENT(base_name ${main} NAME)
+    STRING(REPLACE "." "_" bin_name ${base_name})
+    ADD_EXECUTABLE(${bin_name} ${main})
+    TARGET_LINK_LIBRARIES(${bin_name} crystalnet)
+ENDFOREACH()
 
-set(CMAKE_INSTALL_PREFIX $ENV{HOME}/local/crystalnet)  # TODO: make it configurable
-install(TARGETS crystalnet LIBRARY DESTINATION lib)
-install(DIRECTORY include DESTINATION .)
+SET(CMAKE_INSTALL_PREFIX $ENV{HOME}/local/crystalnet) # TODO: make it
+                                                      # configurable
+INSTALL(TARGETS crystalnet LIBRARY DESTINATION lib)
+INSTALL(DIRECTORY include DESTINATION .)
 
-add_custom_target(doxygen COMMAND doxygen ${CMAKE_SOURCE_DIR}/docs/Doxyfile)
-# add_custom_target(sphinx-doc COMMAND sphinx-build -b html html sphinx/build/html
-#                   DEPENDS doxygen)
-
+ADD_CUSTOM_TARGET(doxygen COMMAND doxygen ${CMAKE_SOURCE_DIR}/docs/Doxyfile)
+# add_custom_target(sphinx-doc COMMAND sphinx-build -b html html
+# sphinx/build/html DEPENDS doxygen)
 
 # contrib
-find_package(opencv)
+FIND_PACKAGE(opencv)
 
-file(GLOB yolo_srcs src/crystalnet-contrib/**/*.cpp
-                    src/crystalnet-contrib/**/*.c)
-add_executable(yolo ${yolo_srcs})
-target_link_libraries(yolo crystalnet)
+FILE(GLOB
+     yolo_srcs
+     src/crystalnet-contrib/**/*.cpp
+     src/crystalnet-contrib/**/*.c)
+ADD_EXECUTABLE(yolo ${yolo_srcs})
+TARGET_LINK_LIBRARIES(yolo crystalnet)
 IF("${CMAKE_SYSTEM}" MATCHES "Linux")
-    target_link_libraries(yolo stdc++fs)
-endif()
+    TARGET_LINK_LIBRARIES(yolo stdc++fs)
+ENDIF()
 
-target_link_libraries(yolo opencv_core opencv_imgproc opencv_highgui opencv_imgcodecs)
-
+TARGET_LINK_LIBRARIES(
+    yolo opencv_core opencv_imgproc opencv_highgui opencv_imgcodecs)
 
 # https://gitlab.kitware.com/cmake/community/wikis/doc/cpack/PackageGenerators
 SET(CPACK_PACKAGE_DIRECTORY ${CMAKE_SOURCE_DIR}/release)
 SET(CPACK_GENERATOR "TGZ")
 SET(CPACK_PACKAGE_VERSION "latest")
-# if ((${CMAKE_SYSTEM_NAME} MATCHES "Linux"))
-    # SET(CPACK_GENERATOR "TGZ;DEB")
-    # SET(CPACK_GENERATOR "TGZ;RPM")
-# endif()
+# if ((${CMAKE_SYSTEM_NAME} MATCHES "Linux")) SET(CPACK_GENERATOR "TGZ;DEB")
+# SET(CPACK_GENERATOR "TGZ;RPM") endif()
 INCLUDE(CPack)

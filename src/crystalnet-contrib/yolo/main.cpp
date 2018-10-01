@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 
+#include <stdtracer>
+
 #include <crystalnet-ext.h>
 #include <crystalnet-internal.h>
 
@@ -13,7 +15,6 @@
 #include <crystalnet-contrib/yolo/input.hpp>
 #include <crystalnet-contrib/yolo/yolo.h>
 #include <crystalnet-contrib/yolo/yolo.hpp>
-#include <crystalnet/core/tracer.hpp>  // TODO: don't include private headers
 #include <crystalnet/debug/debug.hpp>
 #include <crystalnet/model/model.hpp>
 

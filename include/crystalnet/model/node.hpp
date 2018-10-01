@@ -8,7 +8,7 @@
 #include <crystalnet/core/operator.hpp>
 #include <crystalnet/core/shape.hpp>
 #include <crystalnet/core/tensor.hpp>
-#include <crystalnet/core/tracer.hpp>
+#include <stdtracer>
 
 struct node_t {
     const std::string name;

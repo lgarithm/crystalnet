@@ -3,13 +3,13 @@
 #include <crystalnet-ext.h>
 #include <crystalnet-internal.h>
 #include <crystalnet/core/tensor.hpp>
-#include <crystalnet/core/tracer.hpp>
 #include <crystalnet/core/user_context.hpp>
 #include <crystalnet/debug/debug.hpp>
 #include <crystalnet/ops/argmax.hpp>
 #include <crystalnet/ops/batch.hpp>
 #include <crystalnet/symbol/model.hpp>
 #include <crystalnet/utility/range.hpp>
+#include <stdtracer>
 
 struct classifier_t {
     const shape_t image_shape;
