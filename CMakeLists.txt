@@ -8,15 +8,7 @@ SET(CMAKE_CXX_STANDARD 17)
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 
-INCLUDE(ExternalProject)
-EXTERNALPROJECT_ADD(libstdtracer
-                    GIT_REPOSITORY
-                    https://github.com/lgarithm/stdtracer
-                    GIT_TAG
-                    05c6d71afd272b6008504fce66099877c4cec1ef
-                    CMAKE_ARGS
-                    -DCMAKE_INSTALL_PREFIX=${CMAKE_SOURCE_DIR}/3rdparty
-                    -DCMAKE_CXX_FLAGS=-fPIC) # TODO:  fix in upstream
+INCLUDE(cmake/3rdparty.cmake)
 
 # add_definitions(-funroll-loops)
 IF(${USE_OPENBLAS})
@@ -28,8 +20,6 @@ ENDIF()
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
 LINK_DIRECTORIES(${LIBRARY_OUTPUT_PATH})
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/3rdparty/include)
-LINK_DIRECTORIES(${CMAKE_SOURCE_DIR}/3rdparty/lib)
 
 FILE(GLOB srcs src/crystalnet/**/*.cpp)
 ADD_LIBRARY(crystalnet SHARED ${srcs})
