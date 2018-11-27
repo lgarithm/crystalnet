@@ -14,5 +14,5 @@ before_script:
 build_image:
   script:
     - docker info
-    - docker build -t crystalnet .
+    - docker build -t crystalnet -f docker/Dockerfile .
     # - docker run crystalnet
