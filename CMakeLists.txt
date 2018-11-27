@@ -23,7 +23,7 @@ LINK_DIRECTORIES(${LIBRARY_OUTPUT_PATH})
 
 FILE(GLOB srcs src/crystalnet/**/*.cpp)
 ADD_LIBRARY(crystalnet SHARED ${srcs})
-ADD_DEPENDENCIES(crystalnet libstdtracer)
+ADD_DEPENDENCIES(crystalnet stdtracer-repo)
 TARGET_LINK_LIBRARIES(crystalnet stdtracer)
 IF(USE_OPENBLAS)
     TARGET_LINK_LIBRARIES(crystalnet openblas)
@@ -32,7 +32,10 @@ ENDIF()
 FILE(GLOB examples examples/c/*.c)
 FOREACH(main ${examples})
     GET_FILENAME_COMPONENT(base_name ${main} NAME)
-    STRING(REPLACE "." "_" bin_name ${base_name})
+    STRING(REPLACE "."
+                   "_"
+                   bin_name
+                   ${base_name})
     ADD_EXECUTABLE(${bin_name} ${main})
     TARGET_LINK_LIBRARIES(${bin_name} crystalnet)
 ENDFOREACH()
@@ -49,18 +52,19 @@ ADD_CUSTOM_TARGET(doxygen COMMAND doxygen ${CMAKE_SOURCE_DIR}/docs/Doxyfile)
 # contrib
 FIND_PACKAGE(opencv)
 
-FILE(GLOB
-     yolo_srcs
-     src/crystalnet-contrib/**/*.cpp
-     src/crystalnet-contrib/**/*.c)
+FILE(GLOB yolo_srcs src/crystalnet-contrib/**/*.cpp
+          src/crystalnet-contrib/**/*.c)
 ADD_EXECUTABLE(yolo ${yolo_srcs})
 TARGET_LINK_LIBRARIES(yolo crystalnet)
 IF("${CMAKE_SYSTEM}" MATCHES "Linux")
     TARGET_LINK_LIBRARIES(yolo stdc++fs)
 ENDIF()
 
-TARGET_LINK_LIBRARIES(
-    yolo opencv_core opencv_imgproc opencv_highgui opencv_imgcodecs)
+TARGET_LINK_LIBRARIES(yolo
+                      opencv_core
+                      opencv_imgproc
+                      opencv_highgui
+                      opencv_imgcodecs)
 
 # https://gitlab.kitware.com/cmake/community/wikis/doc/cpack/PackageGenerators
 SET(CPACK_PACKAGE_DIRECTORY ${CMAKE_SOURCE_DIR}/release)
