@@ -9,7 +9,8 @@ EXTERNALPROJECT_ADD(stdnn-ops-repo
                     GIT_REPOSITORY
                     ${STDNN_OPS_GIT_URL}
                     GIT_TAG
-                    v0.1.0
+                    master
+                    # v0.1.0
                     PREFIX
                     ${PREFIX}
                     CMAKE_ARGS

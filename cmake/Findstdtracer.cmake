@@ -16,4 +16,5 @@ EXTERNALPROJECT_ADD(stdtracer-repo
                     CMAKE_ARGS
                     -DCMAKE_INSTALL_PREFIX=${PREFIX}
                     -DBUILD_TESTS=0
-                    -DBUILD_EXAMPLES=0)
+                    -DBUILD_EXAMPLES=0
+                    -DCMAKE_CXX_FLAGS=-fPIC)
