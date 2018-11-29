@@ -10,23 +10,15 @@
 #include <crystalnet/core/cast.hpp>
 #include <crystalnet/core/error.hpp>
 
-struct shape_t {
-    const std::vector<uint32_t> dims;
+#include <ttl/tensor>
 
-    template <typename... T>
-    explicit shape_t(T... dims) : dims({static_cast<uint32_t>(dims)...})
-    {
-    }
+using ttl::experimental::raw_tensor;
+using raw_shape = raw_tensor::shape_type;
 
-    explicit shape_t(const std::vector<uint32_t> &dims) : dims(dims) {}
+struct shape_t : public raw_shape {
+    using raw_shape::raw_shape;
 
-    uint8_t rank() const { return dims.size(); }
-
-    uint32_t dim() const
-    {
-        return std::accumulate(dims.begin(), dims.end(), 1,
-                               std::multiplies<uint32_t>());
-    }
+    uint32_t dim() const { return size(); }
 
     uint32_t len() const
     {
